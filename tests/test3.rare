@@ -1,0 +1,8 @@
+import typing;
+import console;
+
+typing::number test() {
+  return 61;
+}
+
+console::out(test());
