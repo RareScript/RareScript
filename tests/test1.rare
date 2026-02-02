@@ -1,4 +1,0 @@
-import console;
-
-console::out("Hello, World!");
-console::out(60 + 1);
