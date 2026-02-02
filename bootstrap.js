@@ -105,6 +105,9 @@ for (var i = 0; i < code.length; i++) {
 if (currentToken.length) {
   addToken(code.length);
 }
+if (isString) {
+  // TODO: Errors
+}
 
 for (var token of tokens) {
   var type = "[]";
