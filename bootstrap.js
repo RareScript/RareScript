@@ -16,8 +16,9 @@ var TokenType = {
   "STRING": 5,
   "NUMBER": 6
 };
-var tokenSeparators = [" ", "\n", ";", "(", ")", "{", "}", ",", "<", ">"];
+var tokenSeparators = [" ", "\n", ";", "(", ")", "{", "}", ","];
 var digits = "0123456789";
+var symbols = "!@#$%^&*-+\\|/";
 var keywords = ["import", "as", "return", "cond", "false", "true", "maybe"];
 var operators = ["(", ")", "{", "}", ",", "+", "-", "*", "/", "=", "!=", ":=", "..", "->", "<", ">"];
 
@@ -52,7 +53,7 @@ function canBeIdentifier(data) {
   if (digits.includes(data)) {
     return !!currentToken.length;
   }
-  if ("!@#$%^&*()-+{}\\|/.,<>'\"`".includes(data)) {
+  if (`${symbols}(){}.,<>'"\``.includes(data)) {
     return false;
   }
   return true;
@@ -86,7 +87,7 @@ for (var i = 0; i < code.length; i++) {
     currentToken += char;
     continue;
   }
-  if (tokenSeparators.includes(char) || (currentToken.at(-1) == "-" && digits.includes(char) && tokens.at(-1) && (tokens.at(-1).type == TokenType.NUMBER || tokens.at(-1).type == TokenType.IDENTIFIER || code.slice(tokens.at(-1).start, tokens.at(-1).start + tokens.at(-1).length) == ")")) || (currentToken.at(-1) != "-" && canBeIdentifier(currentToken.at(-1)) != canBeIdentifier(char)) || (currentToken.at(-1) == "-" && canBeIdentifier(char) && !digits.includes(char))) {
+  if (tokenSeparators.includes(char) || (currentToken.at(-1) == "-" && digits.includes(char) && tokens.at(-1) && (tokens.at(-1).type == TokenType.NUMBER || tokens.at(-1).type == TokenType.IDENTIFIER || code.slice(tokens.at(-1).start, tokens.at(-1).start + tokens.at(-1).length) == ")")) || (currentToken.at(-1) != "-" && canBeIdentifier(currentToken.at(-1)) != canBeIdentifier(char)) || (currentToken.at(-1) == "-" && canBeIdentifier(char) && !digits.includes(char)) || (currentToken.length && !currentToken.split("").find(char2 => !symbols.includes(char2)) && char == "-")) {
     if (currentToken.length) {
       addToken(i);
     }
