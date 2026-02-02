@@ -16,16 +16,17 @@ var TokenType = {
   "STRING": 5,
   "NUMBER": 6
 };
-var tokenSeparators = [" ", "\n", ";", "(", ")", ","];
+var tokenSeparators = [" ", "\n", ";", "(", ")", "{", "}", ","];
 var digits = "0123456789";
-var operators = ["(", ")", ",", "+", "-", "*", "/", "=", "!=", ":=", "..", "->"];
+var keywords = ["import", "as", "return", "cond"];
+var operators = ["(", ")", "{", "}", ",", "+", "-", "*", "/", "=", "!=", ":=", "..", "->"];
 
 function addToken(index) {
   var type = TokenType.IDENTIFIER;
   if (currentToken == "\n" || currentToken == ";") {
     type = TokenType.SEPARATOR;
   }
-  if (currentToken == "import") {
+  if (keywords.includes(currentToken)) {
     type = TokenType.KEYWORD;
   }
   if (currentToken.startsWith("'") && currentToken.endsWith("'")) {
@@ -34,7 +35,7 @@ function addToken(index) {
   if (currentToken.startsWith("\"") && currentToken.endsWith("\"")) {
     type = TokenType.STRING;
   }
-  if (digits.includes(currentToken[0])) {
+  if (digits.includes(currentToken[0]) || (currentToken[0] == "-" && digits.includes(currentToken[1]))) {
     type = TokenType.NUMBER;
   }
   if (operators.includes(currentToken)) {
@@ -47,6 +48,16 @@ function addToken(index) {
   });
 }
 
+function canBeIdentifier(data) {
+  if (digits.includes(data)) {
+    return !!currentToken.length;
+  }
+  if ("!@#$%^&*()-+{}\\|/.,<>'\"`".includes(data)) {
+    return false;
+  }
+  return true;
+}
+
 for (var i = 0; i < code.length; i++) {
   var char = code[i];
   if (char == "\"") {
@@ -56,14 +67,14 @@ for (var i = 0; i < code.length; i++) {
     currentToken += char;
     continue;
   }
-  if (tokenSeparators.includes(char) || (digits.includes(currentToken.at(-1)) && !digits.includes(char)) || (!digits.includes(currentToken.at(-1)) && digits.includes(char))) {
+  if (tokenSeparators.includes(char) || (currentToken.at(-1) == "-" && digits.includes(char) && tokens.at(-1) && (tokens.at(-1).type == TokenType.NUMBER || tokens.at(-1).type == TokenType.IDENTIFIER || code.slice(tokens.at(-1).start, tokens.at(-1).start + tokens.at(-1).length) == ")")) || (canBeIdentifier(currentToken.at(-1)) != canBeIdentifier(char))) {
     if (currentToken.length) {
       addToken(i);
     }
     currentToken = "";
-    if (char != " ") {
+    if (char != " " && char != "\n") {
       currentToken += char;
-      if (char == "\n" || char == ";" || char == "(" || char == ")") {
+      if (char == ";" || char == "(" || char == ")" || char == ",") {
         addToken(i + 1);
         currentToken = "";
       }

@@ -1,10 +1,16 @@
 import typing;
 import console;
 
+typing::number a := 1;
+
+typing::number getOne() {
+  return 1;
+}
+
 console::out(2+2);
 console::out(1..5);
 console::out("cat"->2 = "a");
-console::out(1 - 2, -2, 1 + -2, 1 - -2);
+console::out(1-2,-2,1+-2,1--2,a-2,-getOne()-2);
 console::out(-1.59);
 console::out('a');
 
