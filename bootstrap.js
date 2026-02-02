@@ -18,7 +18,7 @@ var TokenType = {
 };
 var tokenSeparators = [" ", "\n", ";", "(", ")", "{", "}", ","];
 var digits = "0123456789";
-var symbols = "!@#$%^&*-+\\|/";
+var symbols = "!@#$%^&*-+\\|/=";
 var keywords = ["import", "as", "return", "cond", "false", "true", "maybe"];
 var operators = ["(", ")", "{", "}", ",", "+", "-", "*", "/", "=", "!=", ":=", "..", "->", "<", ">"];
 

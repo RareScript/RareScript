@@ -1,0 +1,1748 @@
+[32m[KEYWORD][0m import
+[32m[IDENTIFIER][0m typing
+[32m[SEPARATOR][0m ;
+[32m[KEYWORD][0m import
+[32m[IDENTIFIER][0m console
+[32m[SEPARATOR][0m ;
+[32m[KEYWORD][0m import
+[32m[IDENTIFIER][0m std
+[32m[SEPARATOR][0m ;
+[32m[KEYWORD][0m import
+[32m[IDENTIFIER][0m random
+[32m[SEPARATOR][0m ;
+[32m[KEYWORD][0m import
+[32m[IDENTIFIER][0m keyhook
+[32m[KEYWORD][0m as
+[32m[IDENTIFIER][0m key
+[32m[SEPARATOR][0m ;
+[32m[IDENTIFIER][0m typing::array
+[32m[IDENTIFIER][0m map
+[32m[IDENTIFIER][0m :
+[32m[OPERATOR][0m =
+[32m[IDENTIFIER][0m typing::array
+[32m[OPERATOR][0m (
+[32m[IDENTIFIER][0m typing::array
+[32m[OPERATOR][0m ,
+[32m[IDENTIFIER][0m typing::array
+[32m[OPERATOR][0m (
+[32m[IDENTIFIER][0m typing::string
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m )
+[32m[OPERATOR][0m ,
+[32m[IDENTIFIER][0m typing::array
+[32m[OPERATOR][0m (
+[32m[IDENTIFIER][0m typing::string
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m )
+[32m[OPERATOR][0m ,
+[32m[IDENTIFIER][0m typing::array
+[32m[OPERATOR][0m (
+[32m[IDENTIFIER][0m typing::string
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m )
+[32m[OPERATOR][0m ,
+[32m[IDENTIFIER][0m typing::array
+[32m[OPERATOR][0m (
+[32m[IDENTIFIER][0m typing::string
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m )
+[32m[OPERATOR][0m ,
+[32m[IDENTIFIER][0m typing::array
+[32m[OPERATOR][0m (
+[32m[IDENTIFIER][0m typing::string
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m )
+[32m[OPERATOR][0m ,
+[32m[IDENTIFIER][0m typing::array
+[32m[OPERATOR][0m (
+[32m[IDENTIFIER][0m typing::string
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m )
+[32m[OPERATOR][0m ,
+[32m[IDENTIFIER][0m typing::array
+[32m[OPERATOR][0m (
+[32m[IDENTIFIER][0m typing::string
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m )
+[32m[OPERATOR][0m ,
+[32m[IDENTIFIER][0m typing::array
+[32m[OPERATOR][0m (
+[32m[IDENTIFIER][0m typing::string
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m )
+[32m[OPERATOR][0m ,
+[32m[IDENTIFIER][0m typing::array
+[32m[OPERATOR][0m (
+[32m[IDENTIFIER][0m typing::string
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m )
+[32m[OPERATOR][0m ,
+[32m[IDENTIFIER][0m typing::array
+[32m[OPERATOR][0m (
+[32m[IDENTIFIER][0m typing::string
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m )
+[32m[OPERATOR][0m ,
+[32m[IDENTIFIER][0m typing::array
+[32m[OPERATOR][0m (
+[32m[IDENTIFIER][0m typing::string
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m )
+[32m[OPERATOR][0m ,
+[32m[IDENTIFIER][0m typing::array
+[32m[OPERATOR][0m (
+[32m[IDENTIFIER][0m typing::string
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m )
+[32m[OPERATOR][0m ,
+[32m[IDENTIFIER][0m typing::array
+[32m[OPERATOR][0m (
+[32m[IDENTIFIER][0m typing::string
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m )
+[32m[OPERATOR][0m ,
+[32m[IDENTIFIER][0m typing::array
+[32m[OPERATOR][0m (
+[32m[IDENTIFIER][0m typing::string
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m )
+[32m[OPERATOR][0m ,
+[32m[IDENTIFIER][0m typing::array
+[32m[OPERATOR][0m (
+[32m[IDENTIFIER][0m typing::string
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m )
+[32m[OPERATOR][0m ,
+[32m[IDENTIFIER][0m typing::array
+[32m[OPERATOR][0m (
+[32m[IDENTIFIER][0m typing::string
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m )
+[32m[OPERATOR][0m ,
+[32m[IDENTIFIER][0m typing::array
+[32m[OPERATOR][0m (
+[32m[IDENTIFIER][0m typing::string
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m )
+[32m[OPERATOR][0m ,
+[32m[IDENTIFIER][0m typing::array
+[32m[OPERATOR][0m (
+[32m[IDENTIFIER][0m typing::string
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m )
+[32m[OPERATOR][0m ,
+[32m[IDENTIFIER][0m typing::array
+[32m[OPERATOR][0m (
+[32m[IDENTIFIER][0m typing::string
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m )
+[32m[OPERATOR][0m ,
+[32m[IDENTIFIER][0m typing::array
+[32m[OPERATOR][0m (
+[32m[IDENTIFIER][0m typing::string
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m )
+[32m[OPERATOR][0m ,
+[32m[IDENTIFIER][0m typing::array
+[32m[OPERATOR][0m (
+[32m[IDENTIFIER][0m typing::string
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \" \"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m )
+[32m[OPERATOR][0m ,
+[32m[IDENTIFIER][0m typing::array
+[32m[OPERATOR][0m (
+[32m[IDENTIFIER][0m typing::string
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m ,
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m )
+[32m[OPERATOR][0m )
+[32m[SEPARATOR][0m ;
+[32m[IDENTIFIER][0m typing::number
+[32m[IDENTIFIER][0m i3
+[32m[IDENTIFIER][0m :
+[32m[OPERATOR][0m =
+[32m[NUMBER][0m 1
+[32m[SEPARATOR][0m ;
+[32m[IDENTIFIER][0m typing::array
+[32m[IDENTIFIER][0m maparr
+[32m[IDENTIFIER][0m :
+[32m[OPERATOR][0m =
+[32m[IDENTIFIER][0m typing::array
+[32m[OPERATOR][0m (
+[32m[IDENTIFIER][0m typing::void
+[32m[OPERATOR][0m )
+[32m[SEPARATOR][0m ;
+[32m[IDENTIFIER][0m typing::array
+[32m[IDENTIFIER][0m snake
+[32m[IDENTIFIER][0m :
+[32m[OPERATOR][0m =
+[32m[IDENTIFIER][0m typing::array
+[32m[OPERATOR][0m (
+[32m[IDENTIFIER][0m typing::array
+[32m[OPERATOR][0m ,
+[32m[IDENTIFIER][0m typing::array
+[32m[OPERATOR][0m (
+[32m[IDENTIFIER][0m typing::number
+[32m[OPERATOR][0m ,
+[32m[NUMBER][0m 11
+[32m[OPERATOR][0m ,
+[32m[NUMBER][0m 10
+[32m[OPERATOR][0m )
+[32m[OPERATOR][0m )
+[32m[SEPARATOR][0m ;
+[32m[IDENTIFIER][0m typing::bool
+[32m[IDENTIFIER][0m eatenApple
+[32m[IDENTIFIER][0m :
+[32m[OPERATOR][0m =
+[32m[KEYWORD][0m false
+[32m[SEPARATOR][0m ;
+[32m[IDENTIFIER][0m typing::number
+[32m[IDENTIFIER][0m appleX
+[32m[IDENTIFIER][0m :
+[32m[OPERATOR][0m =
+[32m[NUMBER][0m 0
+[32m[SEPARATOR][0m ;
+[32m[IDENTIFIER][0m typing::number
+[32m[IDENTIFIER][0m appleY
+[32m[IDENTIFIER][0m :
+[32m[OPERATOR][0m =
+[32m[NUMBER][0m 0
+[32m[SEPARATOR][0m ;
+[32m[IDENTIFIER][0m typing::string
+[32m[IDENTIFIER][0m linemap
+[32m[OPERATOR][0m (
+[32m[IDENTIFIER][0m typing::array
+[32m[IDENTIFIER][0m arr
+[32m[OPERATOR][0m ,
+[32m[IDENTIFIER][0m typing::number
+[32m[IDENTIFIER][0m i
+[32m[OPERATOR][0m )
+[32m[OPERATOR][0m {
+[32m[IDENTIFIER][0m typing::string
+[32m[IDENTIFIER][0m charmap
+[32m[OPERATOR][0m (
+[32m[IDENTIFIER][0m typing::string
+[32m[IDENTIFIER][0m char
+[32m[OPERATOR][0m ,
+[32m[IDENTIFIER][0m typing::number
+[32m[IDENTIFIER][0m i2
+[32m[OPERATOR][0m )
+[32m[OPERATOR][0m {
+[32m[IDENTIFIER][0m i3
+[32m[IDENTIFIER][0m :
+[32m[OPERATOR][0m =
+[32m[NUMBER][0m 1
+[32m[SEPARATOR][0m ;
+[32m[IDENTIFIER][0m while
+[32m[IDENTIFIER][0m i3
+[32m[IDENTIFIER][0m <=
+[32m[IDENTIFIER][0m snake
+[32m[OPERATOR][0m ->
+[32m[IDENTIFIER][0m count
+[32m[OPERATOR][0m {
+[32m[KEYWORD][0m cond
+[32m[IDENTIFIER][0m snake
+[32m[IDENTIFIER][0m ->@
+[32m[IDENTIFIER][0m i3
+[32m[OPERATOR][0m ->
+[32m[NUMBER][0m 1
+[32m[OPERATOR][0m =
+[32m[IDENTIFIER][0m i2
+[32m[IDENTIFIER][0m and
+[32m[IDENTIFIER][0m snake
+[32m[IDENTIFIER][0m ->@
+[32m[IDENTIFIER][0m i3
+[32m[OPERATOR][0m ->
+[32m[NUMBER][0m 2
+[32m[OPERATOR][0m =
+[32m[IDENTIFIER][0m i
+[32m[OPERATOR][0m {
+[32m[KEYWORD][0m return
+[32m[STRING][0m \"@\"
+[32m[SEPARATOR][0m ;
+[32m[OPERATOR][0m }
+[32m[IDENTIFIER][0m i3
+[32m[IDENTIFIER][0m +=
+[32m[NUMBER][0m 1
+[32m[SEPARATOR][0m ;
+[32m[OPERATOR][0m }
+[32m[KEYWORD][0m cond
+[32m[IDENTIFIER][0m appleX
+[32m[OPERATOR][0m =
+[32m[IDENTIFIER][0m i2
+[32m[IDENTIFIER][0m and
+[32m[IDENTIFIER][0m appleY
+[32m[OPERATOR][0m =
+[32m[IDENTIFIER][0m i
+[32m[OPERATOR][0m {
+[32m[KEYWORD][0m return
+[32m[STRING][0m \"+\"
+[32m[SEPARATOR][0m ;
+[32m[OPERATOR][0m }
+[32m[KEYWORD][0m return
+[32m[IDENTIFIER][0m char
+[32m[SEPARATOR][0m ;
+[32m[OPERATOR][0m }
+[32m[IDENTIFIER][0m maparr
+[32m[IDENTIFIER][0m :
+[32m[OPERATOR][0m =
+[32m[IDENTIFIER][0m arr
+[32m[OPERATOR][0m ->
+[32m[IDENTIFIER][0m map
+[32m[OPERATOR][0m (
+[32m[IDENTIFIER][0m charmap
+[32m[OPERATOR][0m )
+[32m[SEPARATOR][0m ;
+[32m[KEYWORD][0m return
+[32m[IDENTIFIER][0m maparr
+[32m[OPERATOR][0m ->
+[32m[IDENTIFIER][0m join
+[32m[OPERATOR][0m (
+[32m[STRING][0m \"\"
+[32m[OPERATOR][0m )
+[32m[SEPARATOR][0m ;
+[32m[OPERATOR][0m }
+[32m[IDENTIFIER][0m typing::void
+[32m[IDENTIFIER][0m render
+[32m[OPERATOR][0m (
+[32m[OPERATOR][0m )
+[32m[OPERATOR][0m {
+[32m[IDENTIFIER][0m typing::array
+[32m[IDENTIFIER][0m map2
+[32m[IDENTIFIER][0m :
+[32m[OPERATOR][0m =
+[32m[IDENTIFIER][0m map
+[32m[OPERATOR][0m ->
+[32m[IDENTIFIER][0m map
+[32m[OPERATOR][0m (
+[32m[IDENTIFIER][0m linemap
+[32m[OPERATOR][0m )
+[32m[SEPARATOR][0m ;
+[32m[IDENTIFIER][0m typing::string
+[32m[IDENTIFIER][0m rendered
+[32m[IDENTIFIER][0m :
+[32m[OPERATOR][0m =
+[32m[IDENTIFIER][0m map2
+[32m[OPERATOR][0m ->
+[32m[IDENTIFIER][0m join
+[32m[OPERATOR][0m (
+[32m[STRING][0m \"\\n\"
+[32m[OPERATOR][0m )
+[32m[SEPARATOR][0m ;
+[32m[IDENTIFIER][0m console::clear
+[32m[OPERATOR][0m (
+[32m[OPERATOR][0m )
+[32m[SEPARATOR][0m ;
+[32m[IDENTIFIER][0m std::out
+[32m[OPERATOR][0m (
+[32m[IDENTIFIER][0m rendered
+[32m[OPERATOR][0m )
+[32m[SEPARATOR][0m ;
+[32m[OPERATOR][0m }
+[32m[IDENTIFIER][0m typing::void
+[32m[IDENTIFIER][0m checkApple
+[32m[OPERATOR][0m (
+[32m[OPERATOR][0m )
+[32m[OPERATOR][0m {
+[32m[KEYWORD][0m cond
+[32m[IDENTIFIER][0m eatenApple
+[32m[OPERATOR][0m =
+[32m[KEYWORD][0m false
+[32m[OPERATOR][0m {
+[32m[IDENTIFIER][0m snake
+[32m[OPERATOR][0m ->
+[32m[IDENTIFIER][0m shift
+[32m[OPERATOR][0m (
+[32m[OPERATOR][0m )
+[32m[SEPARATOR][0m ;
+[32m[OPERATOR][0m }
+[32m[IDENTIFIER][0m eatenApple
+[32m[IDENTIFIER][0m :
+[32m[OPERATOR][0m =
+[32m[KEYWORD][0m false
+[32m[SEPARATOR][0m ;
+[32m[KEYWORD][0m cond
+[32m[IDENTIFIER][0m appleX
+[32m[OPERATOR][0m =
+[32m[IDENTIFIER][0m snake
+[32m[IDENTIFIER][0m ->-
+[32m[NUMBER][0m 1
+[32m[OPERATOR][0m ->
+[32m[NUMBER][0m 1
+[32m[IDENTIFIER][0m and
+[32m[IDENTIFIER][0m appleY
+[32m[OPERATOR][0m =
+[32m[IDENTIFIER][0m snake
+[32m[IDENTIFIER][0m ->-
+[32m[NUMBER][0m 1
+[32m[OPERATOR][0m ->
+[32m[NUMBER][0m 2
+[32m[OPERATOR][0m {
+[32m[IDENTIFIER][0m eatenApple
+[32m[IDENTIFIER][0m :
+[32m[OPERATOR][0m =
+[32m[KEYWORD][0m true
+[32m[SEPARATOR][0m ;
+[32m[IDENTIFIER][0m moveApple
+[32m[OPERATOR][0m (
+[32m[OPERATOR][0m )
+[32m[SEPARATOR][0m ;
+[32m[OPERATOR][0m }
+[32m[OPERATOR][0m }
+[32m[IDENTIFIER][0m typing::bool
+[32m[IDENTIFIER][0m checkBounds
+[32m[OPERATOR][0m (
+[32m[IDENTIFIER][0m typing::number
+[32m[IDENTIFIER][0m ox
+[32m[OPERATOR][0m ,
+[32m[IDENTIFIER][0m typing::number
+[32m[IDENTIFIER][0m oy
+[32m[OPERATOR][0m )
+[32m[OPERATOR][0m {
+[32m[IDENTIFIER][0m typing::number
+[32m[IDENTIFIER][0m x
+[32m[IDENTIFIER][0m :
+[32m[OPERATOR][0m =
+[32m[IDENTIFIER][0m snake
+[32m[IDENTIFIER][0m ->-
+[32m[NUMBER][0m 1
+[32m[OPERATOR][0m ->
+[32m[NUMBER][0m 1
+[32m[OPERATOR][0m +
+[32m[IDENTIFIER][0m ox
+[32m[SEPARATOR][0m ;
+[32m[IDENTIFIER][0m typing::number
+[32m[IDENTIFIER][0m y
+[32m[IDENTIFIER][0m :
+[32m[OPERATOR][0m =
+[32m[IDENTIFIER][0m snake
+[32m[IDENTIFIER][0m ->-
+[32m[NUMBER][0m 1
+[32m[OPERATOR][0m ->
+[32m[NUMBER][0m 2
+[32m[OPERATOR][0m +
+[32m[IDENTIFIER][0m oy
+[32m[SEPARATOR][0m ;
+[32m[KEYWORD][0m cond
+[32m[IDENTIFIER][0m map
+[32m[IDENTIFIER][0m ->@
+[32m[IDENTIFIER][0m y
+[32m[IDENTIFIER][0m ->@
+[32m[IDENTIFIER][0m x
+[32m[OPERATOR][0m =
+[32m[STRING][0m \"█\"
+[32m[OPERATOR][0m {
+[32m[KEYWORD][0m return
+[32m[KEYWORD][0m false
+[32m[SEPARATOR][0m ;
+[32m[OPERATOR][0m }
+[32m[IDENTIFIER][0m i3
+[32m[IDENTIFIER][0m :
+[32m[OPERATOR][0m =
+[32m[NUMBER][0m 1
+[32m[SEPARATOR][0m ;
+[32m[IDENTIFIER][0m while
+[32m[IDENTIFIER][0m i3
+[32m[IDENTIFIER][0m <=
+[32m[IDENTIFIER][0m snake
+[32m[OPERATOR][0m ->
+[32m[IDENTIFIER][0m count
+[32m[OPERATOR][0m {
+[32m[KEYWORD][0m cond
+[32m[IDENTIFIER][0m snake
+[32m[IDENTIFIER][0m ->@
+[32m[IDENTIFIER][0m i3
+[32m[OPERATOR][0m ->
+[32m[NUMBER][0m 1
+[32m[OPERATOR][0m =
+[32m[IDENTIFIER][0m x
+[32m[IDENTIFIER][0m and
+[32m[IDENTIFIER][0m snake
+[32m[IDENTIFIER][0m ->@
+[32m[IDENTIFIER][0m i3
+[32m[OPERATOR][0m ->
+[32m[NUMBER][0m 2
+[32m[OPERATOR][0m =
+[32m[IDENTIFIER][0m y
+[32m[OPERATOR][0m {
+[32m[KEYWORD][0m return
+[32m[KEYWORD][0m false
+[32m[SEPARATOR][0m ;
+[32m[OPERATOR][0m }
+[32m[IDENTIFIER][0m i3
+[32m[IDENTIFIER][0m +=
+[32m[NUMBER][0m 1
+[32m[SEPARATOR][0m ;
+[32m[OPERATOR][0m }
+[32m[KEYWORD][0m return
+[32m[KEYWORD][0m true
+[32m[SEPARATOR][0m ;
+[32m[OPERATOR][0m }
+[32m[IDENTIFIER][0m typing::void
+[32m[IDENTIFIER][0m up
+[32m[OPERATOR][0m (
+[32m[OPERATOR][0m )
+[32m[OPERATOR][0m {
+[32m[KEYWORD][0m cond
+[32m[IDENTIFIER][0m checkBounds
+[32m[OPERATOR][0m (
+[32m[NUMBER][0m 0
+[32m[OPERATOR][0m ,
+[32m[NUMBER][0m -1
+[32m[OPERATOR][0m )
+[32m[OPERATOR][0m {
+[32m[IDENTIFIER][0m snake
+[32m[OPERATOR][0m ->
+[32m[IDENTIFIER][0m addEnd
+[32m[OPERATOR][0m (
+[32m[IDENTIFIER][0m typing::array
+[32m[OPERATOR][0m (
+[32m[IDENTIFIER][0m typing::number
+[32m[OPERATOR][0m ,
+[32m[IDENTIFIER][0m snake
+[32m[IDENTIFIER][0m ->-
+[32m[NUMBER][0m 1
+[32m[OPERATOR][0m ->
+[32m[NUMBER][0m 1
+[32m[OPERATOR][0m ,
+[32m[IDENTIFIER][0m snake
+[32m[IDENTIFIER][0m ->-
+[32m[NUMBER][0m 1
+[32m[OPERATOR][0m ->
+[32m[NUMBER][0m 2
+[32m[OPERATOR][0m -
+[32m[NUMBER][0m 1
+[32m[OPERATOR][0m )
+[32m[OPERATOR][0m )
+[32m[SEPARATOR][0m ;
+[32m[IDENTIFIER][0m checkApple
+[32m[OPERATOR][0m (
+[32m[OPERATOR][0m )
+[32m[SEPARATOR][0m ;
+[32m[IDENTIFIER][0m render
+[32m[OPERATOR][0m (
+[32m[OPERATOR][0m )
+[32m[SEPARATOR][0m ;
+[32m[OPERATOR][0m }
+[32m[OPERATOR][0m }
+[32m[IDENTIFIER][0m typing::void
+[32m[IDENTIFIER][0m left
+[32m[OPERATOR][0m (
+[32m[OPERATOR][0m )
+[32m[OPERATOR][0m {
+[32m[KEYWORD][0m cond
+[32m[IDENTIFIER][0m checkBounds
+[32m[OPERATOR][0m (
+[32m[NUMBER][0m -1
+[32m[OPERATOR][0m ,
+[32m[NUMBER][0m 0
+[32m[OPERATOR][0m )
+[32m[OPERATOR][0m {
+[32m[IDENTIFIER][0m snake
+[32m[OPERATOR][0m ->
+[32m[IDENTIFIER][0m addEnd
+[32m[OPERATOR][0m (
+[32m[IDENTIFIER][0m typing::array
+[32m[OPERATOR][0m (
+[32m[IDENTIFIER][0m typing::number
+[32m[OPERATOR][0m ,
+[32m[IDENTIFIER][0m snake
+[32m[IDENTIFIER][0m ->-
+[32m[NUMBER][0m 1
+[32m[OPERATOR][0m ->
+[32m[NUMBER][0m 1
+[32m[OPERATOR][0m -
+[32m[NUMBER][0m 1
+[32m[OPERATOR][0m ,
+[32m[IDENTIFIER][0m snake
+[32m[IDENTIFIER][0m ->-
+[32m[NUMBER][0m 1
+[32m[OPERATOR][0m ->
+[32m[NUMBER][0m 2
+[32m[OPERATOR][0m )
+[32m[OPERATOR][0m )
+[32m[SEPARATOR][0m ;
+[32m[IDENTIFIER][0m checkApple
+[32m[OPERATOR][0m (
+[32m[OPERATOR][0m )
+[32m[SEPARATOR][0m ;
+[32m[IDENTIFIER][0m render
+[32m[OPERATOR][0m (
+[32m[OPERATOR][0m )
+[32m[SEPARATOR][0m ;
+[32m[OPERATOR][0m }
+[32m[OPERATOR][0m }
+[32m[IDENTIFIER][0m typing::void
+[32m[IDENTIFIER][0m down
+[32m[OPERATOR][0m (
+[32m[OPERATOR][0m )
+[32m[OPERATOR][0m {
+[32m[KEYWORD][0m cond
+[32m[IDENTIFIER][0m checkBounds
+[32m[OPERATOR][0m (
+[32m[NUMBER][0m 0
+[32m[OPERATOR][0m ,
+[32m[NUMBER][0m 1
+[32m[OPERATOR][0m )
+[32m[OPERATOR][0m {
+[32m[IDENTIFIER][0m snake
+[32m[OPERATOR][0m ->
+[32m[IDENTIFIER][0m addEnd
+[32m[OPERATOR][0m (
+[32m[IDENTIFIER][0m typing::array
+[32m[OPERATOR][0m (
+[32m[IDENTIFIER][0m typing::number
+[32m[OPERATOR][0m ,
+[32m[IDENTIFIER][0m snake
+[32m[IDENTIFIER][0m ->-
+[32m[NUMBER][0m 1
+[32m[OPERATOR][0m ->
+[32m[NUMBER][0m 1
+[32m[OPERATOR][0m ,
+[32m[IDENTIFIER][0m snake
+[32m[IDENTIFIER][0m ->-
+[32m[NUMBER][0m 1
+[32m[OPERATOR][0m ->
+[32m[NUMBER][0m 2
+[32m[OPERATOR][0m +
+[32m[NUMBER][0m 1
+[32m[OPERATOR][0m )
+[32m[OPERATOR][0m )
+[32m[SEPARATOR][0m ;
+[32m[IDENTIFIER][0m checkApple
+[32m[OPERATOR][0m (
+[32m[OPERATOR][0m )
+[32m[SEPARATOR][0m ;
+[32m[IDENTIFIER][0m render
+[32m[OPERATOR][0m (
+[32m[OPERATOR][0m )
+[32m[SEPARATOR][0m ;
+[32m[OPERATOR][0m }
+[32m[OPERATOR][0m }
+[32m[IDENTIFIER][0m typing::void
+[32m[IDENTIFIER][0m right
+[32m[OPERATOR][0m (
+[32m[OPERATOR][0m )
+[32m[OPERATOR][0m {
+[32m[KEYWORD][0m cond
+[32m[IDENTIFIER][0m checkBounds
+[32m[OPERATOR][0m (
+[32m[NUMBER][0m 1
+[32m[OPERATOR][0m ,
+[32m[NUMBER][0m 0
+[32m[OPERATOR][0m )
+[32m[OPERATOR][0m {
+[32m[IDENTIFIER][0m snake
+[32m[OPERATOR][0m ->
+[32m[IDENTIFIER][0m addEnd
+[32m[OPERATOR][0m (
+[32m[IDENTIFIER][0m typing::array
+[32m[OPERATOR][0m (
+[32m[IDENTIFIER][0m typing::number
+[32m[OPERATOR][0m ,
+[32m[IDENTIFIER][0m snake
+[32m[IDENTIFIER][0m ->-
+[32m[NUMBER][0m 1
+[32m[OPERATOR][0m ->
+[32m[NUMBER][0m 1
+[32m[OPERATOR][0m +
+[32m[NUMBER][0m 1
+[32m[OPERATOR][0m ,
+[32m[IDENTIFIER][0m snake
+[32m[IDENTIFIER][0m ->-
+[32m[NUMBER][0m 1
+[32m[OPERATOR][0m ->
+[32m[NUMBER][0m 2
+[32m[OPERATOR][0m )
+[32m[OPERATOR][0m )
+[32m[SEPARATOR][0m ;
+[32m[IDENTIFIER][0m checkApple
+[32m[OPERATOR][0m (
+[32m[OPERATOR][0m )
+[32m[SEPARATOR][0m ;
+[32m[IDENTIFIER][0m render
+[32m[OPERATOR][0m (
+[32m[OPERATOR][0m )
+[32m[SEPARATOR][0m ;
+[32m[OPERATOR][0m }
+[32m[OPERATOR][0m }
+[32m[IDENTIFIER][0m typing::void
+[32m[IDENTIFIER][0m moveApple
+[32m[OPERATOR][0m (
+[32m[OPERATOR][0m )
+[32m[OPERATOR][0m {
+[32m[IDENTIFIER][0m typing::bool
+[32m[IDENTIFIER][0m cantPlace
+[32m[OPERATOR][0m (
+[32m[OPERATOR][0m )
+[32m[OPERATOR][0m {
+[32m[IDENTIFIER][0m i3
+[32m[IDENTIFIER][0m :
+[32m[OPERATOR][0m =
+[32m[NUMBER][0m 1
+[32m[SEPARATOR][0m ;
+[32m[IDENTIFIER][0m while
+[32m[IDENTIFIER][0m i3
+[32m[IDENTIFIER][0m <=
+[32m[IDENTIFIER][0m snake
+[32m[OPERATOR][0m ->
+[32m[IDENTIFIER][0m count
+[32m[OPERATOR][0m {
+[32m[KEYWORD][0m cond
+[32m[IDENTIFIER][0m snake
+[32m[IDENTIFIER][0m ->@
+[32m[IDENTIFIER][0m i3
+[32m[OPERATOR][0m ->
+[32m[NUMBER][0m 1
+[32m[OPERATOR][0m =
+[32m[IDENTIFIER][0m appleX
+[32m[IDENTIFIER][0m and
+[32m[IDENTIFIER][0m snake
+[32m[IDENTIFIER][0m ->@
+[32m[IDENTIFIER][0m i3
+[32m[OPERATOR][0m ->
+[32m[NUMBER][0m 2
+[32m[OPERATOR][0m =
+[32m[IDENTIFIER][0m appleY
+[32m[OPERATOR][0m {
+[32m[KEYWORD][0m return
+[32m[KEYWORD][0m true
+[32m[SEPARATOR][0m ;
+[32m[OPERATOR][0m }
+[32m[IDENTIFIER][0m i3
+[32m[IDENTIFIER][0m +=
+[32m[NUMBER][0m 1
+[32m[SEPARATOR][0m ;
+[32m[OPERATOR][0m }
+[32m[KEYWORD][0m return
+[32m[KEYWORD][0m false
+[32m[SEPARATOR][0m ;
+[32m[OPERATOR][0m }
+[32m[IDENTIFIER][0m appleX
+[32m[IDENTIFIER][0m :
+[32m[OPERATOR][0m =
+[32m[IDENTIFIER][0m random::int
+[32m[OPERATOR][0m (
+[32m[NUMBER][0m 2
+[32m[OPERATOR][0m ,
+[32m[NUMBER][0m 21
+[32m[OPERATOR][0m )
+[32m[SEPARATOR][0m ;
+[32m[IDENTIFIER][0m appleY
+[32m[IDENTIFIER][0m :
+[32m[OPERATOR][0m =
+[32m[IDENTIFIER][0m random::int
+[32m[OPERATOR][0m (
+[32m[NUMBER][0m 2
+[32m[OPERATOR][0m ,
+[32m[NUMBER][0m 21
+[32m[OPERATOR][0m )
+[32m[SEPARATOR][0m ;
+[32m[IDENTIFIER][0m while
+[32m[IDENTIFIER][0m cantPlace
+[32m[OPERATOR][0m (
+[32m[OPERATOR][0m )
+[32m[OPERATOR][0m {
+[32m[IDENTIFIER][0m appleX
+[32m[IDENTIFIER][0m :
+[32m[OPERATOR][0m =
+[32m[IDENTIFIER][0m random::int
+[32m[OPERATOR][0m (
+[32m[NUMBER][0m 2
+[32m[OPERATOR][0m ,
+[32m[NUMBER][0m 21
+[32m[OPERATOR][0m )
+[32m[SEPARATOR][0m ;
+[32m[IDENTIFIER][0m appleY
+[32m[IDENTIFIER][0m :
+[32m[OPERATOR][0m =
+[32m[IDENTIFIER][0m random::int
+[32m[OPERATOR][0m (
+[32m[NUMBER][0m 2
+[32m[OPERATOR][0m ,
+[32m[NUMBER][0m 21
+[32m[OPERATOR][0m )
+[32m[SEPARATOR][0m ;
+[32m[OPERATOR][0m }
+[32m[OPERATOR][0m }
+[32m[IDENTIFIER][0m moveApple
+[32m[OPERATOR][0m (
+[32m[OPERATOR][0m )
+[32m[SEPARATOR][0m ;
+[32m[IDENTIFIER][0m key::hook
+[32m[OPERATOR][0m (
+[32m[STRING][0m \"w\"
+[32m[OPERATOR][0m ,
+[32m[IDENTIFIER][0m up
+[32m[OPERATOR][0m )
+[32m[SEPARATOR][0m ;
+[32m[IDENTIFIER][0m key::hook
+[32m[OPERATOR][0m (
+[32m[STRING][0m \"a\"
+[32m[OPERATOR][0m ,
+[32m[IDENTIFIER][0m left
+[32m[OPERATOR][0m )
+[32m[SEPARATOR][0m ;
+[32m[IDENTIFIER][0m key::hook
+[32m[OPERATOR][0m (
+[32m[STRING][0m \"s\"
+[32m[OPERATOR][0m ,
+[32m[IDENTIFIER][0m down
+[32m[OPERATOR][0m )
+[32m[SEPARATOR][0m ;
+[32m[IDENTIFIER][0m key::hook
+[32m[OPERATOR][0m (
+[32m[STRING][0m \"d\"
+[32m[OPERATOR][0m ,
+[32m[IDENTIFIER][0m right
+[32m[OPERATOR][0m )
+[32m[SEPARATOR][0m ;
+[32m[IDENTIFIER][0m render
+[32m[OPERATOR][0m (
+[32m[OPERATOR][0m )
+[32m[SEPARATOR][0m ;
