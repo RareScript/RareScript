@@ -62,6 +62,12 @@ for (var i = 0; i < code.length; i++) {
   var char = code[i];
   if (char == "\"") {
     isString = !isString;
+    if (!isString) {
+      currentToken += char;
+      addToken(i + 1);
+      currentToken = "";
+      continue;
+    }
   }
   if (isString) {
     currentToken += char;
@@ -82,10 +88,6 @@ for (var i = 0; i < code.length; i++) {
     continue;
   }
   currentToken += char;
-  if (char == "\"") {
-    addToken(i + 1);
-    currentToken = "";
-  }
 }
 if (currentToken.length) {
   addToken(code.length);
