@@ -16,10 +16,10 @@ var TokenType = {
   "STRING": 5,
   "NUMBER": 6
 };
-var tokenSeparators = [" ", "\n", ";", "(", ")", "{", "}", ","];
+var tokenSeparators = [" ", "\n", ";", "(", ")", "{", "}", ",", "<", ">"];
 var digits = "0123456789";
-var keywords = ["import", "as", "return", "cond"];
-var operators = ["(", ")", "{", "}", ",", "+", "-", "*", "/", "=", "!=", ":=", "..", "->"];
+var keywords = ["import", "as", "return", "cond", "false", "true", "maybe"];
+var operators = ["(", ")", "{", "}", ",", "+", "-", "*", "/", "=", "!=", ":=", "..", "->", "<", ">"];
 
 function addToken(index) {
   var type = TokenType.IDENTIFIER;
@@ -60,6 +60,19 @@ function canBeIdentifier(data) {
 
 for (var i = 0; i < code.length; i++) {
   var char = code[i];
+  if (char == "'") {
+    if (code[i + 2] != "'") {
+      // TODO: Errors
+      break;
+    }
+    currentToken += char;
+    currentToken += code[i + 1];
+    currentToken += char;
+    i += 2;
+    addToken(i + 1);
+    currentToken = "";
+    continue;
+  }
   if (char == "\"") {
     isString = !isString;
     if (!isString) {
@@ -73,7 +86,7 @@ for (var i = 0; i < code.length; i++) {
     currentToken += char;
     continue;
   }
-  if (tokenSeparators.includes(char) || (currentToken.at(-1) == "-" && digits.includes(char) && tokens.at(-1) && (tokens.at(-1).type == TokenType.NUMBER || tokens.at(-1).type == TokenType.IDENTIFIER || code.slice(tokens.at(-1).start, tokens.at(-1).start + tokens.at(-1).length) == ")")) || (canBeIdentifier(currentToken.at(-1)) != canBeIdentifier(char))) {
+  if (tokenSeparators.includes(char) || (currentToken.at(-1) == "-" && digits.includes(char) && tokens.at(-1) && (tokens.at(-1).type == TokenType.NUMBER || tokens.at(-1).type == TokenType.IDENTIFIER || code.slice(tokens.at(-1).start, tokens.at(-1).start + tokens.at(-1).length) == ")")) || (currentToken.at(-1) != "-" && canBeIdentifier(currentToken.at(-1)) != canBeIdentifier(char)) || (currentToken.at(-1) == "-" && canBeIdentifier(char) && !digits.includes(char))) {
     if (currentToken.length) {
       addToken(i);
     }
