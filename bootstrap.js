@@ -1,3 +1,5 @@
+var util = require("util");
+
 var TokenType = {
   "SEPARATOR": 0,
   "IDENTIFIER": 1,
@@ -17,8 +19,22 @@ function getTokenValue(code, token) {
 
 var InstructionType = {
   "IMPORT": 0,
-  "EXPRESSION": 1
+  "EXPRESSION": 1,
+  "VARIABLE": 2
 };
+
+var operatorPriority = [
+  [".."],
+  ["->", "->@"],
+  ["**"],
+  ["*", "/", "//", "%"],
+  ["+", "-"],
+  ["<<", ">>"],
+  ["|", "&", "^"],
+  ["<|"],
+  ["=", "!=", "<", ">", "<=", ">="],
+  ["or", "and"]
+];
 
 class RareScriptError {
   constructor(file, line, code, message) {
@@ -42,7 +58,7 @@ function lexer(filename, code) {
   var digits = "0123456789";
   var symbols = "!@#$%^&*-+\\|/=";
   var keywords = ["import", "as", "return", "cond", "false", "true", "maybe", "and", "or"];
-  var operators = ["(", ")", "{", "}", ",", "+", "-", "*", "/", "%", "=", "!=", ":=", "..", "->", "->@", "<", ">"];
+  var operators = ["(", ")", "{", "}", ",", "**", "+", "-", "*", "/", "//", "%", "=", "!=", ":=", "..", "->", "->@", "<", ">", "|", "&", "^", "<<", ">>", "<=", ">="];
 
   function addToken(index) {
     var type = TokenType.IDENTIFIER;
@@ -124,7 +140,7 @@ function lexer(filename, code) {
       i += code.slice(i).indexOf("\n") - 1;
       continue;
     }
-    if (tokenSeparators.includes(char) || (currentToken.at(-1) == "-" && digits.includes(char) && tokens.at(-1) && (tokens.at(-1).type == TokenType.NUMBER || tokens.at(-1).type == TokenType.IDENTIFIER || code.slice(tokens.at(-1).start, tokens.at(-1).start + tokens.at(-1).length) == ")")) || (currentToken.at(-1) != "-" && canBeIdentifier(currentToken.at(-1)) != canBeIdentifier(char) && !(isNumber(currentToken) && char == ".") && !(isNumber(currentToken) && currentToken.at(-1) == "." && digits.includes(char))) || (isNumber(currentToken) && currentToken.includes(".") && char == ".") || (currentToken.at(-1) == "-" && canBeIdentifier(char) && !digits.includes(char)) || (currentToken.length && !currentToken.split("").find(char2 => !symbols.includes(char2)) && char == "-") || (currentToken == "->" && char == "-")) {
+    if (tokenSeparators.includes(char) || (currentToken.at(-1) == "-" && digits.includes(char) && tokens.at(-1) && (tokens.at(-1).type == TokenType.NUMBER || tokens.at(-1).type == TokenType.IDENTIFIER || code.slice(tokens.at(-1).start, tokens.at(-1).start + tokens.at(-1).length) == ")")) || (currentToken.at(-1) != "-" && canBeIdentifier(currentToken.at(-1)) != canBeIdentifier(char) && !(isNumber(currentToken) && char == ".") && !(isNumber(currentToken) && currentToken.at(-1) == "." && digits.includes(char)) && !(currentToken == ":" && char == "=")) || (isNumber(currentToken) && currentToken.includes(".") && char == ".") || (currentToken.at(-1) == "-" && canBeIdentifier(char) && !digits.includes(char)) || (currentToken.length && !currentToken.split("").find(char2 => !symbols.includes(char2)) && char == "-") || (currentToken == "->" && char == "-")) {
       if (isNumber(currentToken) && currentToken.at(-1) == "." && char == ".") {
         currentToken = currentToken.slice(0, -1);
         addToken(i - 1);
@@ -173,6 +189,9 @@ function parser(filename, code, tokens) {
   }
 
   function expectToken(query) {
+    if (!tokens.length) {
+      return null;
+    }
     if (typeof query === "number" && tokens[0].type == query) {
       return takeToken();
     }
@@ -220,9 +239,48 @@ function parser(filename, code, tokens) {
           return new RareScriptError(filename, token.line, 3, `Unexpected keyword "${value}"`);
       }
     }
+    if (token.type == TokenType.IDENTIFIER) {
+      var type = null;
+      var name = null;
+      var modifiers = [];
+      if (tokens[0].type == TokenType.IDENTIFIER && getTokenValue(code, tokens[1]) == ":=") {
+        type = getTokenValue(code, token);
+        name = getTokenValue(code, takeToken());
+        takeToken(":=");
+      } else if (getTokenValue(code, tokens[0]) == "final" && tokens[1].type == TokenType.IDENTIFIER && getTokenValue(code, tokens[2]) == ":=") {
+        type = getTokenValue(code, token);
+        modifiers.push(getTokenValue(code, takeToken()));
+        name = getTokenValue(code, takeToken());
+        takeToken(":=");
+      }
+      var value = [];
+      if (type && name) {
+        while(!expectToken(TokenType.SEPARATOR)) {
+          var expressionToken = takeToken();
+          if (!expressionToken) {
+            return new RareScriptError(filename, token.line, 8, "Expected separator, got EOF");
+          }
+          value.push(expressionToken);
+        }
+        ast.push({
+          "type": InstructionType.VARIABLE,
+          "variableType": type,
+          name, modifiers,
+          "value": parseExpression(filename, code, value)
+        });
+        continue;
+      }
+    }
+    if (token.type == TokenType.SEPARATOR) {
+      continue;
+    }
     var expression = [token];
     while(!expectToken(TokenType.SEPARATOR)) {
-      expression.push(takeToken());
+      var expressionToken = takeToken();
+      if (!expressionToken) {
+        return new RareScriptError(filename, token.line, 7, "Expected separator, got EOF");
+      }
+      expression.push(expressionToken);
     }
     ast.push({
       "type": InstructionType.EXPRESSION,
@@ -239,6 +297,139 @@ function parser(filename, code, tokens) {
 
 function parseExpression(filename, code, tokens) {
   var expression = {};
+
+  for (var tokenIndex = 0; tokenIndex < tokens.length; tokenIndex++) {
+    if (getTokenValue(code, tokens[tokenIndex]) == "(") {
+      var bracketDepth = 1;
+      for (var tokenIndex2 = tokenIndex + 1; tokenIndex2 < tokens.length; tokenIndex2++) {
+        if (getTokenValue(code, tokens[tokenIndex2]) == "(") {
+          bracketDepth++;
+        }
+        if (getTokenValue(code, tokens[tokenIndex2]) == ")") {
+          if (!--bracketDepth) {
+            break;
+          }
+        }
+      }
+      tokens.splice(tokenIndex, tokenIndex2 - tokenIndex + 1, tokens.slice(tokenIndex + 1, tokenIndex2));
+    }
+  }
+
+  for (var tokenIndex = 0; tokenIndex < tokens.length; tokenIndex++) {
+    if (tokens[tokenIndex].type == TokenType.IDENTIFIER && tokens[tokenIndex + 1] && Array.isArray(tokens[tokenIndex + 1])) {
+      var args = [[]];
+      var bracketDepth = 0;
+      for (var tokenIndex2 = 0; tokenIndex2 < tokens[tokenIndex + 1].length; tokenIndex2++) {
+        var token2 = tokens[tokenIndex + 1][tokenIndex2];
+        if (getTokenValue(code, token2) == "(") {
+          bracketDepth++;
+        }
+        if (getTokenValue(code, token2) == ")") {
+          bracketDepth--;
+        }
+        if (getTokenValue(code, token2) == "," && !bracketDepth) {
+          args.push([]);
+        } else {
+          args.at(-1).push(token2);
+        }
+      }
+      tokens.splice(tokenIndex, 2, {
+        "function": getTokenValue(code, tokens[tokenIndex]),
+        "arguments": args.map(argument => parseExpression(filename, code, argument))
+      });
+    }
+  }
+
+  if (tokens.length == 1) {
+    if (tokens[0].function) {
+      return tokens[0];
+    } else if (tokens[0].type == TokenType.IDENTIFIER) {
+      return {
+        "type": "identifier",
+        "value": getTokenValue(code, tokens[0])
+      };
+    } else if (tokens[0].type == TokenType.CHAR) {
+      return {
+        "type": "char",
+        "value": getTokenValue(code, tokens[0])
+      };
+    } else if (tokens[0].type == TokenType.STRING) {
+      return {
+        "type": "string",
+        "value": getTokenValue(code, tokens[0])
+      };
+    } else if (tokens[0].type == TokenType.NUMBER) {
+      return {
+        "type": "number",
+        "value": getTokenValue(code, tokens[0])
+      };
+    }
+  }
+
+  for (var operatorsIndex = (operatorPriority.length - 1); operatorsIndex > 0; operatorsIndex--) {
+    var operators = operatorPriority[operatorsIndex];
+    var foundIndex = tokens.findLastIndex(token => operators.includes(getTokenValue(code, token)));
+    if (foundIndex > -1) {
+      expression.type = "operator";
+      expression.operator = getTokenValue(code, tokens[foundIndex]);
+      if (foundIndex == 1 && !Array.isArray(tokens[0])) {
+        if (tokens[0].function) {
+          expression.left = tokens[0];
+        } else if (tokens[0].type == TokenType.IDENTIFIER) {
+          expression.left = {
+            "type": "identifier",
+            "value": getTokenValue(code, tokens[0])
+          };
+        } else if (tokens[0].type == TokenType.CHAR) {
+          expression.left = {
+            "type": "char",
+            "value": getTokenValue(code, tokens[0])
+          };
+        } else if (tokens[0].type == TokenType.STRING) {
+          expression.left = {
+            "type": "string",
+            "value": getTokenValue(code, tokens[0])
+          };
+        } else if (tokens[0].type == TokenType.NUMBER) {
+          expression.left = {
+            "type": "number",
+            "value": getTokenValue(code, tokens[0])
+          };
+        }
+      } else {
+        expression.left = parseExpression(filename, code, tokens.slice(0, foundIndex).flat());
+      }
+      if (foundIndex == tokens.length - 2 && !Array.isArray(tokens.at(-1))) {
+        if (tokens.at(-1).function) {
+          expression.right = tokens.at(-1);
+        } else if (tokens.at(-1).type == TokenType.IDENTIFIER) {
+          expression.right = {
+            "type": "identifier",
+            "value": getTokenValue(code, tokens.at(-1))
+          };
+        } else if (tokens.at(-1).type == TokenType.CHAR) {
+          expression.right = {
+            "type": "char",
+            "value": getTokenValue(code, tokens.at(-1))
+          };
+        } else if (tokens.at(-1).type == TokenType.STRING) {
+          expression.right = {
+            "type": "string",
+            "value": getTokenValue(code, tokens.at(-1))
+          };
+        } else if (tokens.at(-1).type == TokenType.NUMBER) {
+          expression.right = {
+            "type": "number",
+            "value": getTokenValue(code, tokens.at(-1))
+          };
+        }
+      } else {
+        expression.right = parseExpression(filename, code, tokens.slice(foundIndex + 1).flat());
+      }
+      break;
+    }
+  }
+
   return expression;
 }
 
@@ -281,7 +472,8 @@ function processCode(filename, code, debug) {
     return throwError(ast, code);
   }
   if (debug) {
-    console.log(ast);
+    console.log(`\x1b[32m[DEBUG / ${ast.length} INSTRUCTIONS]\x1b[0m`);
+    console.log(util.inspect(ast, false, null, true));
   }
 }
 
