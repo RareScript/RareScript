@@ -20,7 +20,7 @@ var tokenSeparators = [" ", "\n", ";", "(", ")", "{", "}", ","];
 var digits = "0123456789";
 var symbols = "!@#$%^&*-+\\|/=";
 var keywords = ["import", "as", "return", "cond", "false", "true", "maybe"];
-var operators = ["(", ")", "{", "}", ",", "+", "-", "*", "/", "=", "!=", ":=", "..", "->", "->@", "<", ">"];
+var operators = ["(", ")", "{", "}", ",", "+", "-", "*", "/", "%", "=", "!=", ":=", "..", "->", "->@", "<", ">"];
 
 function addToken(index) {
   var type = TokenType.IDENTIFIER;
