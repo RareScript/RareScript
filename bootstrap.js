@@ -16,7 +16,8 @@ function getTokenValue(code, token) {
 }
 
 var InstructionType = {
-  "IMPORT": 0
+  "IMPORT": 0,
+  "EXPRESSION": 1
 };
 
 class RareScriptError {
@@ -219,6 +220,14 @@ function parser(filename, code, tokens) {
           return new RareScriptError(filename, token.line, 3, `Unexpected keyword "${value}"`);
       }
     }
+    var expression = [token];
+    while(!expectToken(TokenType.SEPARATOR)) {
+      expression.push(takeToken());
+    }
+    ast.push({
+      "type": InstructionType.EXPRESSION,
+      "expression": parseExpression(filename, code, expression)
+    });
   }
 
   if (cachedError) {
@@ -226,6 +235,11 @@ function parser(filename, code, tokens) {
   }
 
   return ast;
+}
+
+function parseExpression(filename, code, tokens) {
+  var expression = {};
+  return expression;
 }
 
 function processCode(filename, code, debug) {
