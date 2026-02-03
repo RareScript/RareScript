@@ -8,6 +8,17 @@ var TokenType = {
   "NUMBER": 6
 };
 
+function getTokenValue(code, token) {
+  if (!token) {
+    return null;
+  }
+  return code.slice(token.start, token.start + token.length);
+}
+
+var InstructionType = {
+  "IMPORT": 0
+};
+
 class RareScriptError {
   constructor(file, line, code, message) {
     this.file = file;
@@ -16,6 +27,10 @@ class RareScriptError {
     this.message = message;
   }
 };
+
+function throwError(error, code) {
+  console.log(`    \x1B[38;2;119;119;119m╭─\x1B[39m\x1B[35m[${error.file}]\x1B[39m\n    \x1B[38;2;119;119;119m·\x1B[39m\n${((error.line.toString().length > 3) ? "" : " ".repeat(3 - error.line.toString().length))}\x1B[31m${error.line}\x1B[39m${((error.line.toString().length > 3) ? "" : " ")}│ \x1B[33m\x1B[4m${code ? code.split("\n")[error.line - 1] : "[No source code]"}\x1B[24m\x1B[39m\n    \x1B[38;2;119;119;119m·\x1B[39m${" ".repeat((code ? code.split("\n")[error.line - 1].length : 16) - 1)}\x1B[33m╰─────── \x1B[1mE${error.code.toString(16).padStart(2, "0").toUpperCase()}: ${error.message}\x1B[22m\x1B[39m\n    \x1B[38;2;119;119;119m·\x1B[39m\n\x1B[38;2;119;119;119m────╯\x1B[39m`);
+}
 
 function lexer(filename, code) {
   var tokens = [];
@@ -51,7 +66,8 @@ function lexer(filename, code) {
     tokens.push({
       type,
       "start": index - currentToken.length,
-      "length": currentToken.length
+      "length": currentToken.length,
+      "line": currentLine
     });
   }
 
@@ -114,8 +130,14 @@ function lexer(filename, code) {
         currentToken = "..";
         continue;
       }
+      if (char == "\n") {
+        currentLine--;
+      }
       if (currentToken.length) {
         addToken(i);
+      }
+      if (char == "\n") {
+        currentLine++;
       }
       currentToken = "";
       if (char != " " && char != "\n") {
@@ -139,8 +161,71 @@ function lexer(filename, code) {
   return tokens;
 }
 
-function throwError(error, code) {
-  console.log(`    \x1B[38;2;119;119;119m╭─\x1B[39m\x1B[35m[${error.file}]\x1B[39m\n    \x1B[38;2;119;119;119m·\x1B[39m\n${((error.line.toString().length > 3) ? "" : " ".repeat(3 - error.line.toString().length))}\x1B[31m${error.line}\x1B[39m${((error.line.toString().length > 3) ? "" : " ")}│ \x1B[33m\x1B[4m${code ? code.split("\n")[error.line - 1] : "[No source code]"}\x1B[24m\x1B[39m\n    \x1B[38;2;119;119;119m·\x1B[39m${" ".repeat((code ? code.split("\n")[error.line - 1].length : 16) - 1)}\x1B[33m╰─────── \x1B[1mE${error.code.toString(16).padStart(2, "0").toUpperCase()}: ${error.message}\x1B[22m\x1B[39m\n    \x1B[38;2;119;119;119m·\x1B[39m\n\x1B[38;2;119;119;119m────╯\x1B[39m`);
+function parser(filename, code, tokens) {
+  var ast = [];
+  var cachedError = null;
+  var lastToken = null;
+
+  function takeToken() {
+    lastToken = tokens.shift();
+    return lastToken;
+  }
+
+  function expectToken(query) {
+    if (typeof query === "number" && tokens[0].type == query) {
+      return takeToken();
+    }
+    if (typeof query === "string" && getTokenValue(code, tokens[0]) == query) {
+      return takeToken();
+    }
+    return null;
+  }
+
+  function requireSeparator() {
+    if (!expectToken(TokenType.SEPARATOR)) {
+      cachedError = new RareScriptError(filename, lastToken.line, 6, "Expected separator");
+      return cachedError;
+    }
+  }
+
+  while(tokens.length) {
+    if (cachedError) {
+      return cachedError;
+    }
+    var token = takeToken();
+    var value = getTokenValue(code, token);
+    if (token.type == TokenType.KEYWORD) {
+      switch(value) {
+        case "import":
+          var module = expectToken(TokenType.IDENTIFIER);
+          if (!module) {
+            return new RareScriptError(filename, token.line, 4, "Expected module name");
+          }
+          var as = null;
+          if (expectToken("as")) {
+            as = expectToken(TokenType.IDENTIFIER);
+            if (!as) {
+              return new RareScriptError(filename, token.line, 5, "Expected import as name");
+            }
+          }
+          requireSeparator();
+          ast.push({
+            "type": InstructionType.IMPORT,
+            "module": getTokenValue(code, module),
+            "as": getTokenValue(code, as)
+          });
+          continue;
+        default:
+          return new RareScriptError(filename, token.line, 3, `Unexpected keyword "${value}"`);
+      }
+    }
+  }
+
+  if (cachedError) {
+    return cachedError;
+  }
+
+  return ast;
 }
 
 function processCode(filename, code, debug) {
@@ -172,8 +257,17 @@ function processCode(filename, code, debug) {
       if (token.type == TokenType.NUMBER) {
         color = 33;
       }
-      return `\x1b[${color}m${code.slice(token.start, token.start + token.length)}\x1b[0m`;
+      return `\x1b[${color}m${getTokenValue(code, token)}\x1b[0m`;
     }).join(" "));
+    console.log(tokens);
+  }
+
+  var ast = parser(filename, code, tokens);
+  if (ast instanceof RareScriptError) {
+    return throwError(ast, code);
+  }
+  if (debug) {
+    console.log(ast);
   }
 }
 
