@@ -91,6 +91,11 @@ for (var i = 0; i < code.length; i++) {
     currentToken += char;
     continue;
   }
+  if (currentToken == "%%") {
+    currentToken = "";
+    i += code.slice(i).indexOf("\n");
+    continue;
+  }
   if (tokenSeparators.includes(char) || (currentToken.at(-1) == "-" && digits.includes(char) && tokens.at(-1) && (tokens.at(-1).type == TokenType.NUMBER || tokens.at(-1).type == TokenType.IDENTIFIER || code.slice(tokens.at(-1).start, tokens.at(-1).start + tokens.at(-1).length) == ")")) || (currentToken.at(-1) != "-" && canBeIdentifier(currentToken.at(-1)) != canBeIdentifier(char) && !(isNumber(currentToken) && char == ".") && !(isNumber(currentToken) && currentToken.at(-1) == "." && digits.includes(char))) || (isNumber(currentToken) && currentToken.includes(".") && char == ".") || (currentToken.at(-1) == "-" && canBeIdentifier(char) && !digits.includes(char)) || (currentToken.length && !currentToken.split("").find(char2 => !symbols.includes(char2)) && char == "-") || (currentToken == "->" && char == "-")) {
     if (isNumber(currentToken) && currentToken.at(-1) == "." && char == ".") {
       currentToken = currentToken.slice(0, -1);
