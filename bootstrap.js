@@ -8,8 +8,18 @@ var TokenType = {
   "NUMBER": 6
 };
 
-function lexer(code) {
+class RareScriptError {
+  constructor(file, line, code, message) {
+    this.file = file;
+    this.line = line;
+    this.code = code;
+    this.message = message;
+  }
+};
+
+function lexer(filename, code) {
   var tokens = [];
+  var currentLine = 1;
   var currentToken = "";
   var isString = false;
   var tokenSeparators = [" ", "\n", ";", "(", ")", "{", "}", ","];
@@ -61,10 +71,15 @@ function lexer(code) {
 
   for (var i = 0; i < code.length; i++) {
     var char = code[i];
+    if (char == "\n") {
+      if (isString) {
+        return new RareScriptError(filename, currentLine, 0, "Got new line before string close");
+      }
+      currentLine++;
+    }
     if (char == "'") {
       if (code[i + 2] != "'") {
-        // TODO: Errors
-        break;
+        return new RareScriptError(filename, currentLine, 1, "Invalid char");
       }
       currentToken += char;
       currentToken += code[i + 1];
@@ -89,7 +104,7 @@ function lexer(code) {
     }
     if (currentToken == "%%") {
       currentToken = "";
-      i += code.slice(i).indexOf("\n");
+      i += code.slice(i).indexOf("\n") - 1;
       continue;
     }
     if (tokenSeparators.includes(char) || (currentToken.at(-1) == "-" && digits.includes(char) && tokens.at(-1) && (tokens.at(-1).type == TokenType.NUMBER || tokens.at(-1).type == TokenType.IDENTIFIER || code.slice(tokens.at(-1).start, tokens.at(-1).start + tokens.at(-1).length) == ")")) || (currentToken.at(-1) != "-" && canBeIdentifier(currentToken.at(-1)) != canBeIdentifier(char) && !(isNumber(currentToken) && char == ".") && !(isNumber(currentToken) && currentToken.at(-1) == "." && digits.includes(char))) || (isNumber(currentToken) && currentToken.includes(".") && char == ".") || (currentToken.at(-1) == "-" && canBeIdentifier(char) && !digits.includes(char)) || (currentToken.length && !currentToken.split("").find(char2 => !symbols.includes(char2)) && char == "-") || (currentToken == "->" && char == "-")) {
@@ -118,16 +133,23 @@ function lexer(code) {
     addToken(code.length);
   }
   if (isString) {
-    // TODO: Errors
+    return new RareScriptError(filename, currentLine, 2, "Got EOF before string close");
   }
 
   return tokens;
 }
 
-function processCode(code, debug) {
+function throwError(error, code) {
+  console.log(`    \x1B[38;2;119;119;119m╭─\x1B[39m\x1B[35m[${error.file}]\x1B[39m\n    \x1B[38;2;119;119;119m·\x1B[39m\n${((error.line.toString().length > 3) ? "" : " ".repeat(3 - error.line.toString().length))}\x1B[31m${error.line}\x1B[39m${((error.line.toString().length > 3) ? "" : " ")}│ \x1B[33m\x1B[4m${code ? code.split("\n")[error.line - 1] : "[No source code]"}\x1B[24m\x1B[39m\n    \x1B[38;2;119;119;119m·\x1B[39m${" ".repeat((code ? code.split("\n")[error.line - 1].length : 16) - 1)}\x1B[33m╰─────── \x1B[1mE${error.code.toString(16).padStart(2, "0").toUpperCase()}: ${error.message}\x1B[22m\x1B[39m\n    \x1B[38;2;119;119;119m·\x1B[39m\n\x1B[38;2;119;119;119m────╯\x1B[39m`);
+}
+
+function processCode(filename, code, debug) {
   code = code.split("\r\n").join("\n");
 
-  var tokens = lexer(code);
+  var tokens = lexer(filename, code);
+  if (tokens instanceof RareScriptError) {
+    return throwError(tokens, code);
+  }
   if (debug) {
     console.log(`\x1b[32m[DEBUG / ${tokens.length} TOKENS]\x1b[0m`);
     console.log(tokens.map(token => {
@@ -156,5 +178,6 @@ function processCode(code, debug) {
 }
 
 var fs = require("fs");
+var path = require("path");
 var code = fs.readFileSync(process.argv[2]).toString("utf-8");
-processCode(code, true);
+processCode(path.basename(process.argv[2]), code, true);
