@@ -129,7 +129,7 @@ function processCode(code, debug) {
 
   var tokens = lexer(code);
   if (debug) {
-    console.log("\x1b[32m[DEBUG TOKENS VIEW]\x1b[0m");
+    console.log(`\x1b[32m[DEBUG / ${tokens.length} TOKENS]\x1b[0m`);
     console.log(tokens.map(token => {
       var color = 37;
       if (token.type == TokenType.SEPARATOR) {
