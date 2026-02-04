@@ -703,3 +703,100 @@ expectTokensAndAST(`typing::number getOne(typing::string test, typing::number *a
     }
   }]
 }]);
+
+expectTokensAndAST(`cond true { return 1; }`, [{
+  "type": RareScript.TokenType.KEYWORD,
+  "value": "cond"
+}, {
+  "type": RareScript.TokenType.KEYWORD,
+  "value": "true"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": "{"
+}, {
+  "type": RareScript.TokenType.KEYWORD,
+  "value": "return"
+}, {
+  "type": RareScript.TokenType.NUMBER,
+  "value": "1"
+}, {
+  "type": RareScript.TokenType.SEPARATOR,
+  "value": ";"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": "}"
+}], [{
+  "type": RareScript.InstructionType.CONDITION,
+  "condition": {
+    "type": "boolean",
+    "value": "true"
+  },
+  "true": [{
+    "type": RareScript.InstructionType.RETURN,
+    "value": {
+      "type": "number",
+      "value": "1"
+    }
+  }],
+  "false": null
+}]);
+expectTokensAndAST(`cond true { return 1; } else { return 2; }`, [{
+  "type": RareScript.TokenType.KEYWORD,
+  "value": "cond"
+}, {
+  "type": RareScript.TokenType.KEYWORD,
+  "value": "true"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": "{"
+}, {
+  "type": RareScript.TokenType.KEYWORD,
+  "value": "return"
+}, {
+  "type": RareScript.TokenType.NUMBER,
+  "value": "1"
+}, {
+  "type": RareScript.TokenType.SEPARATOR,
+  "value": ";"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": "}"
+}, {
+  "type": RareScript.TokenType.KEYWORD,
+  "value": "else"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": "{"
+}, {
+  "type": RareScript.TokenType.KEYWORD,
+  "value": "return"
+}, {
+  "type": RareScript.TokenType.NUMBER,
+  "value": "2"
+}, {
+  "type": RareScript.TokenType.SEPARATOR,
+  "value": ";"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": "}"
+}], [{
+  "type": RareScript.InstructionType.CONDITION,
+  "condition": {
+    "type": "boolean",
+    "value": "true"
+  },
+  "true": [{
+    "type": RareScript.InstructionType.RETURN,
+    "value": {
+      "type": "number",
+      "value": "1"
+    }
+  }],
+  "false": [{
+    "type": RareScript.InstructionType.RETURN,
+    "value": {
+      "type": "number",
+      "value": "2"
+    }
+  }]
+}]);

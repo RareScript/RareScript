@@ -61,7 +61,7 @@ function lexer(filename, code) {
   var tokenSeparators = [" ", "\n", ";", "(", ")", "{", "}", ","];
   var digits = "0123456789";
   var symbols = "!@#$%^&*-+\\|/=";
-  var keywords = ["import", "as", "return", "cond", "false", "true", "maybe", "and", "or", "final"];
+  var keywords = ["import", "as", "return", "cond", "else", "false", "true", "maybe", "and", "or", "final"];
   var operators = ["(", ")", "{", "}", ",", "**", "+", "-", "*", "/", "//", "%", "=", "!=", ":=", "..", "->", "->@", "<", ">", "|", "&", "^", "<<", ">>", "<=", ">="];
 
   function addToken(index) {
@@ -239,6 +239,53 @@ function parser(filename, code, tokens) {
             "type": InstructionType.IMPORT,
             "module": getTokenValue(code, module),
             "as": getTokenValue(code, as)
+          });
+          continue;
+        case "cond":
+          var condition = [];
+          while(!expectToken("{")) {
+            condition.push(takeToken());
+          }
+          if (!condition.length) {
+            return new RareScriptError(filename, token.line, 14, "Expected a condition");
+          }
+          var bracketDepth = 1;
+          for (var tokenIndex = 0; tokenIndex < tokens.length; tokenIndex++) {
+            if (getTokenValue(code, tokens[tokenIndex]) == "{") {
+              bracketDepth++;
+            }
+            if (getTokenValue(code, tokens[tokenIndex]) == "}") {
+              if (!--bracketDepth) {
+                break;
+              }
+            }
+          }
+          var trueContent = tokens.splice(0, tokenIndex);
+          var falseContent = null;
+          expectToken("}");
+          if (expectToken("else")) {
+            if (!expectToken("{")) {
+              return new RareScriptError(filename, token.line, 15, "Expected {");
+            }
+            var bracketDepth = 1;
+            for (var tokenIndex = 0; tokenIndex < tokens.length; tokenIndex++) {
+              if (getTokenValue(code, tokens[tokenIndex]) == "{") {
+                bracketDepth++;
+              }
+              if (getTokenValue(code, tokens[tokenIndex]) == "}") {
+                if (!--bracketDepth) {
+                  break;
+                }
+              }
+            }
+            falseContent = tokens.splice(0, tokenIndex);
+            expectToken("}");
+          }
+          ast.push({
+            "type": InstructionType.CONDITION,
+            "condition": parseExpression(filename, code, condition),
+            "true": parser(filename, code, trueContent),
+            "false": falseContent ? parser(filename, code, falseContent) : null
           });
           continue;
         case "return":
@@ -429,6 +476,11 @@ function parseExpression(filename, code, tokens) {
         "type": "identifier",
         "value": getTokenValue(code, tokens[0])
       };
+    } else if (tokens[0].type == TokenType.KEYWORD && ["true", "false", "maybe"].includes(getTokenValue(code, tokens[0]))) {
+      return {
+        "type": "boolean",
+        "value": getTokenValue(code, tokens[0])
+      };
     } else if (tokens[0].type == TokenType.CHAR) {
       return {
         "type": "char",
@@ -462,6 +514,11 @@ function parseExpression(filename, code, tokens) {
             "type": "identifier",
             "value": getTokenValue(code, tokens[0])
           };
+        } else if (tokens[0].type == TokenType.KEYWORD && ["true", "false", "maybe"].includes(getTokenValue(code, tokens[0]))) {
+          expression.left = {
+            "type": "boolean",
+            "value": getTokenValue(code, tokens[0])
+          };
         } else if (tokens[0].type == TokenType.CHAR) {
           expression.left = {
             "type": "char",
@@ -487,6 +544,11 @@ function parseExpression(filename, code, tokens) {
         } else if (tokens.at(-1).type == TokenType.IDENTIFIER) {
           expression.right = {
             "type": "identifier",
+            "value": getTokenValue(code, tokens.at(-1))
+          };
+        } else if (tokens.at(-1).type == TokenType.KEYWORD && ["true", "false", "maybe"].includes(getTokenValue(code, tokens.at(-1)))) {
+          expression.right = {
+            "type": "boolean",
             "value": getTokenValue(code, tokens.at(-1))
           };
         } else if (tokens.at(-1).type == TokenType.CHAR) {
