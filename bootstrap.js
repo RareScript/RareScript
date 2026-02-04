@@ -182,6 +182,38 @@ function lexer(filename, code) {
   return tokens;
 }
 
+function parseType(code, tokens) {
+  var type = {
+    "base": getTokenValue(code, tokens.shift()),
+    "subtype": [[]]
+  };
+  if (tokens.length < 2) {
+    type.subtype = [];
+    return type;
+  }
+  tokens.shift();
+  var bracketDepth = 0;
+  for (var tokenIndex = 0; tokenIndex < tokens.length - 1; tokenIndex++) {
+    var token = tokens[tokenIndex];
+    if (getTokenValue(code, token) == "<") {
+      bracketDepth++;
+    }
+    if (getTokenValue(code, token) == ">") {
+      bracketDepth--;
+    }
+    if (getTokenValue(code, token) == "," && !bracketDepth) {
+      type.subtype.push([]);
+    } else {
+      type.subtype.at(-1).push(token);
+    }
+  }
+  if (type.subtype.length == 1 && !type.subtype[0].length) {
+    type.subtype = [];
+  }
+  type.subtype = type.subtype.map(subtype => parseType(code, subtype));
+  return type;
+}
+
 function parser(filename, code, tokens) {
   tokens = Object.assign([], tokens);
 
@@ -310,16 +342,36 @@ function parser(filename, code, tokens) {
       }
     }
     if (token.type == TokenType.IDENTIFIER) {
+      var type = {
+        "base": getTokenValue(code, token),
+        "subtype": []
+      };
+      var nameStart = 0;
+      if (expectToken("<")) {
+        var bracketDepth = 1;
+        for (var tokenIndex = 0; tokenIndex < tokens.length; tokenIndex++) {
+          if (getTokenValue(code, tokens[tokenIndex]) == "<") {
+            bracketDepth++;
+          }
+          if (getTokenValue(code, tokens[tokenIndex]) == ">") {
+            if (!--bracketDepth) {
+              break;
+            }
+          }
+        }
+        type = parseType(code, [token, lastToken, ...tokens.slice(0, tokenIndex + 1)]);
+        nameStart = tokenIndex + 1;
+      }
+
       // Variables
-      var type = null;
       var name = null;
       var modifiers = [];
-      if (tokens[0].type == TokenType.IDENTIFIER && getTokenValue(code, tokens[1]) == ":=") {
-        type = getTokenValue(code, token);
+      if (tokens[nameStart].type == TokenType.IDENTIFIER && getTokenValue(code, tokens[nameStart + 1]) == ":=") {
+        tokens = tokens.slice(nameStart);
         name = getTokenValue(code, takeToken());
         expectToken(":=");
-      } else if (getTokenValue(code, tokens[0]) == "final" && tokens[1].type == TokenType.IDENTIFIER && getTokenValue(code, tokens[2]) == ":=") {
-        type = getTokenValue(code, token);
+      } else if (getTokenValue(code, tokens[nameStart]) == "final" && tokens[nameStart + 1].type == TokenType.IDENTIFIER && getTokenValue(code, tokens[nameStart + 2]) == ":=") {
+        tokens = tokens.slice(nameStart);
         modifiers.push(getTokenValue(code, takeToken()));
         name = getTokenValue(code, takeToken());
         expectToken(":=");
@@ -346,8 +398,8 @@ function parser(filename, code, tokens) {
       }
 
       // Functions
-      if (tokens[0].type == TokenType.IDENTIFIER && getTokenValue(code, tokens[1]) == "(") {
-        var type = getTokenValue(code, token);
+      if (tokens[nameStart].type == TokenType.IDENTIFIER && getTokenValue(code, tokens[nameStart + 1]) == "(") {
+        tokens = tokens.slice(nameStart);
         var name = getTokenValue(code, takeToken());
         expectToken("(");
         var args = [];
@@ -357,7 +409,25 @@ function parser(filename, code, tokens) {
               return new RareScriptError(filename, token.line, 13, "Expected comma between arguments");
             }
           }
-          var argumentType = getTokenValue(code, takeToken());
+          var argumentTypeBase = takeToken();
+          var argumentType = {
+            "base": getTokenValue(code, argumentTypeBase),
+            "subtype": []
+          };
+          if (expectToken("<")) {
+            var bracketDepth = 1;
+            for (var tokenIndex = 0; tokenIndex < tokens.length; tokenIndex++) {
+              if (getTokenValue(code, tokens[tokenIndex]) == "<") {
+                bracketDepth++;
+              }
+              if (getTokenValue(code, tokens[tokenIndex]) == ">") {
+                if (!--bracketDepth) {
+                  break;
+                }
+              }
+            }
+            argumentType = parseType(code, [argumentTypeBase, lastToken, ...tokens.splice(0, tokenIndex + 1)]);
+          }
           var argumentSpreading = false;
           if (expectToken("*")) {
             argumentSpreading = true;

@@ -230,7 +230,10 @@ expectTokensAndAST("typing::number c2t := 1;", [{
   "value": ";"
 }], [{
   "type": RareScript.InstructionType.VARIABLE,
-  "variableType": "typing::number",
+  "variableType": {
+    "base": "typing::number",
+    "subtype": []
+  },
   "name": "c2t",
   "modifiers": [],
   "value": {
@@ -258,7 +261,10 @@ expectTokensAndAST("typing::number final c2t := 1;", [{
   "value": ";"
 }], [{
   "type": RareScript.InstructionType.VARIABLE,
-  "variableType": "typing::number",
+  "variableType": {
+    "base": "typing::number",
+    "subtype": []
+  },
   "name": "c2t",
   "modifiers": ["final"],
   "value": {
@@ -684,14 +690,23 @@ expectTokensAndAST(`typing::number getOne(typing::string test, typing::number *a
   "value": "}"
 }], [{
   "type": RareScript.InstructionType.FUNCTION,
-  "returnType": "typing::number",
+  "returnType": {
+    "base": "typing::number",
+    "subtype": []
+  },
   "name": "getOne",
   "arguments": [{
-    "type": "typing::string",
+    "type": {
+      "base": "typing::string",
+      "subtype": []
+    },
     "name": "test",
     "spreading": false
   }, {
-    "type": "typing::number",
+    "type": {
+      "base": "typing::number",
+      "subtype": []
+    },
     "name": "a",
     "spreading": true
   }],
