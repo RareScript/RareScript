@@ -263,18 +263,19 @@ function parser(filename, code, tokens) {
       }
     }
     if (token.type == TokenType.IDENTIFIER) {
+      // Variables
       var type = null;
       var name = null;
       var modifiers = [];
       if (tokens[0].type == TokenType.IDENTIFIER && getTokenValue(code, tokens[1]) == ":=") {
         type = getTokenValue(code, token);
         name = getTokenValue(code, takeToken());
-        takeToken(":=");
+        expectToken(":=");
       } else if (getTokenValue(code, tokens[0]) == "final" && tokens[1].type == TokenType.IDENTIFIER && getTokenValue(code, tokens[2]) == ":=") {
         type = getTokenValue(code, token);
         modifiers.push(getTokenValue(code, takeToken()));
         name = getTokenValue(code, takeToken());
-        takeToken(":=");
+        expectToken(":=");
       }
       var value = [];
       if (type && name) {
@@ -293,6 +294,56 @@ function parser(filename, code, tokens) {
           "variableType": type,
           name, modifiers,
           "value": parseExpression(filename, code, value)
+        });
+        continue;
+      }
+
+      // Functions
+      if (tokens[0].type == TokenType.IDENTIFIER && getTokenValue(code, tokens[1]) == "(") {
+        var type = getTokenValue(code, token);
+        var name = getTokenValue(code, takeToken());
+        expectToken("(");
+        var args = [];
+        while(!expectToken(")")) {
+          if (args.length) {
+            if (!expectToken(",")) {
+              return new RareScriptError(filename, token.line, 13, "Expected comma between arguments");
+            }
+          }
+          var argumentType = getTokenValue(code, takeToken());
+          var argumentSpreading = false;
+          if (expectToken("*")) {
+            argumentSpreading = true;
+          }
+          var argumentName = getTokenValue(code, takeToken());
+          args.push({
+            "type": argumentType,
+            "name": argumentName,
+            "spreading": argumentSpreading
+          });
+        }
+        if (!expectToken("{")) {
+          return new RareScriptError(filename, token.line, 12, "Expected {");
+        }
+        var bracketDepth = 1;
+        for (var tokenIndex = 0; tokenIndex < tokens.length; tokenIndex++) {
+          if (getTokenValue(code, tokens[tokenIndex]) == "{") {
+            bracketDepth++;
+          }
+          if (getTokenValue(code, tokens[tokenIndex]) == "}") {
+            if (!--bracketDepth) {
+              break;
+            }
+          }
+        }
+        var content = tokens.splice(0, tokenIndex);
+        expectToken("}");
+        ast.push({
+          "type": InstructionType.FUNCTION,
+          "returnType": type,
+          name,
+          "arguments": args,
+          "content": parser(filename, code, content)
         });
         continue;
       }

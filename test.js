@@ -635,3 +635,71 @@ expectTokensAndAST("return 1;", [{
     "value": "1"
   }
 }]);
+expectTokensAndAST(`typing::number getOne(typing::string test, typing::number *a) {
+  return 1;
+}`, [{
+  "type": RareScript.TokenType.IDENTIFIER,
+  "value": "typing::number"
+}, {
+  "type": RareScript.TokenType.IDENTIFIER,
+  "value": "getOne"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": "("
+}, {
+  "type": RareScript.TokenType.IDENTIFIER,
+  "value": "typing::string"
+}, {
+  "type": RareScript.TokenType.IDENTIFIER,
+  "value": "test"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": ","
+}, {
+  "type": RareScript.TokenType.IDENTIFIER,
+  "value": "typing::number"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": "*"
+}, {
+  "type": RareScript.TokenType.IDENTIFIER,
+  "value": "a"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": ")"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": "{"
+}, {
+  "type": RareScript.TokenType.KEYWORD,
+  "value": "return"
+}, {
+  "type": RareScript.TokenType.NUMBER,
+  "value": "1"
+}, {
+  "type": RareScript.TokenType.SEPARATOR,
+  "value": ";"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": "}"
+}], [{
+  "type": RareScript.InstructionType.FUNCTION,
+  "returnType": "typing::number",
+  "name": "getOne",
+  "arguments": [{
+    "type": "typing::string",
+    "name": "test",
+    "spreading": false
+  }, {
+    "type": "typing::number",
+    "name": "a",
+    "spreading": true
+  }],
+  "content": [{
+    "type": RareScript.InstructionType.RETURN,
+    "value": {
+      "type": "number",
+      "value": "1"
+    }
+  }]
+}]);
