@@ -20,7 +20,10 @@ function getTokenValue(code, token) {
 var InstructionType = {
   "IMPORT": 0,
   "EXPRESSION": 1,
-  "VARIABLE": 2
+  "VARIABLE": 2,
+  "CONDITION": 3,
+  "FUNCTION": 4,
+  "RETURN": 5
 };
 
 var operatorPriority = [
@@ -236,6 +239,23 @@ function parser(filename, code, tokens) {
             "type": InstructionType.IMPORT,
             "module": getTokenValue(code, module),
             "as": getTokenValue(code, as)
+          });
+          continue;
+        case "return":
+          var value = [];
+          while(!expectToken(TokenType.SEPARATOR)) {
+            var expressionToken = takeToken();
+            if (!expressionToken) {
+              return new RareScriptError(filename, token.line, 10, "Expected separator, got EOF");
+            }
+            value.push(expressionToken);
+          }
+          if (!value.length) {
+            return new RareScriptError(filename, token.line, 11, "Expected return value");
+          }
+          ast.push({
+            "type": InstructionType.RETURN,
+            "value": parseExpression(filename, code, value)
           });
           continue;
         default:

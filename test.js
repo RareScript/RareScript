@@ -616,3 +616,22 @@ expectTokensAndAST("1 + 2 * 3 - 4 + 5;", [{
     }
   }
 }]);
+expectError("as con;", 3);
+expectError("return 1", 10);
+expectError("return;", 11);
+expectTokensAndAST("return 1;", [{
+  "type": RareScript.TokenType.KEYWORD,
+  "value": "return"
+}, {
+  "type": RareScript.TokenType.NUMBER,
+  "value": "1"
+}, {
+  "type": RareScript.TokenType.SEPARATOR,
+  "value": ";"
+}], [{
+  "type": RareScript.InstructionType.RETURN,
+  "value": {
+    "type": "number",
+    "value": "1"
+  }
+}]);
