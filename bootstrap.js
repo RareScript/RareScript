@@ -58,7 +58,7 @@ function lexer(filename, code) {
   var tokenSeparators = [" ", "\n", ";", "(", ")", "{", "}", ","];
   var digits = "0123456789";
   var symbols = "!@#$%^&*-+\\|/=";
-  var keywords = ["import", "as", "return", "cond", "false", "true", "maybe", "and", "or"];
+  var keywords = ["import", "as", "return", "cond", "false", "true", "maybe", "and", "or", "final"];
   var operators = ["(", ")", "{", "}", ",", "**", "+", "-", "*", "/", "//", "%", "=", "!=", ":=", "..", "->", "->@", "<", ">", "|", "&", "^", "<<", ">>", "<=", ">="];
 
   function addToken(index) {
@@ -264,6 +264,9 @@ function parser(filename, code, tokens) {
             return new RareScriptError(filename, token.line, 8, "Expected separator, got EOF");
           }
           value.push(expressionToken);
+        }
+        if (!value.length) {
+          return new RareScriptError(filename, token.line, 9, "Expected variable value");
         }
         ast.push({
           "type": InstructionType.VARIABLE,

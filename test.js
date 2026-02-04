@@ -212,3 +212,99 @@ console::out(60 + 1);`, [{
     }]
   }
 }]);
+
+expectTokensAndAST("typing::number c2t := 1;", [{
+  "type": RareScript.TokenType.IDENTIFIER,
+  "value": "typing::number"
+}, {
+  "type": RareScript.TokenType.IDENTIFIER,
+  "value": "c2t"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": ":="
+}, {
+  "type": RareScript.TokenType.NUMBER,
+  "value": "1"
+}, {
+  "type": RareScript.TokenType.SEPARATOR,
+  "value": ";"
+}], [{
+  "type": RareScript.InstructionType.VARIABLE,
+  "variableType": "typing::number",
+  "name": "c2t",
+  "modifiers": [],
+  "value": {
+    "type": "number",
+    "value": "1"
+  }
+}]);
+expectTokensAndAST("typing::number final c2t := 1;", [{
+  "type": RareScript.TokenType.IDENTIFIER,
+  "value": "typing::number"
+}, {
+  "type": RareScript.TokenType.KEYWORD,
+  "value": "final"
+}, {
+  "type": RareScript.TokenType.IDENTIFIER,
+  "value": "c2t"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": ":="
+}, {
+  "type": RareScript.TokenType.NUMBER,
+  "value": "1"
+}, {
+  "type": RareScript.TokenType.SEPARATOR,
+  "value": ";"
+}], [{
+  "type": RareScript.InstructionType.VARIABLE,
+  "variableType": "typing::number",
+  "name": "c2t",
+  "modifiers": ["final"],
+  "value": {
+    "type": "number",
+    "value": "1"
+  }
+}]);
+expectError("typing::number a := ;", 9);
+
+expectTokensAndAST("console::out(1..5);", [{
+  "type": RareScript.TokenType.IDENTIFIER,
+  "value": "console::out"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": "("
+}, {
+  "type": RareScript.TokenType.NUMBER,
+  "value": "1"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": ".."
+}, {
+  "type": RareScript.TokenType.NUMBER,
+  "value": "5"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": ")"
+}, {
+  "type": RareScript.TokenType.SEPARATOR,
+  "value": ";"
+}], [{
+  "type": RareScript.InstructionType.EXPRESSION,
+  "expression": {
+    "type": "function",
+    "function": "console::out",
+    "arguments": [{
+      "type": "operator",
+      "operator": "..",
+      "left": {
+        "type": "number",
+        "value": "1"
+      },
+      "right": {
+        "type": "number",
+        "value": "5"
+      }
+    }]
+  }
+}]);
