@@ -308,3 +308,311 @@ expectTokensAndAST("console::out(1..5);", [{
     }]
   }
 }]);
+expectTokensAndAST(`console::out("cat"->2 = 'a');`, [{
+  "type": RareScript.TokenType.IDENTIFIER,
+  "value": "console::out"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": "("
+}, {
+  "type": RareScript.TokenType.STRING,
+  "value": "\"cat\""
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": "->"
+}, {
+  "type": RareScript.TokenType.NUMBER,
+  "value": "2"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": "="
+}, {
+  "type": RareScript.TokenType.CHAR,
+  "value": "'a'"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": ")"
+}, {
+  "type": RareScript.TokenType.SEPARATOR,
+  "value": ";"
+}], [{
+  "type": RareScript.InstructionType.EXPRESSION,
+  "expression": {
+    "type": "function",
+    "function": "console::out",
+    "arguments": [{
+      "type": "operator",
+      "operator": "=",
+      "left": {
+        "type": "operator",
+        "operator": "->",
+        "left": {
+          "type": "string",
+          "value": "\"cat\""
+        },
+        "right": {
+          "type": "number",
+          "value": "2"
+        }
+      },
+      "right": {
+        "type": "char",
+        "value": "'a'"
+      }
+    }]
+  }
+}]);
+expectTokensAndAST("console::out(-1.59);", [{
+  "type": RareScript.TokenType.IDENTIFIER,
+  "value": "console::out"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": "("
+}, {
+  "type": RareScript.TokenType.NUMBER,
+  "value": "-1.59"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": ")"
+}, {
+  "type": RareScript.TokenType.SEPARATOR,
+  "value": ";"
+}], [{
+  "type": RareScript.InstructionType.EXPRESSION,
+  "expression": {
+    "type": "function",
+    "function": "console::out",
+    "arguments": [{
+      "type": "number",
+      "value": "-1.59"
+    }]
+  }
+}]);
+expectError("console::out('a);", 1);
+expectError(`console::out("a);`, 2);
+expectError(`console::out("a\n`, 0);
+expectTokensAndAST("console::out(1-2,-2,1+-2,1--2,a-2,-getOne()-2);", [{
+  "type": RareScript.TokenType.IDENTIFIER,
+  "value": "console::out"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": "("
+}, {
+  "type": RareScript.TokenType.NUMBER,
+  "value": "1"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": "-"
+}, {
+  "type": RareScript.TokenType.NUMBER,
+  "value": "2"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": ","
+}, {
+  "type": RareScript.TokenType.NUMBER,
+  "value": "-2"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": ","
+}, {
+  "type": RareScript.TokenType.NUMBER,
+  "value": "1"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": "+"
+}, {
+  "type": RareScript.TokenType.NUMBER,
+  "value": "-2"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": ","
+}, {
+  "type": RareScript.TokenType.NUMBER,
+  "value": "1"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": "-"
+}, {
+  "type": RareScript.TokenType.NUMBER,
+  "value": "-2"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": ","
+}, {
+  "type": RareScript.TokenType.IDENTIFIER,
+  "value": "a"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": "-"
+}, {
+  "type": RareScript.TokenType.NUMBER,
+  "value": "2"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": ","
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": "-"
+}, {
+  "type": RareScript.TokenType.IDENTIFIER,
+  "value": "getOne"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": "("
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": ")"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": "-"
+}, {
+  "type": RareScript.TokenType.NUMBER,
+  "value": "2"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": ")"
+}, {
+  "type": RareScript.TokenType.SEPARATOR,
+  "value": ";"
+}], [{
+  "type": RareScript.InstructionType.EXPRESSION,
+  "expression": {
+    "type": "function",
+    "function": "console::out",
+    "arguments": [{
+      "type": "operator",
+      "operator": "-",
+      "left": {
+        "type": "number",
+        "value": "1"
+      },
+      "right": {
+        "type": "number",
+        "value": "2"
+      }
+    }, {
+      "type": "number",
+      "value": "-2"
+    }, {
+      "type": "operator",
+      "operator": "+",
+      "left": {
+        "type": "number",
+        "value": "1"
+      },
+      "right": {
+        "type": "number",
+        "value": "-2"
+      }
+    }, {
+      "type": "operator",
+      "operator": "-",
+      "left": {
+        "type": "number",
+        "value": "1"
+      },
+      "right": {
+        "type": "number",
+        "value": "-2"
+      }
+    }, {
+      "type": "operator",
+      "operator": "-",
+      "left": {
+        "type": "identifier",
+        "value": "a"
+      },
+      "right": {
+        "type": "number",
+        "value": "2"
+      }
+    }, {
+      "type": "operator",
+      "operator": "-",
+      "left": {
+        "type": "operator",
+        "operator": "-",
+        "left": null,
+        "right": {
+          "type": "function",
+          "function": "getOne",
+          "arguments": []
+        }
+      },
+      "right": {
+        "type": "number",
+        "value": "2"
+      }
+    }]
+  }
+}]);
+expectTokensAndAST("1 + 2 * 3 - 4 + 5;", [{
+  "type": RareScript.TokenType.NUMBER,
+  "value": "1"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": "+"
+}, {
+  "type": RareScript.TokenType.NUMBER,
+  "value": "2"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": "*"
+}, {
+  "type": RareScript.TokenType.NUMBER,
+  "value": "3"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": "-"
+}, {
+  "type": RareScript.TokenType.NUMBER,
+  "value": "4"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": "+"
+}, {
+  "type": RareScript.TokenType.NUMBER,
+  "value": "5"
+}, {
+  "type": RareScript.TokenType.SEPARATOR,
+  "value": ";"
+}], [{
+  "type": RareScript.InstructionType.EXPRESSION,
+  "expression": {
+    "type": "operator",
+    "operator": "+",
+    "left": {
+      "type": "operator",
+      "operator": "-",
+      "left": {
+        "type": "operator",
+        "operator": "+",
+        "left": {
+          "type": "number",
+          "value": "1"
+        },
+        "right": {
+          "type": "operator",
+          "operator": "*",
+          "left": {
+            "type": "number",
+            "value": "2"
+          },
+          "right": {
+            "type": "number",
+            "value": "3"
+          }
+        }
+      },
+      "right": {
+        "type": "number",
+        "value": "4"
+      }
+    },
+    "right": {
+      "type": "number",
+      "value": "5"
+    }
+  }
+}]);

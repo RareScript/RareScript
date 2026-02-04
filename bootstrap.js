@@ -302,7 +302,7 @@ function parser(filename, code, tokens) {
 }
 
 function parseExpression(filename, code, tokens) {
-  var expression = {};
+  var expression = null;
 
   for (var tokenIndex = 0; tokenIndex < tokens.length; tokenIndex++) {
     if (getTokenValue(code, tokens[tokenIndex]) == "(") {
@@ -338,6 +338,9 @@ function parseExpression(filename, code, tokens) {
         } else {
           args.at(-1).push(token2);
         }
+      }
+      if (args.length == 1 && !args[0].length) {
+        args = [];
       }
       tokens.splice(tokenIndex, 2, {
         "type": "function",
@@ -377,6 +380,7 @@ function parseExpression(filename, code, tokens) {
     var operators = operatorPriority[operatorsIndex];
     var foundIndex = tokens.findLastIndex(token => operators.includes(getTokenValue(code, token)));
     if (foundIndex > -1) {
+      expression = {};
       expression.type = "operator";
       expression.operator = getTokenValue(code, tokens[foundIndex]);
       if (foundIndex == 1 && !Array.isArray(tokens[0])) {
