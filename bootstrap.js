@@ -47,6 +47,7 @@ class RareScriptError {
 
 function throwError(error, code) {
   console.log(`    \x1B[38;2;119;119;119m╭─\x1B[39m\x1B[35m[${error.file}]\x1B[39m\n    \x1B[38;2;119;119;119m·\x1B[39m\n${((error.line.toString().length > 3) ? "" : " ".repeat(3 - error.line.toString().length))}\x1B[31m${error.line}\x1B[39m${((error.line.toString().length > 3) ? "" : " ")}│ \x1B[33m\x1B[4m${code ? code.split("\n")[error.line - 1] : "[No source code]"}\x1B[24m\x1B[39m\n    \x1B[38;2;119;119;119m·\x1B[39m${" ".repeat((code ? code.split("\n")[error.line - 1].length : 16) - 1)}\x1B[33m╰─────── \x1B[1mE${error.code.toString(16).padStart(2, "0").toUpperCase()}: ${error.message}\x1B[22m\x1B[39m\n    \x1B[38;2;119;119;119m·\x1B[39m\n\x1B[38;2;119;119;119m────╯\x1B[39m`);
+  return error;
 }
 
 function lexer(filename, code) {
@@ -179,6 +180,8 @@ function lexer(filename, code) {
 }
 
 function parser(filename, code, tokens) {
+  tokens = Object.assign([], tokens);
+
   var ast = [];
   var cachedError = null;
   var lastToken = null;
@@ -334,6 +337,7 @@ function parseExpression(filename, code, tokens) {
         }
       }
       tokens.splice(tokenIndex, 2, {
+        "type": "function",
         "function": getTokenValue(code, tokens[tokenIndex]),
         "arguments": args.map(argument => parseExpression(filename, code, argument))
       });
@@ -341,7 +345,7 @@ function parseExpression(filename, code, tokens) {
   }
 
   if (tokens.length == 1) {
-    if (tokens[0].function) {
+    if (tokens[0].type == "function") {
       return tokens[0];
     } else if (tokens[0].type == TokenType.IDENTIFIER) {
       return {
@@ -373,7 +377,7 @@ function parseExpression(filename, code, tokens) {
       expression.type = "operator";
       expression.operator = getTokenValue(code, tokens[foundIndex]);
       if (foundIndex == 1 && !Array.isArray(tokens[0])) {
-        if (tokens[0].function) {
+        if (tokens[0].type == "function") {
           expression.left = tokens[0];
         } else if (tokens[0].type == TokenType.IDENTIFIER) {
           expression.left = {
@@ -433,11 +437,14 @@ function parseExpression(filename, code, tokens) {
   return expression;
 }
 
-function processCode(filename, code, debug) {
+function processCode(filename, code, debug, supressErrors) {
   code = code.split("\r\n").join("\n");
 
   var tokens = lexer(filename, code);
   if (tokens instanceof RareScriptError) {
+    if (supressErrors) {
+      return tokens;
+    }
     return throwError(tokens, code);
   }
   if (debug) {
@@ -469,15 +476,25 @@ function processCode(filename, code, debug) {
 
   var ast = parser(filename, code, tokens);
   if (ast instanceof RareScriptError) {
+    if (supressErrors) {
+      return ast;
+    }
     return throwError(ast, code);
   }
   if (debug) {
     console.log(`\x1b[32m[DEBUG / ${ast.length} INSTRUCTIONS]\x1b[0m`);
     console.log(util.inspect(ast, false, null, true));
   }
+
+  return { tokens, ast };
 }
 
-var fs = require("fs");
-var path = require("path");
-var code = fs.readFileSync(process.argv[2]).toString("utf-8");
-processCode(path.basename(process.argv[2]), code, true);
+if (typeof module !== "undefined") {
+  if (require.main == module) {
+    var fs = require("fs");
+    var path = require("path");
+    var code = fs.readFileSync(process.argv[2]).toString("utf-8");
+    processCode(path.basename(process.argv[2]), code, true);
+  }
+  module.exports = { TokenType, getTokenValue, InstructionType, RareScriptError, lexer, parser, parseExpression, processCode };
+}
