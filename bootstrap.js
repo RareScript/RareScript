@@ -373,7 +373,7 @@ function parseExpression(filename, code, tokens) {
     }
   }
 
-  for (var operatorsIndex = (operatorPriority.length - 1); operatorsIndex > 0; operatorsIndex--) {
+  for (var operatorsIndex = (operatorPriority.length - 1); operatorsIndex >= 0; operatorsIndex--) {
     var operators = operatorPriority[operatorsIndex];
     var foundIndex = tokens.findLastIndex(token => operators.includes(getTokenValue(code, token)));
     if (foundIndex > -1) {
