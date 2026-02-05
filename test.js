@@ -4,7 +4,7 @@ var testNum = 0;
 
 function expectError(code, errCode) {
   testNum++;
-  var result = RareScript.processCode("test.rare", code, false, true);
+  var result = RareScript.processCode("test.rare", code, false, true, false);
   if (!(result instanceof RareScript.RareScriptError)) {
     return console.log(`\x1b[31m❌ Test #${testNum} failed: Didn't got an error.\x1b[0m`);
   }
@@ -16,7 +16,7 @@ function expectError(code, errCode) {
 
 function expectTokens(code, tokens) {
   testNum++;
-  var result = RareScript.processCode("test.rare", code, false, true);
+  var result = RareScript.processCode("test.rare", code, false, true, false);
   if (result instanceof RareScript.RareScriptError) {
     return console.log(`\x1b[31m❌ Test #${testNum} failed: Got an error ${result.code}.\x1b[0m`);
   }
@@ -39,7 +39,7 @@ function expectTokens(code, tokens) {
 
 function expectAST(code, ast) {
   testNum++;
-  var result = RareScript.processCode("test.rare", code, false, true);
+  var result = RareScript.processCode("test.rare", code, false, true, false);
   if (result instanceof RareScript.RareScriptError) {
     return console.log(`\x1b[31m❌ Test #${testNum} failed: Got an error ${result.code}.\x1b[0m`);
   }
@@ -58,7 +58,7 @@ function expectAST(code, ast) {
 
 function expectTokensAndAST(code, tokens, ast) {
   testNum++;
-  var result = RareScript.processCode("test.rare", code, false, true);
+  var result = RareScript.processCode("test.rare", code, false, true, false);
   if (result instanceof RareScript.RareScriptError) {
     return console.log(`\x1b[31m❌ Test #${testNum} failed: Got an error ${result.code}.\x1b[0m`);
   }
@@ -85,6 +85,18 @@ function expectTokensAndAST(code, tokens, ast) {
         return console.log(`\x1b[31m❌ Test #${testNum} failed: Instruction #${astIndex + 1} property "${prop}" doesn't match.\x1b[0m`);
       }
     }
+  }
+  console.log(`\x1b[32m✅ Test #${testNum} passed.\x1b[0m`);
+}
+
+function expectCode(code, compiled) {
+  testNum++;
+  var result = RareScript.processCode("test.rare", code, false, true, false);
+  if (result instanceof RareScript.RareScriptError) {
+    return console.log(`\x1b[31m❌ Test #${testNum} failed: Got an error ${result.code}.\x1b[0m`);
+  }
+  if (result.compiled != compiled) {
+    return console.log(`\x1b[31m❌ Test #${testNum} failed: Compiled code does not match.`);
   }
   console.log(`\x1b[32m✅ Test #${testNum} passed.\x1b[0m`);
 }
@@ -874,3 +886,6 @@ expectTokensAndAST(`cond true { return 1; } else { return 2; }`, [{
     "line": 1
   }]
 }]);
+
+expectCode("import std;", "var std = {};");
+expectCode(`import std; std::out("Hello, World!\\n");`, `var std = {};std.out = data => void process.stdout.write(data);std.out("Hello, World!\\n");`);
