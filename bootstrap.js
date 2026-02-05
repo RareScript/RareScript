@@ -856,8 +856,8 @@ function compiler(filename, ast) {
       var result = operators[expression.operator].type(filename, instruction.line, expression.left ? solveExpressionType(expression.left) : null, expression.right ? solveExpressionType(expression.right) : null);
       if (result instanceof RareScriptError) {
         cachedError = result;
-        return result;
       }
+      return result;
     }
   }
 
