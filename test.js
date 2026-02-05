@@ -715,7 +715,8 @@ expectTokensAndAST(`typing::number getOne(typing::string test, typing::number *a
     "value": {
       "type": "number",
       "value": "1"
-    }
+    },
+    "line": 2
   }]
 }]);
 
@@ -751,7 +752,8 @@ expectTokensAndAST(`cond true { return 1; }`, [{
     "value": {
       "type": "number",
       "value": "1"
-    }
+    },
+    "line": 1
   }],
   "false": null
 }]);
@@ -805,13 +807,15 @@ expectTokensAndAST(`cond true { return 1; } else { return 2; }`, [{
     "value": {
       "type": "number",
       "value": "1"
-    }
+    },
+    "line": 1
   }],
   "false": [{
     "type": RareScript.InstructionType.RETURN,
     "value": {
       "type": "number",
       "value": "2"
-    }
+    },
+    "line": 1
   }]
 }]);

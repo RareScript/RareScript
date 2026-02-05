@@ -1,0 +1,24 @@
+{
+  "name": "rarescript",
+  "version": "0.0.1",
+  "description": "RareScript is a new programming language.",
+  "main": "bootstrap.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BoryaGames/RareScript.git"
+  },
+  "keywords": [],
+  "author": "topcatto",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/BoryaGames/RareScript/issues"
+  },
+  "homepage": "https://github.com/BoryaGames/RareScript#readme",
+  "dependencies": {
+    "babel-minify": "^0.5.2"
+  }
+}

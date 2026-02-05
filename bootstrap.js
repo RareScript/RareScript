@@ -1,4 +1,5 @@
 var util = require("util");
+var babelMinify = null;
 
 var TokenType = {
   "SEPARATOR": 0,
@@ -52,6 +53,20 @@ function throwError(error, code) {
   console.log(`    \x1B[38;2;119;119;119m╭─\x1B[39m\x1B[35m[${error.file}]\x1B[39m\n    \x1B[38;2;119;119;119m·\x1B[39m\n${((error.line.toString().length > 3) ? "" : " ".repeat(3 - error.line.toString().length))}\x1B[31m${error.line}\x1B[39m${((error.line.toString().length > 3) ? "" : " ")}│ \x1B[33m\x1B[4m${code ? code.split("\n")[error.line - 1] : "[No source code]"}\x1B[24m\x1B[39m\n    \x1B[38;2;119;119;119m·\x1B[39m${" ".repeat((code ? code.split("\n")[error.line - 1].length : 16) - 1)}\x1B[33m╰─────── \x1B[1mE${error.code.toString(16).padStart(2, "0").toUpperCase()}: ${error.message}\x1B[22m\x1B[39m\n    \x1B[38;2;119;119;119m·\x1B[39m\n\x1B[38;2;119;119;119m────╯\x1B[39m`);
   return error;
 }
+
+var builtinModules = {
+  "std": {
+    "variables": {
+      "out": {
+        "type": {
+          "base": "typing::function",
+          "subtype": ["typing::string", "typing::void"]
+        },
+        "js": "data => void process.stdout.write(data)"
+      }
+    }
+  }
+};
 
 function lexer(filename, code) {
   var tokens = [];
@@ -270,7 +285,8 @@ function parser(filename, code, tokens) {
           ast.push({
             "type": InstructionType.IMPORT,
             "module": getTokenValue(code, module),
-            "as": getTokenValue(code, as)
+            "as": getTokenValue(code, as),
+            "line": token.line
           });
           continue;
         case "cond":
@@ -317,7 +333,8 @@ function parser(filename, code, tokens) {
             "type": InstructionType.CONDITION,
             "condition": parseExpression(filename, code, condition),
             "true": parser(filename, code, trueContent),
-            "false": falseContent ? parser(filename, code, falseContent) : null
+            "false": falseContent ? parser(filename, code, falseContent) : null,
+            "line": token.line
           });
           continue;
         case "return":
@@ -334,7 +351,8 @@ function parser(filename, code, tokens) {
           }
           ast.push({
             "type": InstructionType.RETURN,
-            "value": parseExpression(filename, code, value)
+            "value": parseExpression(filename, code, value),
+            "line": token.line
           });
           continue;
         default:
@@ -392,7 +410,8 @@ function parser(filename, code, tokens) {
           "type": InstructionType.VARIABLE,
           "variableType": type,
           name, modifiers,
-          "value": parseExpression(filename, code, value)
+          "value": parseExpression(filename, code, value),
+          "line": token.line
         });
         continue;
       }
@@ -460,7 +479,8 @@ function parser(filename, code, tokens) {
           "returnType": type,
           name,
           "arguments": args,
-          "content": parser(filename, code, content)
+          "content": parser(filename, code, content),
+          "line": token.line
         });
         continue;
       }
@@ -478,7 +498,8 @@ function parser(filename, code, tokens) {
     }
     ast.push({
       "type": InstructionType.EXPRESSION,
-      "expression": parseExpression(filename, code, expression)
+      "expression": parseExpression(filename, code, expression),
+      "line": token.line
     });
   }
 
@@ -647,7 +668,50 @@ function parseExpression(filename, code, tokens) {
   return expression;
 }
 
-function processCode(filename, code, debug, supressErrors) {
+function compiler(filename, ast) {
+  var namespaces = {};
+  var compiled = "";
+  var addedFunctions = new Set;
+
+  function compileExpression(expression) {
+    if (expression.type == "string") {
+      return expression.value;
+    }
+    if (instruction.expression.type == "function") {
+      var namespace = null;
+      var functionName = instruction.expression.function;
+      if (functionName.includes("::")) {
+        [namespace, functionName] = functionName.split("::");
+      }
+      if (namespace && !addedFunctions.has(`${namespace}::${functionName}`)) {
+        if (!namespaces[namespace]) {
+          return new RareScriptError(filename, instruction.line, 17, `Namespace "${namespace}" not imported`);
+        }
+        addedFunctions.add(`${namespace}::${functionName}`);
+        compiled += `${namespace}.${functionName} = ${namespaces[namespace].variables[functionName].js};`;
+      }
+      compiled += `${namespace ? `${namespace}.` : ""}${functionName}(${expression.arguments.map(compileExpression).join(",")});`;
+    }
+  }
+
+  for (var instruction of ast) {
+    if (instruction.type == InstructionType.IMPORT) {
+      if (builtinModules[instruction.module]) {
+        namespaces[instruction.as || instruction.module] = builtinModules[instruction.module];
+        compiled += `var ${instruction.as || instruction.module} = {};`;
+        continue;
+      }
+      return new RareScriptError(filename, instruction.line, 16, `Module "${instruction.module}" not found`);
+    }
+    if (instruction.type == InstructionType.EXPRESSION) {
+      compileExpression(instruction.expression);
+    }
+  }
+
+  return compiled;
+}
+
+function processCode(filename, code, debug, supressErrors, minify) {
   code = code.split("\r\n").join("\n");
 
   var tokens = lexer(filename, code);
@@ -696,7 +760,37 @@ function processCode(filename, code, debug, supressErrors) {
     console.log(util.inspect(ast, false, null, true));
   }
 
-  return { tokens, ast };
+  var compiled = compiler(filename, ast);
+  if (tokens instanceof RareScriptError) {
+    if (supressErrors) {
+      return compiled;
+    }
+    return throwError(compiled, code);
+  }
+  if (debug) {
+    console.log(`\x1b[32m[DEBUG / ${compiled.length} CHARACTERS]\x1b[0m`);
+    console.log(compiled);
+  }
+
+  if (minify) {
+    if (!babelMinify) {
+      babelMinify = require("babel-minify");
+    }
+    compiled = babelMinify(compiled, {
+      "mangle": {
+        "topLevel": true
+      }
+    }).code;
+    if (compiled.endsWith(";")) {
+      compiled = compiled.slice(0, -1);
+    }
+    if (debug) {
+      console.log(`\x1b[32m[DEBUG / ${compiled.length} CHARACTERS / MINIFIED]\x1b[0m`);
+      console.log(compiled);
+    }
+  }
+
+  return { tokens, ast, compiled };
 }
 
 if (typeof module !== "undefined") {
@@ -704,7 +798,10 @@ if (typeof module !== "undefined") {
     var fs = require("fs");
     var path = require("path");
     var code = fs.readFileSync(process.argv[2]).toString("utf-8");
-    processCode(path.basename(process.argv[2]), code, true);
+    var result = processCode(path.basename(process.argv[2]), code, true, false, true);
+    if (!(result instanceof RareScriptError)) {
+      eval(result.compiled);
+    }
   }
   module.exports = { TokenType, getTokenValue, InstructionType, RareScriptError, lexer, parser, parseExpression, processCode };
 }
