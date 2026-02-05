@@ -905,6 +905,7 @@ function compiler(filename, ast) {
       if (globalVariables.has(instruction.name)) {
         return new RareScriptError(filename, instruction.line, 27, `Variable "${instruction.name}" already exists`);
       }
+      // TODO: Check variableType if it exists and is a type
       globalVariables.set(instruction.name, {
         "type": instruction.variableType,
         "modifiers": instruction.modifiers
