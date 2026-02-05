@@ -29,11 +29,10 @@ var InstructionType = {
 
 var operators = {
   "+": {
-    "type": (left, right) => {
+    "type": (filename, line, left, right) => {
       if (left.base == "typing::string" || left.base == "typing::char") {
         if (right.base != "typing::string" && right.base != "typing::char") {
-          // TODO: Error
-          return;
+          return new RareScriptError(filename, line, 20, "Expected right side to be typing::string or typing::char");
         }
         return {
           "base": "typing::string",
@@ -43,8 +42,7 @@ var operators = {
       }
       if (left.base == "typing::number") {
         if (right.base != "typing::number") {
-          // TODO: Error
-          return;
+          return new RareScriptError(filename, line, 21, "Expected right side to be typing::number");
         }
         return {
           "base": "typing::number",
@@ -52,8 +50,7 @@ var operators = {
           "star": false
         };
       }
-      // TODO: Error
-      return;
+      return new RareScriptError(filename, line, 22, "Operator does not accept this type");
     },
     "js": left => {
       if (left.base == "typing::string" || left.base == "typing::char") {
@@ -65,10 +62,9 @@ var operators = {
     }
   },
   "-": {
-    "type": (left, right) => {
+    "type": (filename, line, left, right) => {
       if (left.base != "typing::number" || right.base != "typing::number") {
-        // TODO: Error
-        return;
+        return new RareScriptError(filename, line, 23, "Operator expects typing::number");
       }
       return {
         "base": "typing::number",
@@ -79,10 +75,9 @@ var operators = {
     "js": ".sub"
   },
   "*": {
-    "type": (left, right) => {
+    "type": (filename, line, left, right) => {
       if (left.base != "typing::number" || right.base != "typing::number") {
-        // TODO: Error
-        return;
+        return new RareScriptError(filename, line, 24, "Operator expects typing::number");
       }
       return {
         "base": "typing::number",
@@ -93,10 +88,9 @@ var operators = {
     "js": ".mul"
   },
   "/": {
-    "type": (left, right) => {
+    "type": (filename, line, left, right) => {
       if (left.base != "typing::number" || right.base != "typing::number") {
-        // TODO: Error
-        return;
+        return new RareScriptError(filename, line, 25, "Operator expects typing::number");
       }
       return {
         "base": "typing::number",
@@ -107,10 +101,9 @@ var operators = {
     "js": ".div"
   },
   "%": {
-    "type": (left, right) => {
+    "type": (filename, line, left, right) => {
       if (left.base != "typing::number" || right.base != "typing::number") {
-        // TODO: Error
-        return;
+        return new RareScriptError(filename, line, 26, "Operator expects typing::number");
       }
       return {
         "base": "typing::number",
@@ -809,7 +802,7 @@ function compiler(filename, ast) {
       if (typeof operators[expression.operator].js === "string") {
         return compileExpression(expression.left) + operators[expression.operator].js + compileExpression(expression.right);
       }
-      return compileExpression(expression.left) + operators[expression.operator].js(expression.left ? solveExpressionType(expression.left) : null, expression.right ? solveExpressionType(expression.right) : null) + compileExpression(expression.right);
+      return compileExpression(expression.left) + operators[expression.operator].js(filename, instruction.line, expression.left ? solveExpressionType(expression.left) : null, expression.right ? solveExpressionType(expression.right) : null) + compileExpression(expression.right);
     }
     if (expression.type == "function") {
       var namespace = null;
@@ -827,6 +820,9 @@ function compiler(filename, ast) {
       }
       var argumentsTypesCorrect = namespaces[namespace].variables[functionName].type.subtype.slice(0, -1);
       var argumentsTypes = expression.arguments.map(solveExpressionType);
+      if (cachedError) {
+        return cachedError;
+      }
       if (argumentsTypesCorrect.length != argumentsTypes.length) {
         cachedError = new RareScriptError(filename, instruction.line, 18, `Expected ${argumentsTypesCorrect} arguments, but got ${argumentsTypes.length}`);
         return cachedError;
@@ -857,7 +853,11 @@ function compiler(filename, ast) {
       };
     }
     if (expression.type == "operator") {
-      return operators[expression.operator].type(expression.left ? solveExpressionType(expression.left) : null, expression.right ? solveExpressionType(expression.right) : null);
+      var result = operators[expression.operator].type(filename, instruction.line, expression.left ? solveExpressionType(expression.left) : null, expression.right ? solveExpressionType(expression.right) : null);
+      if (result instanceof RareScriptError) {
+        cachedError = result;
+        return result;
+      }
     }
   }
 
