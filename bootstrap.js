@@ -63,7 +63,16 @@ var builtinModules = {
       "out": {
         "type": {
           "base": "typing::function",
-          "subtype": ["typing::string", "typing::void"]
+          "subtype": [{
+            "base": "typing::string",
+            "subtype": [],
+            "star": false
+          }, {
+            "base": "typing::void",
+            "subtype": [],
+            "star": false
+          }],
+          "star": false
         },
         "js": "data => void process.stdout.write(data)"
       }
@@ -203,9 +212,15 @@ function lexer(filename, code) {
 }
 
 function parseType(code, tokens) {
+  var hasStar = false;
+  if (tokens.length == 2 && getTokenValue(code, tokens[0]) == "*") {
+    tokens.shift();
+    hasStar = true;
+  }
   var type = {
     "base": getTokenValue(code, tokens.shift()),
-    "subtype": [[]]
+    "subtype": [[]],
+    "star": hasStar
   };
   if (tokens.length < 2) {
     type.subtype = [];
@@ -367,7 +382,8 @@ function parser(filename, code, tokens) {
     if (token.type == TokenType.IDENTIFIER) {
       var type = {
         "base": getTokenValue(code, token),
-        "subtype": []
+        "subtype": [],
+        "star": false
       };
       var nameStart = 0;
       if (expectToken("<")) {
@@ -678,8 +694,12 @@ function compiler(filename, ast) {
   var compiled = [];
   var addedFunctions = new Set;
   var numberClassAdded = false;
+  var cachedError = null;
 
   function compileExpression(expression) {
+    if (cachedError) {
+      return cachedError;
+    }
     if (expression.type == "number") {
       if (!numberClassAdded) {
         numberClassAdded = true;
@@ -698,16 +718,49 @@ function compiler(filename, ast) {
       }
       if (namespace && !addedFunctions.has(`${namespace}::${functionName}`)) {
         if (!namespaces[namespace]) {
-          return new RareScriptError(filename, instruction.line, 17, `Namespace "${namespace}" not imported`);
+          cachedError = new RareScriptError(filename, instruction.line, 17, `Namespace "${namespace}" not imported`);
+          return cachedError;
         }
         addedFunctions.add(`${namespace}::${functionName}`);
         compiled.push(`${namespace}.${functionName} = ${namespaces[namespace].variables[functionName].js};`);
       }
-      compiled.push(`${namespace ? `${namespace}.` : ""}${functionName}(${expression.arguments.map(compileExpression).join(",")});`);
+      var argumentsTypesCorrect = namespaces[namespace].variables[functionName].type.subtype.slice(0, -1);
+      var argumentsTypes = expression.arguments.map(solveExpressionType);
+      if (argumentsTypesCorrect.length != argumentsTypes.length) {
+        cachedError = new RareScriptError(filename, instruction.line, 18, `Expected ${argumentsTypesCorrect} arguments, but got ${argumentsTypes.length}`);
+        return cachedError;
+      }
+      for (var argumentIndex = 0; argumentIndex < argumentsTypes.length; argumentIndex++) {
+        if (JSON.stringify(argumentsTypesCorrect[argumentIndex]) != JSON.stringify(argumentsTypes[argumentIndex])) {
+          cachedError = new RareScriptError(filename, instruction.line, 19, `Expected argument type ${argumentsTypesCorrect[argumentIndex].base}${argumentsTypesCorrect[argumentIndex].subtype.length ? `<${argumentsTypesCorrect[argumentIndex].subtype.map(subtype => subtype.base).join(", ")}>` : ""}, but got ${argumentsTypes[argumentIndex].base}${argumentsTypes[argumentIndex].subtype.length ? `<${argumentsTypes[argumentIndex].subtype.map(subtype => subtype.base).join(", ")}>` : ""}`);
+          return cachedError;
+        }
+      }
+      compiled.push(`${namespace ? `${namespace}.` : ""}${functionName}(${expression.arguments.map(compileExpression).join(", ")});`);
+    }
+  }
+
+  function solveExpressionType(expression) {
+    if (expression.type == "number") {
+      return {
+        "base": "typing::number",
+        "subtype": [],
+        "star": false
+      };
+    }
+    if (expression.type == "string") {
+      return {
+        "base": "typing::string",
+        "subtype": [],
+        "star": false
+      };
     }
   }
 
   for (var instruction of ast) {
+    if (cachedError) {
+      return cachedError;
+    }
     if (instruction.type == InstructionType.IMPORT) {
       if (builtinModules[instruction.module]) {
         namespaces[instruction.as || instruction.module] = builtinModules[instruction.module];
@@ -719,6 +772,10 @@ function compiler(filename, ast) {
     if (instruction.type == InstructionType.EXPRESSION) {
       compileExpression(instruction.expression);
     }
+  }
+
+  if (cachedError) {
+    return cachedError;
   }
 
   return compiled.join("");
@@ -774,7 +831,7 @@ function processCode(filename, code, debug, supressErrors, minify) {
   }
 
   var compiled = compiler(filename, ast);
-  if (tokens instanceof RareScriptError) {
+  if (compiled instanceof RareScriptError) {
     if (supressErrors) {
       return compiled;
     }
