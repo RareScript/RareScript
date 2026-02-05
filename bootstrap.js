@@ -778,7 +778,8 @@ function parseExpression(filename, code, tokens) {
 }
 
 function compiler(filename, ast) {
-  var namespaces = {};
+  var namespaces = new Map;
+  var globalVariables = new Map;
   var compiled = [];
   var addedFunctions = new Set;
   var numberClassAdded = false;
@@ -787,6 +788,16 @@ function compiler(filename, ast) {
   function compileExpression(expression) {
     if (cachedError) {
       return cachedError;
+    }
+    if (expression.type == "boolean") {
+      if (expression.value == "maybe") {
+        return "(!Math.floor(Math.random() *2))";
+      } else {
+        return expression.value;
+      }
+    }
+    if (expression.type == "identifier") {
+      return expression.value;
     }
     if (expression.type == "number") {
       if (!numberClassAdded) {
@@ -811,14 +822,14 @@ function compiler(filename, ast) {
         [namespace, functionName] = functionName.split("::");
       }
       if (namespace && !addedFunctions.has(`${namespace}::${functionName}`)) {
-        if (!namespaces[namespace]) {
+        if (!namespaces.has(namespace)) {
           cachedError = new RareScriptError(filename, instruction.line, 17, `Namespace "${namespace}" not imported`);
           return cachedError;
         }
         addedFunctions.add(`${namespace}::${functionName}`);
-        compiled.push(`${namespace}.${functionName} = ${namespaces[namespace].variables[functionName].js};`);
+        compiled.push(`${namespace}.${functionName} = ${namespaces.get(namespace).variables[functionName].js};`);
       }
-      var argumentsTypesCorrect = namespaces[namespace].variables[functionName].type.subtype.slice(0, -1);
+      var argumentsTypesCorrect = namespaces.get(namespace).variables[functionName].type.subtype.slice(0, -1);
       var argumentsTypes = expression.arguments.map(solveExpressionType);
       if (cachedError) {
         return cachedError;
@@ -838,6 +849,20 @@ function compiler(filename, ast) {
   }
 
   function solveExpressionType(expression) {
+    if (expression.type == "boolean") {
+      return {
+        "base": "typing::boolean",
+        "subtype": [],
+        "star": false
+      };
+    }
+    if (expression.type == "identifier") {
+      if (!globalVariables.has(expression.value)) {
+        cachedError = new RareScriptError(filename, instruction.line, 28, `Variable "${expression.value}" does not exist`);
+        return cachedError;
+      }
+      return globalVariables.get(expression.value).type;
+    }
     if (expression.type == "number") {
       return {
         "base": "typing::number",
@@ -867,7 +892,7 @@ function compiler(filename, ast) {
     }
     if (instruction.type == InstructionType.IMPORT) {
       if (builtinModules[instruction.module]) {
-        namespaces[instruction.as || instruction.module] = builtinModules[instruction.module];
+        namespaces.set(instruction.as || instruction.module, builtinModules[instruction.module]);
         compiled.push(`var ${instruction.as || instruction.module} = {};`);
         continue;
       }
@@ -875,6 +900,16 @@ function compiler(filename, ast) {
     }
     if (instruction.type == InstructionType.EXPRESSION) {
       compileExpression(instruction.expression);
+    }
+    if (instruction.type == InstructionType.VARIABLE) {
+      if (globalVariables.has(instruction.name)) {
+        return new RareScriptError(filename, instruction.line, 27, `Variable "${instruction.name}" already exists`);
+      }
+      globalVariables.set(instruction.name, {
+        "type": instruction.variableType,
+        "modifiers": instruction.modifiers
+      });
+      compiled.push(`var ${instruction.name} = ${compileExpression(instruction.value)};`);
     }
   }
 
