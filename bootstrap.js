@@ -52,7 +52,7 @@ var operators = {
       }
       return new RareScriptError(filename, line, 22, "Operator does not accept this type");
     },
-    "js": left => {
+    "js": (_filename, _line, left) => {
       if (left.base == "typing::string" || left.base == "typing::char") {
         return " + ";
       }
