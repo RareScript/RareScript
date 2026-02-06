@@ -4,7 +4,11 @@ var testNum = 0;
 
 function expectError(code, errCode) {
   testNum++;
-  var result = RareScript.processCode("test.rare", code, false, true, false);
+  try {
+    var result = RareScript.processCode("test.rare", code, false, true, false);
+  } catch {
+    return console.log(`\x1b[31m❌ Test #${testNum} failed: Compiler crashed.\x1b[0m`);
+  }
   if (!(result instanceof RareScript.RareScriptError)) {
     return console.log(`\x1b[31m❌ Test #${testNum} failed: Didn't got an error.\x1b[0m`);
   }
@@ -16,7 +20,11 @@ function expectError(code, errCode) {
 
 function expectTokens(code, tokens) {
   testNum++;
-  var result = RareScript.processCode("test.rare", code, false, true, false);
+  try {
+    var result = RareScript.processCode("test.rare", code, false, true, false);
+  } catch {
+    return console.log(`\x1b[31m❌ Test #${testNum} failed: Compiler crashed.\x1b[0m`);
+  }
   if (result instanceof RareScript.RareScriptError) {
     return console.log(`\x1b[31m❌ Test #${testNum} failed: Got an error ${result.code}.\x1b[0m`);
   }
@@ -39,7 +47,11 @@ function expectTokens(code, tokens) {
 
 function expectAST(code, ast) {
   testNum++;
-  var result = RareScript.processCode("test.rare", code, false, true, false);
+  try {
+    var result = RareScript.processCode("test.rare", code, false, true, false);
+  } catch {
+    return console.log(`\x1b[31m❌ Test #${testNum} failed: Compiler crashed.\x1b[0m`);
+  }
   if (result instanceof RareScript.RareScriptError) {
     return console.log(`\x1b[31m❌ Test #${testNum} failed: Got an error ${result.code}.\x1b[0m`);
   }
@@ -58,7 +70,11 @@ function expectAST(code, ast) {
 
 function expectTokensAndAST(code, tokens, ast) {
   testNum++;
-  var result = RareScript.processCode("test.rare", code, false, true, false);
+  try {
+    var result = RareScript.processCode("test.rare", code, false, true, false);
+  } catch {
+    return console.log(`\x1b[31m❌ Test #${testNum} failed: Compiler crashed.\x1b[0m`);
+  }
   if (result instanceof RareScript.RareScriptError) {
     return console.log(`\x1b[31m❌ Test #${testNum} failed: Got an error ${result.code}.\x1b[0m`);
   }
@@ -91,7 +107,11 @@ function expectTokensAndAST(code, tokens, ast) {
 
 function expectCode(code, compiled) {
   testNum++;
-  var result = RareScript.processCode("test.rare", code, false, true, false);
+  try {
+    var result = RareScript.processCode("test.rare", code, false, true, false);
+  } catch {
+    return console.log(`\x1b[31m❌ Test #${testNum} failed: Compiler crashed.\x1b[0m`);
+  }
   if (result instanceof RareScript.RareScriptError) {
     return console.log(`\x1b[31m❌ Test #${testNum} failed: Got an error ${result.code}.\x1b[0m`);
   }
@@ -225,7 +245,16 @@ console::out(60 + 1);`, [{
   }
 }]);
 
-expectTokensAndAST("typing::number c2t := 1;", [{
+expectTokensAndAST("import typing; typing::number c2t := 1;", [{
+  "type": RareScript.TokenType.KEYWORD,
+  "value": "import"
+}, {
+  "type": RareScript.TokenType.IDENTIFIER,
+  "value": "typing"
+}, {
+  "type": RareScript.TokenType.SEPARATOR,
+  "value": ";"
+}, {
   "type": RareScript.TokenType.IDENTIFIER,
   "value": "typing::number"
 }, {
@@ -241,6 +270,10 @@ expectTokensAndAST("typing::number c2t := 1;", [{
   "type": RareScript.TokenType.SEPARATOR,
   "value": ";"
 }], [{
+  "type": RareScript.InstructionType.IMPORT,
+  "module": "typing",
+  "as": null
+}, {
   "type": RareScript.InstructionType.VARIABLE,
   "variableType": {
     "base": "typing::number",
@@ -254,7 +287,16 @@ expectTokensAndAST("typing::number c2t := 1;", [{
     "value": "1"
   }
 }]);
-expectTokensAndAST("typing::number final c2t := 1;", [{
+expectTokensAndAST("import typing; typing::number final c2t := 1;", [{
+  "type": RareScript.TokenType.KEYWORD,
+  "value": "import"
+}, {
+  "type": RareScript.TokenType.IDENTIFIER,
+  "value": "typing"
+}, {
+  "type": RareScript.TokenType.SEPARATOR,
+  "value": ";"
+}, {
   "type": RareScript.TokenType.IDENTIFIER,
   "value": "typing::number"
 }, {
@@ -273,6 +315,10 @@ expectTokensAndAST("typing::number final c2t := 1;", [{
   "type": RareScript.TokenType.SEPARATOR,
   "value": ";"
 }], [{
+  "type": RareScript.InstructionType.IMPORT,
+  "module": "typing",
+  "as": null
+}, {
   "type": RareScript.InstructionType.VARIABLE,
   "variableType": {
     "base": "typing::number",
@@ -889,3 +935,5 @@ expectTokensAndAST(`cond true { return 1; } else { return 2; }`, [{
 
 expectCode("import std;", "var std = {};");
 expectCode(`import std; std::out("Hello, World!\\n");`, `var std = {};std.out = data => void process.stdout.write(data);std.out("Hello, World!\\n");`);
+
+expectError("import typing; typing::string := 1;", 1);

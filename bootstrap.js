@@ -30,6 +30,19 @@ var InstructionType = {
 var operators = {
   "+": {
     "type": (filename, line, left, right) => {
+      if (!right) {
+        return new RareScriptError(filename, line, 34, "Expected right side");
+      }
+      if (!left) {
+        if (right.base != "typing::number") {
+          return new RareScriptError(filename, line, 33, "Expected right side to be typing::number");
+        }
+        return {
+          "base": "typing::number",
+          "subtype": [],
+          "star": false
+        };
+      }
       if (left.base == "typing::string" || left.base == "typing::char") {
         if (right.base != "typing::string" && right.base != "typing::char") {
           return new RareScriptError(filename, line, 20, "Expected right side to be typing::string or typing::char");
@@ -53,16 +66,35 @@ var operators = {
       return new RareScriptError(filename, line, 22, "Operator does not accept this type");
     },
     "js": (_filename, _line, left) => {
+      if (!left) {
+        return "";
+      }
       if (left.base == "typing::string" || left.base == "typing::char") {
         return " + ";
       }
       if (left.base == "typing::number") {
         return ".add";
       }
+    },
+    "jsAppend": left => {
+      return left ? "" : ".abs()";
     }
   },
   "-": {
     "type": (filename, line, left, right) => {
+      if (!right) {
+        return new RareScriptError(filename, line, 36, "Expected right side");
+      }
+      if (!left) {
+        if (right.base != "typing::number") {
+          return new RareScriptError(filename, line, 35, "Expected right side to be typing::number");
+        }
+        return {
+          "base": "typing::number",
+          "subtype": [],
+          "star": false
+        };
+      }
       if (left.base != "typing::number" || right.base != "typing::number") {
         return new RareScriptError(filename, line, 23, "Operator expects typing::number");
       }
@@ -72,10 +104,21 @@ var operators = {
         "star": false
       };
     },
-    "js": ".sub"
+    "js": (_filename, _line, left) => {
+      return left ? ".sub" : "";
+    },
+    "jsAppend": left => {
+      return left ? "" : ".neg()";
+    }
   },
   "*": {
     "type": (filename, line, left, right) => {
+      if (!left) {
+        return new RareScriptError(filename, line, 37, "Expected left side");
+      }
+      if (!right) {
+        return new RareScriptError(filename, line, 38, "Expected right side");
+      }
       if (left.base != "typing::number" || right.base != "typing::number") {
         return new RareScriptError(filename, line, 24, "Operator expects typing::number");
       }
@@ -89,6 +132,12 @@ var operators = {
   },
   "/": {
     "type": (filename, line, left, right) => {
+      if (!left) {
+        return new RareScriptError(filename, line, 39, "Expected left side");
+      }
+      if (!right) {
+        return new RareScriptError(filename, line, 40, "Expected right side");
+      }
       if (left.base != "typing::number" || right.base != "typing::number") {
         return new RareScriptError(filename, line, 25, "Operator expects typing::number");
       }
@@ -102,6 +151,12 @@ var operators = {
   },
   "%": {
     "type": (filename, line, left, right) => {
+      if (!left) {
+        return new RareScriptError(filename, line, 41, "Expected left side");
+      }
+      if (!right) {
+        return new RareScriptError(filename, line, 42, "Expected right side");
+      }
       if (left.base != "typing::number" || right.base != "typing::number") {
         return new RareScriptError(filename, line, 26, "Operator expects typing::number");
       }
@@ -125,7 +180,9 @@ var operatorPriority = [
   ["|", "&", "^"],
   ["<|"],
   ["=", "!=", "<", ">", "<=", ">="],
-  ["or", "and"]
+  ["!"],
+  ["or", "and"],
+  [":="]
 ];
 
 class RareScriptError {
@@ -144,11 +201,93 @@ function throwError(error, code) {
 
 var builtinModules = {
   "typing": {
-    "variables": {}
+    "variables": new Map([
+      ["void", {
+        "type": {
+          "base": "typing::function",
+          "subtype": [{
+            "base": "typing::any",
+            "subtype": [],
+            "star": true
+          }, {
+            "base": "typing::void",
+            "subtype": [],
+            "star": false
+          }],
+          "star": false
+        },
+        "modifiers": ["type"],
+        "js": "() => {}"
+      }],
+      ["string", {
+        "type": {
+          "base": "typing::function",
+          "subtype": [{
+            "base": "typing::any",
+            "subtype": [],
+            "star": true
+          }, {
+            "base": "typing::string",
+            "subtype": [],
+            "star": false
+          }],
+          "star": false
+        },
+        "modifiers": ["type"],
+        // TODO: Converting code
+        "js": "() => {}"
+      }],
+      ["number", {
+        "type": {
+          "base": "typing::function",
+          "subtype": [{
+            "base": "typing::any",
+            "subtype": [],
+            "star": true
+          }, {
+            "base": "typing::number",
+            "subtype": [],
+            "star": false
+          }],
+          "star": false
+        },
+        "modifiers": ["type"],
+        // TODO: Converting code
+        "js": "() => {}"
+      }],
+      ["boolean", {
+        "type": {
+          "base": "typing::function",
+          "subtype": [{
+            "base": "typing::any",
+            "subtype": [],
+            "star": true
+          }, {
+            "base": "typing::boolean",
+            "subtype": [],
+            "star": false
+          }],
+          "star": false
+        },
+        "modifiers": ["type"],
+        // TODO: Converting code
+        "js": "() => {}"
+      }],
+      ["any", {
+        "type": {
+          "base": "typing::void",
+          "subtype": [],
+          "star": false
+        },
+        "modifiers": ["type"],
+        // TODO: Converting code
+        "js": "() => {}"
+      }]
+    ])
   },
   "std": {
-    "variables": {
-      "out": {
+    "variables": new Map([
+      ["out", {
         "type": {
           "base": "typing::function",
           "subtype": [{
@@ -162,9 +301,10 @@ var builtinModules = {
           }],
           "star": false
         },
+        "modifiers": [],
         "js": "data => void process.stdout.write(data)"
-      }
-    }
+      }]
+    ])
   }
 };
 
@@ -777,8 +917,13 @@ function parseExpression(filename, code, tokens) {
   return expression;
 }
 
+function renderType(type) {
+  return `${type.base}${type.subtype.length ? `<${type.subtype.map(renderType).join(", ")}>` : ""}`;
+}
+
 function compiler(filename, ast) {
   var namespaces = new Map;
+  var typeTransformationTable = new Map;
   var globalVariables = new Map;
   var compiled = [];
   var addedFunctions = new Set;
@@ -810,41 +955,69 @@ function compiler(filename, ast) {
       return expression.value;
     }
     if (expression.type == "operator") {
-      if (typeof operators[expression.operator].js === "string") {
-        return compileExpression(expression.left) + operators[expression.operator].js + compileExpression(expression.right);
+      if (typeof operators[expression.operator].type === "function") {
+        var leftType = expression.left ? solveExpressionType(expression.left) : null;
+        var rightType = expression.right ? solveExpressionType(expression.right) : null;
+        if (cachedError) {
+          return cachedError;
+        }
+        var result = operators[expression.operator].type(filename, instruction.line, leftType, rightType);
+        if (result instanceof RareScriptError) {
+          cachedError = result;
+          return result;
+        }
       }
-      return compileExpression(expression.left) + operators[expression.operator].js(filename, instruction.line, expression.left ? solveExpressionType(expression.left) : null, expression.right ? solveExpressionType(expression.right) : null) + compileExpression(expression.right);
+      var prepend = (operators[expression.operator].jsPrepend || "");
+      var append = (operators[expression.operator].jsAppend || "");
+      if (typeof prepend === "function") {
+        prepend = prepend(expression.left ? solveExpressionType(expression.left) : null, expression.right ? solveExpressionType(expression.right) : null);
+      }
+      if (typeof append === "function") {
+        append = append(expression.left ? solveExpressionType(expression.left) : null, expression.right ? solveExpressionType(expression.right) : null);
+      }
+      if (typeof operators[expression.operator].js === "string") {
+        return prepend + (expression.left ? compileExpression(expression.left) : "") + operators[expression.operator].js + (expression.right ? compileExpression(expression.right) : "") + append;
+      }
+      return prepend + (expression.left ? compileExpression(expression.left) : "") + operators[expression.operator].js(filename, instruction.line, expression.left ? solveExpressionType(expression.left) : null, expression.right ? solveExpressionType(expression.right) : null) + (expression.right ? compileExpression(expression.right) : "") + append;
     }
     if (expression.type == "function") {
       var namespace = null;
-      var functionName = instruction.expression.function;
+      var functionName = expression.function;
       if (functionName.includes("::")) {
         [namespace, functionName] = functionName.split("::");
       }
+      if (namespace && !namespaces.get(namespace).variables.has(functionName)) {
+        cachedError = new RareScriptError(filename, instruction.line, 45, `Variable "${namespace ? `${namespace}::` : ""}${functionName}" does not exist`);
+        return cachedError;
+      }
       if (namespace && !addedFunctions.has(`${namespace}::${functionName}`)) {
         if (!namespaces.has(namespace)) {
-          cachedError = new RareScriptError(filename, instruction.line, 17, `Namespace "${namespace}" not imported`);
+          cachedError = new RareScriptError(filename, instruction.line, 17, `Namespace "${namespace}" does not exist`);
           return cachedError;
         }
         addedFunctions.add(`${namespace}::${functionName}`);
-        compiled.push(`${namespace}.${functionName} = ${namespaces.get(namespace).variables[functionName].js};`);
+        compiled.push(`${namespace}.${functionName} = ${namespaces.get(namespace).variables.get(functionName).js};`);
       }
-      var argumentsTypesCorrect = namespaces.get(namespace).variables[functionName].type.subtype.slice(0, -1);
+      if (namespaces.get(namespace).variables.get(functionName).modifiers.includes("numbers") && !numberClassAdded) {
+        numberClassAdded = true;
+        compiled.unshift(numberClass);
+      }
+      var argumentsTypesCorrect = namespaces.get(namespace).variables.get(functionName).type.subtype.slice(0, -1);
       var argumentsTypes = expression.arguments.map(solveExpressionType);
       if (cachedError) {
         return cachedError;
       }
       if (argumentsTypesCorrect.length != argumentsTypes.length) {
-        cachedError = new RareScriptError(filename, instruction.line, 18, `Expected ${argumentsTypesCorrect} arguments, but got ${argumentsTypes.length}`);
+        cachedError = new RareScriptError(filename, instruction.line, 18, `Expected ${argumentsTypesCorrect.length} arguments, but got ${argumentsTypes.length}`);
         return cachedError;
       }
       for (var argumentIndex = 0; argumentIndex < argumentsTypes.length; argumentIndex++) {
         if (JSON.stringify(argumentsTypesCorrect[argumentIndex]) != JSON.stringify(argumentsTypes[argumentIndex])) {
-          cachedError = new RareScriptError(filename, instruction.line, 19, `Expected argument type ${argumentsTypesCorrect[argumentIndex].base}${argumentsTypesCorrect[argumentIndex].subtype.length ? `<${argumentsTypesCorrect[argumentIndex].subtype.map(subtype => subtype.base).join(", ")}>` : ""}, but got ${argumentsTypes[argumentIndex].base}${argumentsTypes[argumentIndex].subtype.length ? `<${argumentsTypes[argumentIndex].subtype.map(subtype => subtype.base).join(", ")}>` : ""}`);
+          cachedError = new RareScriptError(filename, instruction.line, 19, `Expected argument type ${renderType(argumentsTypesCorrect[argumentIndex])}, but got ${renderType(argumentsTypes[argumentIndex])}`);
           return cachedError;
         }
       }
-      compiled.push(`${namespace ? `${namespace}.` : ""}${functionName}(${expression.arguments.map(compileExpression).join(", ")});`);
+      return `${namespace ? `${namespace}.` : ""}${functionName}(${expression.arguments.map(compileExpression).join(", ")})`;
     }
   }
 
@@ -878,12 +1051,45 @@ function compiler(filename, ast) {
       };
     }
     if (expression.type == "operator") {
+      if (typeof operators[expression.operator].type === "object") {
+        return operators[expression.operator].type;
+      }
       var result = operators[expression.operator].type(filename, instruction.line, expression.left ? solveExpressionType(expression.left) : null, expression.right ? solveExpressionType(expression.right) : null);
       if (result instanceof RareScriptError) {
         cachedError = result;
       }
       return result;
     }
+    if (expression.type == "function") {
+      var namespace = null;
+      var functionName = expression.function;
+      if (functionName.includes("::")) {
+        [namespace, functionName] = functionName.split("::");
+      }
+      if (namespace && !addedFunctions.has(`${namespace}::${functionName}`)) {
+        if (!namespaces.has(namespace)) {
+          cachedError = new RareScriptError(filename, instruction.line, 43, `Namespace "${namespace}" does not exist`);
+          return cachedError;
+        }
+      }
+      if (namespace && !namespaces.get(namespace).variables.has(functionName)) {
+        cachedError = new RareScriptError(filename, instruction.line, 44, `Variable "${namespace ? `${namespace}::` : ""}${functionName}" does not exist`);
+        return cachedError;
+      }
+      return namespaces.get(namespace).variables.get(functionName).type.subtype.at(-1);
+    }
+  }
+
+  function transformType(type) {
+    if (type.base.includes("::")) {
+      var [namespace, name] = type.base.split("::");
+      if (typeTransformationTable.has(namespace)) {
+        namespace = typeTransformationTable.get(namespace);
+      }
+      type.base = `${namespace}::${name}`;
+    }
+    type.subtype = type.subtype.map(transformType);
+    return type;
   }
 
   for (var instruction of ast) {
@@ -892,6 +1098,9 @@ function compiler(filename, ast) {
     }
     if (instruction.type == InstructionType.IMPORT) {
       if (builtinModules[instruction.module]) {
+        if (instruction.as) {
+          typeTransformationTable.set(instruction.as, instruction.module);
+        }
         namespaces.set(instruction.as || instruction.module, builtinModules[instruction.module]);
         compiled.push(`var ${instruction.as || instruction.module} = {};`);
         continue;
@@ -899,15 +1108,33 @@ function compiler(filename, ast) {
       return new RareScriptError(filename, instruction.line, 16, `Module "${instruction.module}" not found`);
     }
     if (instruction.type == InstructionType.EXPRESSION) {
-      compileExpression(instruction.expression);
+      compiled.push(compileExpression(instruction.expression) + ";");
     }
     if (instruction.type == InstructionType.VARIABLE) {
       if (globalVariables.has(instruction.name)) {
         return new RareScriptError(filename, instruction.line, 27, `Variable "${instruction.name}" already exists`);
       }
-      // TODO: Check variableType if it exists and is a type
+      var typeNamespace = null;
+      var type = instruction.variableType.base;
+      if (type.includes("::")) {
+        [typeNamespace, type] = type.split("::");
+      }
+      if (typeNamespace && !namespaces.has(typeNamespace)) {
+        return new RareScriptError(filename, instruction.line, 29, `Namespace "${typeNamespace}" does not exist`);
+      }
+      if ((!typeNamespace && !globalVariables.has(type)) || (typeNamespace && !namespaces.get(typeNamespace).variables.has(type))) {
+        return new RareScriptError(filename, instruction.line, 30, `Variable "${typeNamespace ? `${typeNamespace}::` : ""}${type}" does not exist`);
+      }
+      if ((!typeNamespace && !globalVariables.get(type).modifiers.includes("type")) || (typeNamespace && !namespaces.get(typeNamespace).variables.get(type).modifiers.includes("type"))) {
+        return new RareScriptError(filename, instruction.line, 31, `Variable "${typeNamespace ? `${typeNamespace}::` : ""}${type}" is not a type`);
+      }
+      var valueType = solveExpressionType(instruction.value);
+      var transformedType = transformType(instruction.variableType);
+      if (JSON.stringify(transformedType) != JSON.stringify(valueType)) {
+        return new RareScriptError(filename, instruction.line, 32, `Cannot assign "${renderType(valueType)}" as "${renderType(instruction.variableType)}"`);
+      }
       globalVariables.set(instruction.name, {
-        "type": instruction.variableType,
+        "type": transformedType,
         "modifiers": instruction.modifiers
       });
       compiled.push(`var ${instruction.name} = ${compileExpression(instruction.value)};`);
