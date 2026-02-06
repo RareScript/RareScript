@@ -931,6 +931,7 @@ function compiler(filename, ast) {
   var addedFunctions = new Set;
   var numberClassAdded = false;
   var cachedError = null;
+  var lastInstruction = null;
 
   function compileExpression(expression) {
     if (cachedError) {
@@ -960,7 +961,7 @@ function compiler(filename, ast) {
         if (cachedError) {
           return cachedError;
         }
-        var result = operators[expression.operator].type(filename, instruction.line, leftType, rightType);
+        var result = operators[expression.operator].type(filename, lastInstruction.line, leftType, rightType);
         if (result instanceof RareScriptError) {
           cachedError = result;
           return result;
@@ -977,7 +978,7 @@ function compiler(filename, ast) {
       if (typeof operators[expression.operator].js === "string") {
         return prepend + (expression.left ? compileExpression(expression.left) : "") + operators[expression.operator].js + (expression.right ? compileExpression(expression.right) : "") + append;
       }
-      return prepend + (expression.left ? compileExpression(expression.left) : "") + operators[expression.operator].js(filename, instruction.line, expression.left ? solveExpressionType(expression.left) : null, expression.right ? solveExpressionType(expression.right) : null) + (expression.right ? compileExpression(expression.right) : "") + append;
+      return prepend + (expression.left ? compileExpression(expression.left) : "") + operators[expression.operator].js(filename, lastInstruction.line, expression.left ? solveExpressionType(expression.left) : null, expression.right ? solveExpressionType(expression.right) : null) + (expression.right ? compileExpression(expression.right) : "") + append;
     }
     if (expression.type == "function") {
       var namespace = null;
@@ -986,12 +987,12 @@ function compiler(filename, ast) {
         [namespace, functionName] = functionName.split("::");
       }
       if (namespace && !namespaces.get(namespace).variables.has(functionName)) {
-        cachedError = new RareScriptError(filename, instruction.line, 45, `Variable "${namespace ? `${namespace}::` : ""}${functionName}" does not exist`);
+        cachedError = new RareScriptError(filename, lastInstruction.line, 45, `Variable "${namespace ? `${namespace}::` : ""}${functionName}" does not exist`);
         return cachedError;
       }
       if (namespace && !addedFunctions.has(`${namespace}::${functionName}`)) {
         if (!namespaces.has(namespace)) {
-          cachedError = new RareScriptError(filename, instruction.line, 17, `Namespace "${namespace}" does not exist`);
+          cachedError = new RareScriptError(filename, lastInstruction.line, 17, `Namespace "${namespace}" does not exist`);
           return cachedError;
         }
         addedFunctions.add(`${namespace}::${functionName}`);
@@ -1006,12 +1007,12 @@ function compiler(filename, ast) {
         return cachedError;
       }
       if (argumentsTypesCorrect.length != argumentsTypes.length) {
-        cachedError = new RareScriptError(filename, instruction.line, 18, `Expected ${argumentsTypesCorrect.length} arguments, but got ${argumentsTypes.length}`);
+        cachedError = new RareScriptError(filename, lastInstruction.line, 18, `Expected ${argumentsTypesCorrect.length} arguments, but got ${argumentsTypes.length}`);
         return cachedError;
       }
       for (var argumentIndex = 0; argumentIndex < argumentsTypes.length; argumentIndex++) {
         if (JSON.stringify(argumentsTypesCorrect[argumentIndex]) != JSON.stringify(argumentsTypes[argumentIndex])) {
-          cachedError = new RareScriptError(filename, instruction.line, 19, `Expected argument type ${renderType(argumentsTypesCorrect[argumentIndex])}, but got ${renderType(argumentsTypes[argumentIndex])}`);
+          cachedError = new RareScriptError(filename, lastInstruction.line, 19, `Expected argument type ${renderType(argumentsTypesCorrect[argumentIndex])}, but got ${renderType(argumentsTypes[argumentIndex])}`);
           return cachedError;
         }
       }
@@ -1029,7 +1030,7 @@ function compiler(filename, ast) {
     }
     if (expression.type == "identifier") {
       if (!globalVariables.has(expression.value)) {
-        cachedError = new RareScriptError(filename, instruction.line, 28, `Variable "${expression.value}" does not exist`);
+        cachedError = new RareScriptError(filename, lastInstruction.line, 28, `Variable "${expression.value}" does not exist`);
         return cachedError;
       }
       return globalVariables.get(expression.value).type;
@@ -1052,7 +1053,7 @@ function compiler(filename, ast) {
       if (typeof operators[expression.operator].type === "object") {
         return operators[expression.operator].type;
       }
-      var result = operators[expression.operator].type(filename, instruction.line, expression.left ? solveExpressionType(expression.left) : null, expression.right ? solveExpressionType(expression.right) : null);
+      var result = operators[expression.operator].type(filename, lastInstruction.line, expression.left ? solveExpressionType(expression.left) : null, expression.right ? solveExpressionType(expression.right) : null);
       if (result instanceof RareScriptError) {
         cachedError = result;
       }
@@ -1066,12 +1067,12 @@ function compiler(filename, ast) {
       }
       if (namespace && !addedFunctions.has(`${namespace}::${functionName}`)) {
         if (!namespaces.has(namespace)) {
-          cachedError = new RareScriptError(filename, instruction.line, 43, `Namespace "${namespace}" does not exist`);
+          cachedError = new RareScriptError(filename, lastInstruction.line, 43, `Namespace "${namespace}" does not exist`);
           return cachedError;
         }
       }
       if (namespace && !namespaces.get(namespace).variables.has(functionName)) {
-        cachedError = new RareScriptError(filename, instruction.line, 44, `Variable "${namespace ? `${namespace}::` : ""}${functionName}" does not exist`);
+        cachedError = new RareScriptError(filename, lastInstruction.line, 44, `Variable "${namespace ? `${namespace}::` : ""}${functionName}" does not exist`);
         return cachedError;
       }
       return namespaces.get(namespace).variables.get(functionName).type.subtype.at(-1);
@@ -1092,6 +1093,7 @@ function compiler(filename, ast) {
 
   function compileAST(ast) {
     for (var instruction of ast) {
+      lastInstruction = instruction;
       if (cachedError) {
         return cachedError;
       }
@@ -1140,10 +1142,16 @@ function compiler(filename, ast) {
       }
       if (instruction.type == InstructionType.CONDITION) {
         compiled.push(`if (${compileExpression(instruction.condition)}) {`);
-        compileAST(instruction.true);
+        var result = compileAST(instruction.true);
+        if (result instanceof RareScriptError) {
+          return result;
+        }
         if (instruction.false) {
           compiled.push("} else {");
-          compileAST(instruction.false);
+          result = compileAST(instruction.false);
+          if (result instanceof RareScriptError) {
+            return result;
+          }
           compiled.push("}");
         } else {
           compiled.push("}");
@@ -1151,8 +1159,10 @@ function compiler(filename, ast) {
       }
     }
   }
-  compileAST(ast);
-
+  var result = compileAST(ast);
+  if (result instanceof RareScriptError) {
+    return result;
+  }
   if (cachedError) {
     return cachedError;
   }
