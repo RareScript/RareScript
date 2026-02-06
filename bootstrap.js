@@ -925,7 +925,9 @@ function compiler(filename, ast) {
   var namespaces = new Map;
   var typeTransformationTable = new Map;
   var globalVariables = new Map;
-  var compiled = [];
+  var compiled = [
+    [], []
+  ];
   var addedFunctions = new Set;
   var numberClassAdded = false;
   var cachedError = null;
@@ -945,10 +947,7 @@ function compiler(filename, ast) {
       return expression.value;
     }
     if (expression.type == "number") {
-      if (!numberClassAdded) {
-        numberClassAdded = true;
-        compiled.unshift(numberClass);
-      }
+      numberClassAdded = true;
       return `(new RSNumber("${expression.value}"))`;
     }
     if (expression.type == "string") {
@@ -996,11 +995,10 @@ function compiler(filename, ast) {
           return cachedError;
         }
         addedFunctions.add(`${namespace}::${functionName}`);
-        compiled.push(`${namespace}.${functionName} = ${namespaces.get(namespace).variables.get(functionName).js};`);
+        compiled[1].push(`${namespace}.${functionName} = ${namespaces.get(namespace).variables.get(functionName).js};`);
       }
-      if (namespaces.get(namespace).variables.get(functionName).modifiers.includes("numbers") && !numberClassAdded) {
+      if (namespaces.get(namespace).variables.get(functionName).modifiers.includes("numbers")) {
         numberClassAdded = true;
-        compiled.unshift(numberClass);
       }
       var argumentsTypesCorrect = namespaces.get(namespace).variables.get(functionName).type.subtype.slice(0, -1);
       var argumentsTypes = expression.arguments.map(solveExpressionType);
@@ -1092,60 +1090,74 @@ function compiler(filename, ast) {
     return type;
   }
 
-  for (var instruction of ast) {
-    if (cachedError) {
-      return cachedError;
-    }
-    if (instruction.type == InstructionType.IMPORT) {
-      if (builtinModules[instruction.module]) {
-        if (instruction.as) {
-          typeTransformationTable.set(instruction.as, instruction.module);
+  function compileAST(ast) {
+    for (var instruction of ast) {
+      if (cachedError) {
+        return cachedError;
+      }
+      if (instruction.type == InstructionType.IMPORT) {
+        if (builtinModules[instruction.module]) {
+          if (instruction.as) {
+            typeTransformationTable.set(instruction.as, instruction.module);
+          }
+          namespaces.set(instruction.as || instruction.module, builtinModules[instruction.module]);
+          compiled[0].push(`var ${instruction.as || instruction.module} = {};`);
+          continue;
         }
-        namespaces.set(instruction.as || instruction.module, builtinModules[instruction.module]);
-        compiled.push(`var ${instruction.as || instruction.module} = {};`);
-        continue;
+        return new RareScriptError(filename, instruction.line, 16, `Module "${instruction.module}" not found`);
       }
-      return new RareScriptError(filename, instruction.line, 16, `Module "${instruction.module}" not found`);
-    }
-    if (instruction.type == InstructionType.EXPRESSION) {
-      compiled.push(compileExpression(instruction.expression) + ";");
-    }
-    if (instruction.type == InstructionType.VARIABLE) {
-      if (globalVariables.has(instruction.name)) {
-        return new RareScriptError(filename, instruction.line, 27, `Variable "${instruction.name}" already exists`);
+      if (instruction.type == InstructionType.EXPRESSION) {
+        compiled.push(compileExpression(instruction.expression) + ";");
       }
-      var typeNamespace = null;
-      var type = instruction.variableType.base;
-      if (type.includes("::")) {
-        [typeNamespace, type] = type.split("::");
+      if (instruction.type == InstructionType.VARIABLE) {
+        if (globalVariables.has(instruction.name)) {
+          return new RareScriptError(filename, instruction.line, 27, `Variable "${instruction.name}" already exists`);
+        }
+        var typeNamespace = null;
+        var type = instruction.variableType.base;
+        if (type.includes("::")) {
+          [typeNamespace, type] = type.split("::");
+        }
+        if (typeNamespace && !namespaces.has(typeNamespace)) {
+          return new RareScriptError(filename, instruction.line, 29, `Namespace "${typeNamespace}" does not exist`);
+        }
+        if ((!typeNamespace && !globalVariables.has(type)) || (typeNamespace && !namespaces.get(typeNamespace).variables.has(type))) {
+          return new RareScriptError(filename, instruction.line, 30, `Variable "${typeNamespace ? `${typeNamespace}::` : ""}${type}" does not exist`);
+        }
+        if ((!typeNamespace && !globalVariables.get(type).modifiers.includes("type")) || (typeNamespace && !namespaces.get(typeNamespace).variables.get(type).modifiers.includes("type"))) {
+          return new RareScriptError(filename, instruction.line, 31, `Variable "${typeNamespace ? `${typeNamespace}::` : ""}${type}" is not a type`);
+        }
+        var valueType = solveExpressionType(instruction.value);
+        var transformedType = transformType(instruction.variableType);
+        if (JSON.stringify(transformedType) != JSON.stringify(valueType)) {
+          return new RareScriptError(filename, instruction.line, 32, `Cannot assign "${renderType(valueType)}" as "${renderType(instruction.variableType)}"`);
+        }
+        globalVariables.set(instruction.name, {
+          "type": transformedType,
+          "modifiers": instruction.modifiers
+        });
+        compiled.push(`var ${instruction.name} = ${compileExpression(instruction.value)};`);
       }
-      if (typeNamespace && !namespaces.has(typeNamespace)) {
-        return new RareScriptError(filename, instruction.line, 29, `Namespace "${typeNamespace}" does not exist`);
+      if (instruction.type == InstructionType.CONDITION) {
+        compiled.push(`if (${compileExpression(instruction.condition)}) {`);
+        compileAST(instruction.true);
+        if (instruction.false) {
+          compiled.push("} else {");
+          compileAST(instruction.false);
+          compiled.push("}");
+        } else {
+          compiled.push("}");
+        }
       }
-      if ((!typeNamespace && !globalVariables.has(type)) || (typeNamespace && !namespaces.get(typeNamespace).variables.has(type))) {
-        return new RareScriptError(filename, instruction.line, 30, `Variable "${typeNamespace ? `${typeNamespace}::` : ""}${type}" does not exist`);
-      }
-      if ((!typeNamespace && !globalVariables.get(type).modifiers.includes("type")) || (typeNamespace && !namespaces.get(typeNamespace).variables.get(type).modifiers.includes("type"))) {
-        return new RareScriptError(filename, instruction.line, 31, `Variable "${typeNamespace ? `${typeNamespace}::` : ""}${type}" is not a type`);
-      }
-      var valueType = solveExpressionType(instruction.value);
-      var transformedType = transformType(instruction.variableType);
-      if (JSON.stringify(transformedType) != JSON.stringify(valueType)) {
-        return new RareScriptError(filename, instruction.line, 32, `Cannot assign "${renderType(valueType)}" as "${renderType(instruction.variableType)}"`);
-      }
-      globalVariables.set(instruction.name, {
-        "type": transformedType,
-        "modifiers": instruction.modifiers
-      });
-      compiled.push(`var ${instruction.name} = ${compileExpression(instruction.value)};`);
     }
   }
+  compileAST(ast);
 
   if (cachedError) {
     return cachedError;
   }
 
-  return compiled.join("");
+  return (numberClassAdded ? numberClass : "") + compiled.flat().join("");
 }
 
 function processCode(filename, code, debug, supressErrors, minify) {
