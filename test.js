@@ -737,7 +737,31 @@ expectTokensAndAST("1 + 2 * 3 - 4 + 5;", [{
 expectError("as con;", 3);
 expectError("return 1", 10);
 expectError("return;", 11);
-expectTokensAndAST("return 1;", [{
+expectTokensAndAST("import typing; typing::number test() { return 1; }", [{
+  "type": RareScript.TokenType.KEYWORD,
+  "value": "import"
+}, {
+  "type": RareScript.TokenType.IDENTIFIER,
+  "value": "typing"
+}, {
+  "type": RareScript.TokenType.SEPARATOR,
+  "value": ";"
+}, {
+  "type": RareScript.TokenType.IDENTIFIER,
+  "value": "typing::number"
+}, {
+  "type": RareScript.TokenType.IDENTIFIER,
+  "value": "test"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": "("
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": ")"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": "{"
+}, {
   "type": RareScript.TokenType.KEYWORD,
   "value": "return"
 }, {
@@ -746,16 +770,46 @@ expectTokensAndAST("return 1;", [{
 }, {
   "type": RareScript.TokenType.SEPARATOR,
   "value": ";"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": "}"
 }], [{
-  "type": RareScript.InstructionType.RETURN,
-  "value": {
-    "type": "number",
-    "value": "1"
-  }
+  "type": RareScript.InstructionType.IMPORT,
+  "module": "typing",
+  "as": null,
+  "line": 1
+}, {
+  "type": RareScript.InstructionType.FUNCTION,
+  "returnType": {
+    "base": "typing::number",
+    "subtype": [],
+    "star": false
+  },
+  "name": "test",
+  "arguments": [],
+  "content": [{
+    "type": RareScript.InstructionType.RETURN,
+    "value": {
+      "type": "number",
+      "value": "1"
+    },
+    "line": 1
+  }],
+  "line": 1
 }]);
-expectTokensAndAST(`typing::number getOne(typing::string test, typing::number *a) {
+expectTokensAndAST(`import typing;
+typing::number getOne(typing::string test, typing::number *a) {
   return 1;
 }`, [{
+  "type": RareScript.TokenType.KEYWORD,
+  "value": "import"
+}, {
+  "type": RareScript.TokenType.IDENTIFIER,
+  "value": "typing"
+}, {
+  "type": RareScript.TokenType.SEPARATOR,
+  "value": ";"
+}, {
   "type": RareScript.TokenType.IDENTIFIER,
   "value": "typing::number"
 }, {
@@ -801,6 +855,11 @@ expectTokensAndAST(`typing::number getOne(typing::string test, typing::number *a
   "type": RareScript.TokenType.OPERATOR,
   "value": "}"
 }], [{
+  "type": RareScript.InstructionType.IMPORT,
+  "module": "typing",
+  "as": null,
+  "line": 1
+}, {
   "type": RareScript.InstructionType.FUNCTION,
   "returnType": {
     "base": "typing::number",
@@ -811,17 +870,17 @@ expectTokensAndAST(`typing::number getOne(typing::string test, typing::number *a
   "arguments": [{
     "type": {
       "base": "typing::string",
-      "subtype": []
+      "subtype": [],
+      "star": false
     },
-    "name": "test",
-    "spreading": false
+    "name": "test"
   }, {
     "type": {
       "base": "typing::number",
-      "subtype": []
+      "subtype": [],
+      "star": true
     },
-    "name": "a",
-    "spreading": true
+    "name": "a"
   }],
   "content": [{
     "type": RareScript.InstructionType.RETURN,
@@ -829,11 +888,36 @@ expectTokensAndAST(`typing::number getOne(typing::string test, typing::number *a
       "type": "number",
       "value": "1"
     },
-    "line": 2
-  }]
+    "line": 3
+  }],
+  "line": 2
 }]);
 
-expectTokensAndAST(`cond true { return 1; }`, [{
+expectTokensAndAST(`import typing; typing::number test() { cond true { return 1; } }`, [{
+  "type": RareScript.TokenType.KEYWORD,
+  "value": "import"
+}, {
+  "type": RareScript.TokenType.IDENTIFIER,
+  "value": "typing"
+}, {
+  "type": RareScript.TokenType.SEPARATOR,
+  "value": ";"
+}, {
+  "type": RareScript.TokenType.IDENTIFIER,
+  "value": "typing::number"
+}, {
+  "type": RareScript.TokenType.IDENTIFIER,
+  "value": "test"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": "("
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": ")"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": "{"
+}, {
   "type": RareScript.TokenType.KEYWORD,
   "value": "cond"
 }, {
@@ -854,23 +938,67 @@ expectTokensAndAST(`cond true { return 1; }`, [{
 }, {
   "type": RareScript.TokenType.OPERATOR,
   "value": "}"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": "}"
 }], [{
-  "type": RareScript.InstructionType.CONDITION,
-  "condition": {
-    "type": "boolean",
-    "value": "true"
+  "type": RareScript.InstructionType.IMPORT,
+  "module": "typing",
+  "as": null,
+  "line": 1
+}, {
+  "type": RareScript.InstructionType.FUNCTION,
+  "returnType": {
+    "base": "typing::number",
+    "subtype": [],
+    "star": false
   },
-  "true": [{
-    "type": RareScript.InstructionType.RETURN,
-    "value": {
-      "type": "number",
-      "value": "1"
+  "name": "test",
+  "arguments": [],
+  "content": [{
+    "type": RareScript.InstructionType.CONDITION,
+    "condition": {
+      "type": "boolean",
+      "value": "true"
     },
+    "true": [{
+      "type": RareScript.InstructionType.RETURN,
+      "value": {
+        "type": "number",
+        "value": "1"
+      },
+      "line": 1
+    }],
+    "false": null,
     "line": 1
   }],
-  "false": null
+  "line": 1
 }]);
-expectTokensAndAST(`cond true { return 1; } else { return 2; }`, [{
+expectTokensAndAST(`import typing; typing::number test() { cond true { return 1; } else { return 2; } }`, [{
+  "type": RareScript.TokenType.KEYWORD,
+  "value": "import"
+}, {
+  "type": RareScript.TokenType.IDENTIFIER,
+  "value": "typing"
+}, {
+  "type": RareScript.TokenType.SEPARATOR,
+  "value": ";"
+}, {
+  "type": RareScript.TokenType.IDENTIFIER,
+  "value": "typing::number"
+}, {
+  "type": RareScript.TokenType.IDENTIFIER,
+  "value": "test"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": "("
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": ")"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": "{"
+}, {
   "type": RareScript.TokenType.KEYWORD,
   "value": "cond"
 }, {
@@ -909,31 +1037,53 @@ expectTokensAndAST(`cond true { return 1; } else { return 2; }`, [{
 }, {
   "type": RareScript.TokenType.OPERATOR,
   "value": "}"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": "}"
 }], [{
-  "type": RareScript.InstructionType.CONDITION,
-  "condition": {
-    "type": "boolean",
-    "value": "true"
+  "type": RareScript.InstructionType.IMPORT,
+  "module": "typing",
+  "as": null,
+  "line": 1
+}, {
+  "type": RareScript.InstructionType.FUNCTION,
+  "returnType": {
+    "base": "typing::number",
+    "subtype": [],
+    "star": false
   },
-  "true": [{
-    "type": RareScript.InstructionType.RETURN,
-    "value": {
-      "type": "number",
-      "value": "1"
+  "name": "test",
+  "arguments": [],
+  "content": [{
+    "type": RareScript.InstructionType.CONDITION,
+    "condition": {
+      "type": "boolean",
+      "value": "true"
     },
+    "true": [{
+      "type": RareScript.InstructionType.RETURN,
+      "value": {
+        "type": "number",
+        "value": "1"
+      },
+      "line": 1
+    }],
+    "false": [{
+      "type": RareScript.InstructionType.RETURN,
+      "value": {
+        "type": "number",
+        "value": "2"
+      },
+      "line": 1
+    }],
     "line": 1
   }],
-  "false": [{
-    "type": RareScript.InstructionType.RETURN,
-    "value": {
-      "type": "number",
-      "value": "2"
-    },
-    "line": 1
-  }]
+  "line": 1
 }]);
 
 expectCode("import std;", "var std = {};");
-expectCode(`import std; std::out("Hello, World!\\n");`, `var std = {};std.out = data => void process.stdout.write(data);std.out("Hello, World!\\n");`);
+expectCode(`import std; std::out("Hello, World!\\n");`, `var std = {};var stdoutBuffer = "";std.out = data => {if (typeof process === "undefined") {stdoutBuffer += data;if (data.includes("\\n")) {var lines = stdoutBuffer.split("\\n");stdoutBuffer = lines.pop();console.log(lines.join("\\n"));}} else {process.stdout.write(data);}};std.out("Hello, World!\\n");`);
 
 expectError("import typing; typing::string := 1;", 1);
+
+expectError("return 1;", 51);
