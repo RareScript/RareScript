@@ -273,6 +273,27 @@ var builtinModules = {
         "modifiers": ["type"],
         "js": `data => new Boolean((typeof RSNumber !== "undefined" && data instanceof RSNumber) ? parseFloat(data.toString()) : data) == 1`
       }],
+      ["function", {
+        "type": {
+          "base": "typing::function",
+          "subtype": [{
+            "base": "typing::any",
+            "subtype": [],
+            "star": true
+          }, {
+            "base": "typing::function",
+            "subtype": [{
+              "base": "typing::any",
+              "subtype": [],
+              "star": false
+            }],
+            "star": false
+          }],
+          "star": false
+        },
+        "modifiers": ["type"],
+        "js": "data => data"
+      }],
       ["any", {
         "type": {
           "base": "typing::void",
