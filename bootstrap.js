@@ -73,11 +73,11 @@ var operators = {
         return " + ";
       }
       if (left.base == "typing::number") {
-        return ".add";
+        return ".add(";
       }
     },
     "jsAppend": left => {
-      return left ? "" : ".abs()";
+      return left ? (left.base == "typing::number" ? ")" : "") : ".abs()";
     }
   },
   "-": {
@@ -105,10 +105,10 @@ var operators = {
       };
     },
     "js": (_filename, _line, left) => {
-      return left ? ".sub" : "";
+      return left ? ".sub(" : "";
     },
     "jsAppend": left => {
-      return left ? "" : ".neg()";
+      return left ? ")" : ".neg()";
     }
   },
   "*": {
@@ -128,7 +128,8 @@ var operators = {
         "star": false
       };
     },
-    "js": ".mul"
+    "js": ".mul(",
+    "jsAppend": ")"
   },
   "/": {
     "type": (filename, line, left, right) => {
@@ -147,7 +148,8 @@ var operators = {
         "star": false
       };
     },
-    "js": ".div"
+    "js": ".div(",
+    "jsAppend": ")"
   },
   "%": {
     "type": (filename, line, left, right) => {
@@ -166,7 +168,8 @@ var operators = {
         "star": false
       };
     },
-    "js": ".mod"
+    "js": ".mod(",
+    "jsAppend": ")"
   }
 };
 
@@ -234,8 +237,7 @@ var builtinModules = {
           "star": false
         },
         "modifiers": ["type"],
-        // TODO: Converting code
-        "js": "() => {}"
+        "js": `data => data === void 0 ? "" : data.toString()`
       }],
       ["number", {
         "type": {
@@ -251,9 +253,8 @@ var builtinModules = {
           }],
           "star": false
         },
-        "modifiers": ["type"],
-        // TODO: Converting code
-        "js": "() => {}"
+        "modifiers": ["type", "numbers"],
+        "js": `data => new RSNumber(data === void 0 ? 0 : (typeof data === "boolean" ? +data : data))`
       }],
       ["boolean", {
         "type": {
@@ -270,8 +271,7 @@ var builtinModules = {
           "star": false
         },
         "modifiers": ["type"],
-        // TODO: Converting code
-        "js": "() => {}"
+        "js": `data => new Boolean((typeof RSNumber !== "undefined" && data instanceof RSNumber) ? parseFloat(data.toString()) : data) == 1`
       }],
       ["any", {
         "type": {
@@ -279,9 +279,7 @@ var builtinModules = {
           "subtype": [],
           "star": false
         },
-        "modifiers": ["type"],
-        // TODO: Converting code
-        "js": "() => {}"
+        "modifiers": ["type"]
       }]
     ])
   },
