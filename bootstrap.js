@@ -1209,6 +1209,9 @@ function compiler(filename, ast) {
         }
         compiled.push("}");
       }
+      if (instruction.type == InstructionType.RETURN) {
+        compiled.push(`return ${compileExpression(instruction.value)};`);
+      }
     }
   }
   var result = compileAST(ast);
