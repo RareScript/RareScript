@@ -300,7 +300,8 @@ var builtinModules = {
           "star": false
         },
         "modifiers": [],
-        "js": "data => void process.stdout.write(data)"
+        "jsExtra": `var stdoutBuffer = "";`,
+        "js": `data => {if (typeof process === "undefined") {stdoutBuffer += data;if (data.includes("\\n")) {var lines = stdoutBuffer.split("\\n");stdoutBuffer = lines.pop();console.log(lines.join("\\n"));}} else {process.stdout.write(data);}}`
       }]
     ])
   }
@@ -924,7 +925,7 @@ function compiler(filename, ast) {
   var typeTransformationTable = new Map;
   var globalVariables = new Map;
   var compiled = [
-    [], []
+    [], [], []
   ];
   var addedFunctions = new Set;
   var numberClassAdded = false;
@@ -994,12 +995,20 @@ function compiler(filename, ast) {
           return cachedError;
         }
         addedFunctions.add(`${namespace}::${functionName}`);
-        compiled[1].push(`${namespace}.${functionName} = ${namespaces.get(namespace).variables.get(functionName).js};`);
+        if (namespaces.get(namespace).variables.get(functionName).jsExtra) {
+          compiled[1].push(namespaces.get(namespace).variables.get(functionName).jsExtra);
+        }
+        compiled[2].push(`${namespace}.${functionName} = ${namespaces.get(namespace).variables.get(functionName).js};`);
       }
-      if (namespaces.get(namespace).variables.get(functionName).modifiers.includes("numbers")) {
+      if (namespace && namespaces.get(namespace).variables.get(functionName).modifiers.includes("numbers")) {
         numberClassAdded = true;
       }
-      var argumentsTypesCorrect = namespaces.get(namespace).variables.get(functionName).type.subtype.slice(0, -1);
+      var argumentsTypesCorrect = [];
+      if (namespace) {
+        argumentsTypesCorrect = namespaces.get(namespace).variables.get(functionName).type.subtype.slice(0, -1);
+      } else {
+        argumentsTypesCorrect = globalVariables.get(functionName).type.subtype.slice(0, -1);
+      }
       var argumentsTypes = expression.arguments.map(solveExpressionType);
       if (cachedError) {
         return cachedError;
@@ -1054,7 +1063,12 @@ function compiler(filename, ast) {
       if (typeof operators[expression.operator].type === "object") {
         return operators[expression.operator].type;
       }
-      var result = operators[expression.operator].type(filename, lastInstruction.line, expression.left ? solveExpressionType(expression.left) : null, expression.right ? solveExpressionType(expression.right) : null);
+      var left = (expression.left ? solveExpressionType(expression.left) : null);
+      var right = (expression.right ? solveExpressionType(expression.right) : null);
+      if (cachedError) {
+        return cachedError;
+      }
+      var result = operators[expression.operator].type(filename, lastInstruction.line, left, right);
       if (result instanceof RareScriptError) {
         cachedError = result;
       }
@@ -1066,17 +1080,21 @@ function compiler(filename, ast) {
       if (functionName.includes("::")) {
         [namespace, functionName] = functionName.split("::");
       }
-      if (namespace && !addedFunctions.has(`${namespace}::${functionName}`)) {
+      if (namespace && !namespaces.has(namespace)) {
         if (!namespaces.has(namespace)) {
           cachedError = new RareScriptError(filename, lastInstruction.line, 43, `Namespace "${namespace}" does not exist`);
           return cachedError;
         }
       }
-      if (namespace && !namespaces.get(namespace).variables.has(functionName)) {
+      if ((namespace && !namespaces.get(namespace).variables.has(functionName)) || (!namespace && !globalVariables.has(functionName))) {
         cachedError = new RareScriptError(filename, lastInstruction.line, 44, `Variable "${namespace ? `${namespace}::` : ""}${functionName}" does not exist`);
         return cachedError;
       }
-      return namespaces.get(namespace).variables.get(functionName).type.subtype.at(-1);
+      if (namespace) {
+        return namespaces.get(namespace).variables.get(functionName).type.subtype.at(-1);
+      } else {
+        return globalVariables.get(functionName).type.subtype.at(-1);
+      }
     }
   }
 
@@ -1157,6 +1175,39 @@ function compiler(filename, ast) {
         } else {
           compiled.push("}");
         }
+      }
+      if (instruction.type == InstructionType.FUNCTION) {
+        if (globalVariables.has(instruction.name)) {
+          return new RareScriptError(filename, instruction.line, 46, `Variable "${instruction.name}" already exists`);
+        }
+        var typeNamespace = null;
+        var type = instruction.returnType.base;
+        if (type.includes("::")) {
+          [typeNamespace, type] = type.split("::");
+        }
+        if (typeNamespace && !namespaces.has(typeNamespace)) {
+          return new RareScriptError(filename, instruction.line, 47, `Namespace "${typeNamespace}" does not exist`);
+        }
+        if ((!typeNamespace && !globalVariables.has(type)) || (typeNamespace && !namespaces.get(typeNamespace).variables.has(type))) {
+          return new RareScriptError(filename, instruction.line, 48, `Variable "${typeNamespace ? `${typeNamespace}::` : ""}${type}" does not exist`);
+        }
+        if ((!typeNamespace && !globalVariables.get(type).modifiers.includes("type")) || (typeNamespace && !namespaces.get(typeNamespace).variables.get(type).modifiers.includes("type"))) {
+          return new RareScriptError(filename, instruction.line, 49, `Variable "${typeNamespace ? `${typeNamespace}::` : ""}${type}" is not a type`);
+        }
+        globalVariables.set(instruction.name, {
+          "type": {
+            "base": "typing::function",
+            "subtype": [transformType(instruction.returnType)],
+            "star": false
+          },
+          "modifiers": []
+        });
+        compiled.push(`function ${instruction.name}() {`);
+        var result = compileAST(instruction.content);
+        if (result instanceof RareScriptError) {
+          return result;
+        }
+        compiled.push("}");
       }
     }
   }
