@@ -700,7 +700,8 @@ function parser(filename, code, tokens) {
           var argumentTypeBase = takeToken();
           var argumentType = {
             "base": getTokenValue(code, argumentTypeBase),
-            "subtype": []
+            "subtype": [],
+            "star": false
           };
           if (expectToken("<")) {
             var bracketDepth = 1;
@@ -716,15 +717,13 @@ function parser(filename, code, tokens) {
             }
             argumentType = parseType(code, [argumentTypeBase, lastToken, ...tokens.splice(0, tokenIndex + 1)]);
           }
-          var argumentSpreading = false;
           if (expectToken("*")) {
-            argumentSpreading = true;
+            argumentType.star = true;
           }
           var argumentName = getTokenValue(code, takeToken());
           args.push({
             "type": argumentType,
-            "name": argumentName,
-            "spreading": argumentSpreading
+            "name": argumentName
           });
         }
         if (!expectToken("{")) {
@@ -945,6 +944,7 @@ function compiler(filename, ast) {
   var namespaces = new Map;
   var typeTransformationTable = new Map;
   var globalVariables = new Map;
+  var contexts = [];
   var compiled = [
     [], [], []
   ];
@@ -1024,11 +1024,20 @@ function compiler(filename, ast) {
       if (namespace && namespaces.get(namespace).variables.get(functionName).modifiers.includes("numbers")) {
         numberClassAdded = true;
       }
-      var argumentsTypesCorrect = [];
+      var argumentsTypesCorrect = null;
       if (namespace) {
         argumentsTypesCorrect = namespaces.get(namespace).variables.get(functionName).type.subtype.slice(0, -1);
       } else {
-        argumentsTypesCorrect = globalVariables.get(functionName).type.subtype.slice(0, -1);
+        for (var contextIndex = (contexts.length - 1); contextIndex >= 0; contextIndex--) {
+          var context = contexts[contextIndex];
+          if (context.variables.has(functionName)) {
+            argumentsTypesCorrect = context.variables.get(functionName).type.subtype.slice(0, -1);
+            break;
+          }
+        }
+        if (!argumentsTypesCorrect) {
+          argumentsTypesCorrect = globalVariables.get(functionName).type.subtype.slice(0, -1);
+        }
       }
       var argumentsTypes = expression.arguments.map(solveExpressionType);
       if (cachedError) {
@@ -1060,11 +1069,17 @@ function compiler(filename, ast) {
       };
     }
     if (expression.type == "identifier") {
-      if (!globalVariables.has(expression.value)) {
-        cachedError = new RareScriptError(filename, lastInstruction.line, 28, `Variable "${expression.value}" does not exist`);
-        return cachedError;
+      for (var contextIndex = (contexts.length - 1); contextIndex >= 0; contextIndex--) {
+        var context = contexts[contextIndex];
+        if (context.variables.has(expression.value)) {
+          return context.variables.get(expression.value).type;
+        }
       }
-      return globalVariables.get(expression.value).type;
+      if (globalVariables.has(expression.value)) {
+        return globalVariables.get(expression.value).type;
+      }
+      cachedError = new RareScriptError(filename, lastInstruction.line, 28, `Variable "${expression.value}" does not exist`);
+      return cachedError;
     }
     if (expression.type == "number") {
       return {
@@ -1101,21 +1116,28 @@ function compiler(filename, ast) {
       if (functionName.includes("::")) {
         [namespace, functionName] = functionName.split("::");
       }
-      if (namespace && !namespaces.has(namespace)) {
+      if (namespace) {
         if (!namespaces.has(namespace)) {
           cachedError = new RareScriptError(filename, lastInstruction.line, 43, `Namespace "${namespace}" does not exist`);
           return cachedError;
         }
-      }
-      if ((namespace && !namespaces.get(namespace).variables.has(functionName)) || (!namespace && !globalVariables.has(functionName))) {
-        cachedError = new RareScriptError(filename, lastInstruction.line, 44, `Variable "${namespace ? `${namespace}::` : ""}${functionName}" does not exist`);
-        return cachedError;
-      }
-      if (namespace) {
+        if (!namespaces.get(namespace).variables.has(functionName)) {
+          cachedError = new RareScriptError(filename, lastInstruction.line, 44, `Variable "${namespace}::${functionName}" does not exist`);
+          return cachedError;
+        }
         return namespaces.get(namespace).variables.get(functionName).type.subtype.at(-1);
-      } else {
+      }
+      for (var contextIndex = (contexts.length - 1); contextIndex >= 0; contextIndex--) {
+        var context = contexts[contextIndex];
+        if (context.variables.has(functionName)) {
+          return context.variables.get(functionName).type.subtype.at(-1);
+        }
+      }
+      if (globalVariables.has(functionName)) {
         return globalVariables.get(functionName).type.subtype.at(-1);
       }
+      cachedError = new RareScriptError(filename, lastInstruction.line, 50, `Variable "${functionName}" does not exist`);
+      return cachedError;
     }
   }
 
@@ -1152,7 +1174,11 @@ function compiler(filename, ast) {
         compiled.push(compileExpression(instruction.expression) + ";");
       }
       if (instruction.type == InstructionType.VARIABLE) {
-        if (globalVariables.has(instruction.name)) {
+        var context = globalVariables;
+        if (contexts.length) {
+          context = contexts.at(-1).variables;
+        }
+        if (context.has(instruction.name)) {
           return new RareScriptError(filename, instruction.line, 27, `Variable "${instruction.name}" already exists`);
         }
         var typeNamespace = null;
@@ -1174,7 +1200,7 @@ function compiler(filename, ast) {
         if (JSON.stringify(transformedType) != JSON.stringify(valueType)) {
           return new RareScriptError(filename, instruction.line, 32, `Cannot assign "${renderType(valueType)}" as "${renderType(instruction.variableType)}"`);
         }
-        globalVariables.set(instruction.name, {
+        context.set(instruction.name, {
           "type": transformedType,
           "modifiers": instruction.modifiers
         });
@@ -1182,23 +1208,37 @@ function compiler(filename, ast) {
       }
       if (instruction.type == InstructionType.CONDITION) {
         compiled.push(`if (${compileExpression(instruction.condition)}) {`);
+        contexts.push({
+          "owner": instruction,
+          "variables": new Map
+        });
         var result = compileAST(instruction.true);
         if (result instanceof RareScriptError) {
           return result;
         }
+        contexts.pop();
         if (instruction.false) {
           compiled.push("} else {");
+          contexts.push({
+            "owner": instruction,
+            "variables": new Map
+          });
           result = compileAST(instruction.false);
           if (result instanceof RareScriptError) {
             return result;
           }
+          contexts.pop();
           compiled.push("}");
         } else {
           compiled.push("}");
         }
       }
       if (instruction.type == InstructionType.FUNCTION) {
-        if (globalVariables.has(instruction.name)) {
+        var context = globalVariables;
+        if (contexts.length) {
+          context = contexts.at(-1).variables;
+        }
+        if (context.has(instruction.name)) {
           return new RareScriptError(filename, instruction.line, 46, `Variable "${instruction.name}" already exists`);
         }
         var typeNamespace = null;
@@ -1215,22 +1255,48 @@ function compiler(filename, ast) {
         if ((!typeNamespace && !globalVariables.get(type).modifiers.includes("type")) || (typeNamespace && !namespaces.get(typeNamespace).variables.get(type).modifiers.includes("type"))) {
           return new RareScriptError(filename, instruction.line, 49, `Variable "${typeNamespace ? `${typeNamespace}::` : ""}${type}" is not a type`);
         }
-        globalVariables.set(instruction.name, {
+        context.set(instruction.name, {
           "type": {
             "base": "typing::function",
-            "subtype": [transformType(instruction.returnType)],
+            "subtype": [...instruction.arguments.map(argument => argument.type), transformType(instruction.returnType)],
             "star": false
           },
           "modifiers": []
         });
-        compiled.push(`function ${instruction.name}() {`);
+        compiled.push(`function ${instruction.name}(${instruction.arguments.map(argument => argument.name).join(", ")}) {`);
+        contexts.push({
+          "owner": instruction,
+          "variables": new Map(instruction.arguments.map(argument => [
+            argument.name,
+            {
+              "type": argument.type,
+              "modifiers": []
+            }
+          ]))
+        });
         var result = compileAST(instruction.content);
         if (result instanceof RareScriptError) {
           return result;
         }
+        contexts.pop();
         compiled.push("}");
       }
       if (instruction.type == InstructionType.RETURN) {
+        var correctType = null;
+        for (var contextIndex = (contexts.length - 1); contextIndex >= 0; contextIndex--) {
+          var context = contexts[contextIndex];
+          if (context.owner && context.owner.type == InstructionType.FUNCTION) {
+            correctType = context.owner.returnType;
+            break;
+          }
+        }
+        if (!correctType) {
+          return new RareScriptError(filename, lastInstruction.line, 51, "Cannot use return outside of function");
+        }
+        var valueType = solveExpressionType(instruction.value);
+        if (JSON.stringify(valueType) != JSON.stringify(correctType)) {
+          return new RareScriptError(filename, lastInstruction.line, 52, `Cannot return type "${renderType(valueType)}", expected "${renderType(correctType)}" instead`);
+        }
         compiled.push(`return ${compileExpression(instruction.value)};`);
       }
     }
