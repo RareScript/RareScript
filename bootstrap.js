@@ -1011,6 +1011,9 @@ function compiler(filename, ast) {
         return cachedError;
       }
       for (var argumentIndex = 0; argumentIndex < argumentsTypes.length; argumentIndex++) {
+        if (argumentsTypesCorrect[argumentIndex].base == "typing::any") {
+          continue;
+        }
         if (JSON.stringify(argumentsTypesCorrect[argumentIndex]) != JSON.stringify(argumentsTypes[argumentIndex])) {
           cachedError = new RareScriptError(filename, lastInstruction.line, 19, `Expected argument type ${renderType(argumentsTypesCorrect[argumentIndex])}, but got ${renderType(argumentsTypes[argumentIndex])}`);
           return cachedError;
