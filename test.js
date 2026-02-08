@@ -1084,7 +1084,7 @@ expectTokensAndAST(`import typing; typing::number test() { cond true { return 1;
 expectCode("import std;", "var std = {};");
 expectCode(`import std; std::out("Hello, World!\\n");`, `var std = {};var stdoutBuffer = "";std.out = data => {if (typeof process === "undefined") {stdoutBuffer += data;if (data.includes("\\n")) {var lines = stdoutBuffer.split("\\n");stdoutBuffer = lines.pop();console.log(lines.join("\\n"));}} else {process.stdout.write(data);}};std.out("Hello, World!\\n");`);
 
-expectError("import typing; typing::string := 1;", 1);
+expectError("import typing; typing::string := 1;", 106);
 
 expectError("return 1;", 51);
 

@@ -36,7 +36,7 @@ var operators = {
       if (!right) {
         return new RareScriptError(filename, line, 54, "Expected right side");
       }
-      if (left.base != "typing::number" || right.base != "typing::number") {
+      if (left.type.base != "typing::number" || right.type.base != "typing::number") {
         return new RareScriptError(filename, line, 55, "Operator expects typing::number");
       }
       return {
@@ -57,7 +57,7 @@ var operators = {
       if (!right) {
         return new RareScriptError(filename, line, 38, "Expected right side");
       }
-      if (left.base != "typing::number" || right.base != "typing::number") {
+      if (left.type.base != "typing::number" || right.type.base != "typing::number") {
         return new RareScriptError(filename, line, 24, "Operator expects typing::number");
       }
       return {
@@ -78,7 +78,7 @@ var operators = {
       if (!right) {
         return new RareScriptError(filename, line, 40, "Expected right side");
       }
-      if (left.base != "typing::number" || right.base != "typing::number") {
+      if (left.type.base != "typing::number" || right.type.base != "typing::number") {
         return new RareScriptError(filename, line, 25, "Operator expects typing::number");
       }
       return {
@@ -99,7 +99,7 @@ var operators = {
       if (!right) {
         return new RareScriptError(filename, line, 57, "Expected right side");
       }
-      if (left.base != "typing::number" || right.base != "typing::number") {
+      if (left.type.base != "typing::number" || right.type.base != "typing::number") {
         return new RareScriptError(filename, line, 58, "Operator expects typing::number");
       }
       return {
@@ -120,7 +120,7 @@ var operators = {
       if (!right) {
         return new RareScriptError(filename, line, 42, "Expected right side");
       }
-      if (left.base != "typing::number" || right.base != "typing::number") {
+      if (left.type.base != "typing::number" || right.type.base != "typing::number") {
         return new RareScriptError(filename, line, 26, "Operator expects typing::number");
       }
       return {
@@ -139,7 +139,7 @@ var operators = {
         return new RareScriptError(filename, line, 34, "Expected right side");
       }
       if (!left) {
-        if (right.base != "typing::number") {
+        if (right.type.base != "typing::number") {
           return new RareScriptError(filename, line, 33, "Expected right side to be typing::number");
         }
         return {
@@ -148,8 +148,8 @@ var operators = {
           "star": false
         };
       }
-      if (left.base == "typing::string" || left.base == "typing::char") {
-        if (right.base != "typing::string" && right.base != "typing::char") {
+      if (left.type.base == "typing::string" || left.type.base == "typing::char") {
+        if (right.type.base != "typing::string" && right.type.base != "typing::char") {
           return new RareScriptError(filename, line, 20, "Expected right side to be typing::string or typing::char");
         }
         return {
@@ -158,8 +158,8 @@ var operators = {
           "star": false
         };
       }
-      if (left.base == "typing::number") {
-        if (right.base != "typing::number") {
+      if (left.type.base == "typing::number") {
+        if (right.type.base != "typing::number") {
           return new RareScriptError(filename, line, 21, "Expected right side to be typing::number");
         }
         return {
@@ -174,10 +174,10 @@ var operators = {
       if (!left) {
         return `${right}.abs()`;
       }
-      if (leftType.base == "typing::string" || leftType.base == "typing::char") {
+      if (leftType.type.base == "typing::string" || leftType.type.base == "typing::char") {
         return `${left} + ${right}`;
       }
-      if (leftType.base == "typing::number") {
+      if (leftType.type.base == "typing::number") {
         return `${left}.add(${right})`;
       }
     }
@@ -188,7 +188,7 @@ var operators = {
         return new RareScriptError(filename, line, 36, "Expected right side");
       }
       if (!left) {
-        if (right.base != "typing::number") {
+        if (right.type.base != "typing::number") {
           return new RareScriptError(filename, line, 35, "Expected right side to be typing::number");
         }
         return {
@@ -197,7 +197,7 @@ var operators = {
           "star": false
         };
       }
-      if (left.base != "typing::number" || right.base != "typing::number") {
+      if (left.type.base != "typing::number" || right.type.base != "typing::number") {
         return new RareScriptError(filename, line, 23, "Operator expects typing::number");
       }
       return {
@@ -218,7 +218,7 @@ var operators = {
       if (!right) {
         return new RareScriptError(filename, line, 60, "Expected right side");
       }
-      if (left.base != "typing::number" || right.base != "typing::number") {
+      if (left.type.base != "typing::number" || right.type.base != "typing::number") {
         return new RareScriptError(filename, line, 61, "Operator expects typing::number");
       }
       return {
@@ -239,7 +239,7 @@ var operators = {
       if (!right) {
         return new RareScriptError(filename, line, 63, "Expected right side");
       }
-      if (left.base != "typing::number" || right.base != "typing::number") {
+      if (left.type.base != "typing::number" || right.type.base != "typing::number") {
         return new RareScriptError(filename, line, 64, "Operator expects typing::number");
       }
       return {
@@ -260,7 +260,7 @@ var operators = {
       if (!right) {
         return new RareScriptError(filename, line, 66, "Expected right side");
       }
-      if (left.base != "typing::number" || right.base != "typing::number") {
+      if (left.type.base != "typing::number" || right.type.base != "typing::number") {
         return new RareScriptError(filename, line, 67, "Operator expects typing::number");
       }
       return {
@@ -281,7 +281,7 @@ var operators = {
       if (!right) {
         return new RareScriptError(filename, line, 69, "Expected right side");
       }
-      if (left.base != "typing::number" || right.base != "typing::number") {
+      if (left.type.base != "typing::number" || right.type.base != "typing::number") {
         return new RareScriptError(filename, line, 70, "Operator expects typing::number");
       }
       return {
@@ -302,7 +302,7 @@ var operators = {
       if (!right) {
         return new RareScriptError(filename, line, 72, "Expected right side");
       }
-      if (left.base != "typing::number" || right.base != "typing::number") {
+      if (left.type.base != "typing::number" || right.type.base != "typing::number") {
         return new RareScriptError(filename, line, 73, "Operator expects typing::number");
       }
       return {
@@ -323,10 +323,10 @@ var operators = {
       if (!right) {
         return new RareScriptError(filename, line, 75, "Expected right side");
       }
-      if (right.base != "typing::function" || right.subtype.length != 2 || JSON.stringify(right.subtype[0]) != JSON.stringify(left)) {
-        return new RareScriptError(filename, line, 76, `Expected "typing::function<${renderType(left)}, typing::any>" on right side`);
+      if (right.type.base != "typing::function" || right.type.subtype.length != 2 || JSON.stringify(right.type.subtype[0]) != JSON.stringify(left.type)) {
+        return new RareScriptError(filename, line, 76, `Expected "typing::function<${renderType(left.type)}, typing::any>" on right side`);
       }
-      return right.subtype[1];
+      return right.type.subtype[1];
     },
     "js": (_filename, _line, left, right) => {
       return `${right}(${left})`;
@@ -340,7 +340,7 @@ var operators = {
       if (!right) {
         return new RareScriptError(filename, line, 78, "Expected right side");
       }
-      if (left.base != "typing::any" && right.base != "typing::any" && JSON.stringify(left) != JSON.stringify(right)) {
+      if (left.type.base != "typing::any" && right.type.base != "typing::any" && JSON.stringify(left.type) != JSON.stringify(right.type)) {
         return new RareScriptError(filename, line, 79, "Comparing different types is always false");
       }
       return {
@@ -362,7 +362,7 @@ var operators = {
       if (!right) {
         return new RareScriptError(filename, line, 81, "Expected right side");
       }
-      if (left.base != "typing::any" && right.base != "typing::any" && JSON.stringify(left) != JSON.stringify(right)) {
+      if (left.type.base != "typing::any" && right.type.base != "typing::any" && JSON.stringify(left.type) != JSON.stringify(right.type)) {
         return new RareScriptError(filename, line, 82, "Comparing different types is always false");
       }
       return {
@@ -384,7 +384,7 @@ var operators = {
       if (!right) {
         return new RareScriptError(filename, line, 84, "Expected right side");
       }
-      if (left.base != "typing::number" || right.base != "typing::number") {
+      if (left.type.base != "typing::number" || right.type.base != "typing::number") {
         return new RareScriptError(filename, line, 85, "Operator expects typing::number");
       }
       return {
@@ -405,7 +405,7 @@ var operators = {
       if (!right) {
         return new RareScriptError(filename, line, 87, "Expected right side");
       }
-      if (left.base != "typing::number" || right.base != "typing::number") {
+      if (left.type.base != "typing::number" || right.type.base != "typing::number") {
         return new RareScriptError(filename, line, 88, "Operator expects typing::number");
       }
       return {
@@ -426,7 +426,7 @@ var operators = {
       if (!right) {
         return new RareScriptError(filename, line, 90, "Expected right side");
       }
-      if (left.base != "typing::number" || right.base != "typing::number") {
+      if (left.type.base != "typing::number" || right.type.base != "typing::number") {
         return new RareScriptError(filename, line, 91, "Operator expects typing::number");
       }
       return {
@@ -447,7 +447,7 @@ var operators = {
       if (!right) {
         return new RareScriptError(filename, line, 93, "Expected right side");
       }
-      if (left.base != "typing::number" || right.base != "typing::number") {
+      if (left.type.base != "typing::number" || right.type.base != "typing::number") {
         return new RareScriptError(filename, line, 94, "Operator expects typing::number");
       }
       return {
@@ -468,7 +468,7 @@ var operators = {
       if (!right) {
         return new RareScriptError(filename, line, 96, "Expected right side");
       }
-      if (right.base != "typing::boolean") {
+      if (right.type.base != "typing::boolean") {
         return new RareScriptError(filename, line, 97, "Operator expects typing::boolean");
       }
       return {
@@ -489,7 +489,7 @@ var operators = {
       if (!right) {
         return new RareScriptError(filename, line, 99, "Expected right side");
       }
-      if (left.base != "typing::boolean" || right.base != "typing::boolean") {
+      if (left.type.base != "typing::boolean" || right.type.base != "typing::boolean") {
         return new RareScriptError(filename, line, 100, "Operator expects typing::boolean");
       }
       return {
@@ -510,7 +510,7 @@ var operators = {
       if (!right) {
         return new RareScriptError(filename, line, 102, "Expected right side");
       }
-      if (left.base != "typing::boolean" || right.base != "typing::boolean") {
+      if (left.type.base != "typing::boolean" || right.type.base != "typing::boolean") {
         return new RareScriptError(filename, line, 103, "Operator expects typing::boolean");
       }
       return {
@@ -532,8 +532,11 @@ var operators = {
       if (!right) {
         return new RareScriptError(filename, line, 105, "Expected right side");
       }
-      if (JSON.stringify(left) != JSON.stringify(right)) {
-        return new RareScriptError(filename, line, 106, `Cannot assign "${renderType(right)}" as "${renderType(left)}"`);
+      if (left.modifiers.includes("final")) {
+        return new RareScriptError(filename, line, 111, "Cannot assign to a final variable");
+      }
+      if (JSON.stringify(left.type) != JSON.stringify(right.type)) {
+        return new RareScriptError(filename, line, 106, `Cannot assign "${renderType(right.type)}" as "${renderType(left.type)}"`);
       }
       return right;
     },
@@ -1413,7 +1416,7 @@ function compiler(filename, ast) {
           argumentsTypesCorrect = globalVariables.get(functionName).type.subtype.slice(0, -1);
         }
       }
-      var argumentsTypes = expression.arguments.map(solveExpressionType);
+      var argumentsTypes = expression.arguments.map(solveExpressionType).map(argument => argument.type);
       if (cachedError) {
         return cachedError;
       }
@@ -1437,36 +1440,61 @@ function compiler(filename, ast) {
   function solveExpressionType(expression) {
     if (expression.type == "boolean") {
       return {
-        "base": "typing::boolean",
-        "subtype": [],
-        "star": false
+        "type": {
+          "base": "typing::boolean",
+          "subtype": [],
+          "star": false
+        },
+        "modifiers": []
       };
     }
     if (expression.type == "identifier") {
+      var namespace = null;
+      var variableName = expression.value;
+      if (variableName.includes("::")) {
+        [namespace, variableName] = variableName.split("::");
+      }
+      if (namespace) {
+        if (!namespaces.has(namespace)) {
+          cachedError = new RareScriptError(filename, lastInstruction.line, 109, `Namespace "${namespace}" does not exist`);
+          return cachedError;
+        }
+        if (!namespaces.get(namespace).variables.has(variableName)) {
+          cachedError = new RareScriptError(filename, lastInstruction.line, 110, `Variable "${namespace}::${variableName}" does not exist`);
+          return cachedError;
+        }
+        return namespaces.get(namespace).variables.get(variableName);
+      }
       for (var contextIndex = (contexts.length - 1); contextIndex >= 0; contextIndex--) {
         var context = contexts[contextIndex];
         if (context.variables.has(expression.value)) {
-          return context.variables.get(expression.value).type;
+          return context.variables.get(expression.value);
         }
       }
       if (globalVariables.has(expression.value)) {
-        return globalVariables.get(expression.value).type;
+        return globalVariables.get(expression.value);
       }
       cachedError = new RareScriptError(filename, lastInstruction.line, 28, `Variable "${expression.value}" does not exist`);
       return cachedError;
     }
     if (expression.type == "number") {
       return {
-        "base": "typing::number",
-        "subtype": [],
-        "star": false
+        "type": {
+          "base": "typing::number",
+          "subtype": [],
+          "star": false
+        },
+        "modifiers": []
       };
     }
     if (expression.type == "string") {
       return {
-        "base": "typing::string",
-        "subtype": [],
-        "star": false
+        "type": {
+          "base": "typing::string",
+          "subtype": [],
+          "star": false
+        },
+        "modifiers": []
       };
     }
     if (expression.type == "operator") {
@@ -1482,7 +1510,10 @@ function compiler(filename, ast) {
       if (result instanceof RareScriptError) {
         cachedError = result;
       }
-      return result;
+      return {
+        "type": result,
+        "modifiers": []
+      };
     }
     if (expression.type == "function") {
       var namespace = null;
@@ -1499,16 +1530,25 @@ function compiler(filename, ast) {
           cachedError = new RareScriptError(filename, lastInstruction.line, 44, `Variable "${namespace}::${functionName}" does not exist`);
           return cachedError;
         }
-        return namespaces.get(namespace).variables.get(functionName).type.subtype.at(-1);
+        return {
+          "type": namespaces.get(namespace).variables.get(functionName).type.subtype.at(-1),
+          "modifiers": []
+        };
       }
       for (var contextIndex = (contexts.length - 1); contextIndex >= 0; contextIndex--) {
         var context = contexts[contextIndex];
         if (context.variables.has(functionName)) {
-          return context.variables.get(functionName).type.subtype.at(-1);
+          return {
+            "type": context.variables.get(functionName).type.subtype.at(-1),
+            "modifiers": []
+          };
         }
       }
       if (globalVariables.has(functionName)) {
-        return globalVariables.get(functionName).type.subtype.at(-1);
+        return {
+          "type": globalVariables.get(functionName).type.subtype.at(-1),
+          "modifiers": []
+        };
       }
       cachedError = new RareScriptError(filename, lastInstruction.line, 50, `Variable "${functionName}" does not exist`);
       return cachedError;
@@ -1577,8 +1617,8 @@ function compiler(filename, ast) {
         }
         var valueType = solveExpressionType(instruction.value);
         var transformedType = transformType(instruction.variableType);
-        if (JSON.stringify(transformedType) != JSON.stringify(valueType)) {
-          return new RareScriptError(filename, instruction.line, 32, `Cannot assign "${renderType(valueType)}" as "${renderType(instruction.variableType)}"`);
+        if (JSON.stringify(transformedType) != JSON.stringify(valueType.type)) {
+          return new RareScriptError(filename, instruction.line, 32, `Cannot assign "${renderType(valueType.type)}" as "${renderType(instruction.variableType)}"`);
         }
         context.set(instruction.name, {
           "type": transformedType,
@@ -1673,7 +1713,7 @@ function compiler(filename, ast) {
         if (!correctType) {
           return new RareScriptError(filename, lastInstruction.line, 51, "Cannot use return outside of function");
         }
-        var valueType = solveExpressionType(instruction.value);
+        var valueType = solveExpressionType(instruction.value).type;
         if (JSON.stringify(valueType) != JSON.stringify(correctType)) {
           return new RareScriptError(filename, lastInstruction.line, 52, `Cannot return type "${renderType(valueType)}", expected "${renderType(correctType)}" instead`);
         }
