@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/BoryaGames/RareScript#readme",
   "dependencies": {
-    "babel-minify": "^0.5.2"
+    "@babel/core": "^7.29.0",
+    "babel-preset-minify": "^0.5.2"
   }
 }

@@ -1,5 +1,5 @@
 var util = require("util");
-var babelMinify = null;
+var babelCore = null;
 
 var TokenType = {
   "SEPARATOR": 0,
@@ -374,6 +374,153 @@ var operators = {
     "jsExtra": `var equals = (a, b) => (typeof RSNumber !== "undefined" && a instanceof RSNumber && b instanceof RSNumber) ? a.toString() === b.toString() : a === b;`,
     "js": (_filename, _line, left, right) => {
       return `!equals(${left}, ${right})`;
+    }
+  },
+  "<": {
+    "type": (filename, line, left, right) => {
+      if (!left) {
+        return new RareScriptError(filename, line, 83, "Expected left side");
+      }
+      if (!right) {
+        return new RareScriptError(filename, line, 84, "Expected right side");
+      }
+      if (left.base != "typing::number" || right.base != "typing::number") {
+        return new RareScriptError(filename, line, 85, "Operator expects typing::number");
+      }
+      return {
+        "base": "typing::boolean",
+        "subtype": [],
+        "star": false
+      };
+    },
+    "js": (_filename, _line, left, right) => {
+      return `${left}.cmp(${right}) == -1`;
+    }
+  },
+  ">": {
+    "type": (filename, line, left, right) => {
+      if (!left) {
+        return new RareScriptError(filename, line, 86, "Expected left side");
+      }
+      if (!right) {
+        return new RareScriptError(filename, line, 87, "Expected right side");
+      }
+      if (left.base != "typing::number" || right.base != "typing::number") {
+        return new RareScriptError(filename, line, 88, "Operator expects typing::number");
+      }
+      return {
+        "base": "typing::boolean",
+        "subtype": [],
+        "star": false
+      };
+    },
+    "js": (_filename, _line, left, right) => {
+      return `${left}.cmp(${right}) == 1`;
+    }
+  },
+  "<=": {
+    "type": (filename, line, left, right) => {
+      if (!left) {
+        return new RareScriptError(filename, line, 89, "Expected left side");
+      }
+      if (!right) {
+        return new RareScriptError(filename, line, 90, "Expected right side");
+      }
+      if (left.base != "typing::number" || right.base != "typing::number") {
+        return new RareScriptError(filename, line, 91, "Operator expects typing::number");
+      }
+      return {
+        "base": "typing::boolean",
+        "subtype": [],
+        "star": false
+      };
+    },
+    "js": (_filename, _line, left, right) => {
+      return `${left}.cmp(${right}) < 1`;
+    }
+  },
+  ">=": {
+    "type": (filename, line, left, right) => {
+      if (!left) {
+        return new RareScriptError(filename, line, 92, "Expected left side");
+      }
+      if (!right) {
+        return new RareScriptError(filename, line, 93, "Expected right side");
+      }
+      if (left.base != "typing::number" || right.base != "typing::number") {
+        return new RareScriptError(filename, line, 94, "Operator expects typing::number");
+      }
+      return {
+        "base": "typing::boolean",
+        "subtype": [],
+        "star": false
+      };
+    },
+    "js": (_filename, _line, left, right) => {
+      return `${left}.cmp(${right}) > -1`;
+    }
+  },
+  "!": {
+    "type": (filename, line, left, right) => {
+      if (left) {
+        return new RareScriptError(filename, line, 95, "Operator does not accept left side");
+      }
+      if (!right) {
+        return new RareScriptError(filename, line, 96, "Expected right side");
+      }
+      if (right.base != "typing::boolean") {
+        return new RareScriptError(filename, line, 97, "Operator expects typing::boolean");
+      }
+      return {
+        "base": "typing::boolean",
+        "subtype": [],
+        "star": false
+      };
+    },
+    "js": (_filename, _line, _left, right) => {
+      return `!${right}`;
+    }
+  },
+  "or": {
+    "type": (filename, line, left, right) => {
+      if (!left) {
+        return new RareScriptError(filename, line, 98, "Expected left side");
+      }
+      if (!right) {
+        return new RareScriptError(filename, line, 99, "Expected right side");
+      }
+      if (left.base != "typing::boolean" || right.base != "typing::boolean") {
+        return new RareScriptError(filename, line, 100, "Operator expects typing::boolean");
+      }
+      return {
+        "base": "typing::boolean",
+        "subtype": [],
+        "star": false
+      };
+    },
+    "js": (_filename, _line, left, right) => {
+      return `${left} || ${right}`;
+    }
+  },
+  "and": {
+    "type": (filename, line, left, right) => {
+      if (!left) {
+        return new RareScriptError(filename, line, 101, "Expected left side");
+      }
+      if (!right) {
+        return new RareScriptError(filename, line, 102, "Expected right side");
+      }
+      if (left.base != "typing::boolean" || right.base != "typing::boolean") {
+        return new RareScriptError(filename, line, 103, "Operator expects typing::boolean");
+      }
+      return {
+        "base": "typing::boolean",
+        "subtype": [],
+        "star": false
+      };
+    },
+    "js": (_filename, _line, left, right) => {
+      return `${left} && ${right}`;
     }
   }
 };
@@ -1571,12 +1718,21 @@ function processCode(filename, code, debug, supressErrors, minify) {
   }
 
   if (minify) {
-    if (!babelMinify) {
-      babelMinify = require("babel-minify");
+    if (!babelCore) {
+      babelCore = require("@babel/core");
     }
-    compiled = babelMinify(compiled, {
-      "mangle": {
-        "topLevel": true
+    compiled = babelCore.transformSync(compiled, {
+      "presets": [
+        ["minify", {
+          "mangle": {
+            "topLevel": true
+          }
+        }]
+      ],
+      "generatorOpts": {
+        "jsescOption": {
+          "minimal": true
+        }
       }
     }).code;
     if (compiled.endsWith(";")) {
