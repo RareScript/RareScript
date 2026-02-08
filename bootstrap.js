@@ -1325,6 +1325,7 @@ function compiler(filename, ast) {
   var numberClassAdded = false;
   var cachedError = null;
   var lastInstruction = null;
+  var importStreak = true;
 
   function compileExpression(expression) {
     if (cachedError) {
@@ -1532,7 +1533,13 @@ function compiler(filename, ast) {
       if (cachedError) {
         return cachedError;
       }
+      if (instruction.type != InstructionType.IMPORT) {
+        importStreak = false;
+      }
       if (instruction.type == InstructionType.IMPORT) {
+        if (!importStreak) {
+          return new RareScriptError(filename, instruction.line, 108, "Imports should be at the start of top-level");
+        }
         if (builtinModules[instruction.module]) {
           if (instruction.as) {
             typeTransformationTable.set(instruction.as, instruction.module);
