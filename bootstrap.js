@@ -45,8 +45,9 @@ var operators = {
         "star": false
       };
     },
-    "js": ".pow((",
-    "jsAppend": ").toNumber())"
+    "js": (_filename, _line, left, right) => {
+      return `${left}.pow((${right}).toNumber())`;
+    }
   },
   "*": {
     "type": (filename, line, left, right) => {
@@ -65,8 +66,9 @@ var operators = {
         "star": false
       };
     },
-    "js": ".mul(",
-    "jsAppend": ")"
+    "js": (_filename, _line, left, right) => {
+      return `${left}.mul(${right})`;
+    }
   },
   "/": {
     "type": (filename, line, left, right) => {
@@ -85,8 +87,9 @@ var operators = {
         "star": false
       };
     },
-    "js": ".div(",
-    "jsAppend": ")"
+    "js": (_filename, _line, left, right) => {
+      return `${left}.div(${right})`;
+    }
   },
   "//": {
     "type": (filename, line, left, right) => {
@@ -105,8 +108,9 @@ var operators = {
         "star": false
       };
     },
-    "js": ".div(",
-    "jsAppend": ").round(0, RSNumber.roundDown)"
+    "js": (_filename, _line, left, right) => {
+      return `${left}.div(${right}).round(0, RSNumber.roundDown)`;
+    }
   },
   "%": {
     "type": (filename, line, left, right) => {
@@ -125,8 +129,9 @@ var operators = {
         "star": false
       };
     },
-    "js": ".mod(",
-    "jsAppend": ")"
+    "js": (_filename, _line, left, right) => {
+      return `${left}.mod(${right})`;
+    }
   },
   "+": {
     "type": (filename, line, left, right) => {
@@ -165,19 +170,16 @@ var operators = {
       }
       return new RareScriptError(filename, line, 22, "Operator does not accept this type");
     },
-    "js": (_filename, _line, left) => {
+    "js": (_filename, _line, left, right, leftType) => {
       if (!left) {
-        return "";
+        return `${right}.abs()`;
       }
-      if (left.base == "typing::string" || left.base == "typing::char") {
-        return " + ";
+      if (leftType.base == "typing::string" || leftType.base == "typing::char") {
+        return `${left} + ${right}`;
       }
-      if (left.base == "typing::number") {
-        return ".add(";
+      if (leftType.base == "typing::number") {
+        return `${left}.add(${right})`;
       }
-    },
-    "jsAppend": left => {
-      return left ? (left.base == "typing::number" ? ")" : "") : ".abs()";
     }
   },
   "-": {
@@ -204,11 +206,8 @@ var operators = {
         "star": false
       };
     },
-    "js": (_filename, _line, left) => {
-      return left ? ".sub(" : "";
-    },
-    "jsAppend": left => {
-      return left ? ")" : ".neg()";
+    "js": (_filename, _line, left, right) => {
+      return left ? `${left}.sub(${right})` : `${right}.neg()`;
     }
   },
   "<<": {
@@ -228,9 +227,9 @@ var operators = {
         "star": false
       };
     },
-    "jsPrepend": "new RSNumber(",
-    "js": " << ",
-    "jsAppend": ")"
+    "js": (_filename, _line, left, right) => {
+      return `new RSNumber(${left} << ${right})`
+    }
   },
   ">>": {
     "type": (filename, line, left, right) => {
@@ -249,9 +248,9 @@ var operators = {
         "star": false
       };
     },
-    "jsPrepend": "new RSNumber(",
-    "js": " >> ",
-    "jsAppend": ")"
+    "js": (_filename, _line, left, right) => {
+      return `new RSNumber(${left} >> ${right})`
+    }
   },
   "|": {
     "type": (filename, line, left, right) => {
@@ -270,9 +269,9 @@ var operators = {
         "star": false
       };
     },
-    "jsPrepend": "new RSNumber(",
-    "js": " | ",
-    "jsAppend": ")"
+    "js": (_filename, _line, left, right) => {
+      return `new RSNumber(${left} | ${right})`
+    }
   },
   "&": {
     "type": (filename, line, left, right) => {
@@ -291,9 +290,9 @@ var operators = {
         "star": false
       };
     },
-    "jsPrepend": "new RSNumber(",
-    "js": " & ",
-    "jsAppend": ")"
+    "js": (_filename, _line, left, right) => {
+      return `new RSNumber(${left} & ${right})`
+    }
   },
   "^": {
     "type": (filename, line, left, right) => {
@@ -312,9 +311,26 @@ var operators = {
         "star": false
       };
     },
-    "jsPrepend": "new RSNumber(",
-    "js": " ^ ",
-    "jsAppend": ")"
+    "js": (_filename, _line, left, right) => {
+      return `new RSNumber(${left} ^ ${right})`
+    }
+  },
+  "|>": {
+    "type": (filename, line, left, right) => {
+      if (!left) {
+        return new RareScriptError(filename, line, 74, "Expected left side");
+      }
+      if (!right) {
+        return new RareScriptError(filename, line, 75, "Expected right side");
+      }
+      if (right.base != "typing::function" || right.subtype.length != 2 || JSON.stringify(right.subtype[0]) != JSON.stringify(left)) {
+        return new RareScriptError(filename, line, 76, `Expected "typing::function<${renderType(left)}, typing::any>" on right side`);
+      }
+      return right.subtype[1];
+    },
+    "js": (_filename, _line, left, right) => {
+      return `${right}(${left})`;
+    }
   }
 };
 
@@ -1132,18 +1148,7 @@ function compiler(filename, ast) {
           return result;
         }
       }
-      var prepend = (operators[expression.operator].jsPrepend || "");
-      var append = (operators[expression.operator].jsAppend || "");
-      if (typeof prepend === "function") {
-        prepend = prepend(expression.left ? solveExpressionType(expression.left) : null, expression.right ? solveExpressionType(expression.right) : null);
-      }
-      if (typeof append === "function") {
-        append = append(expression.left ? solveExpressionType(expression.left) : null, expression.right ? solveExpressionType(expression.right) : null);
-      }
-      if (typeof operators[expression.operator].js === "string") {
-        return prepend + (expression.left ? compileExpression(expression.left) : "") + operators[expression.operator].js + (expression.right ? compileExpression(expression.right) : "") + append;
-      }
-      return prepend + (expression.left ? compileExpression(expression.left) : "") + operators[expression.operator].js(filename, lastInstruction.line, expression.left ? solveExpressionType(expression.left) : null, expression.right ? solveExpressionType(expression.right) : null) + (expression.right ? compileExpression(expression.right) : "") + append;
+      return operators[expression.operator].js(filename, lastInstruction.line, (expression.left ? compileExpression(expression.left) : null), (expression.right ? compileExpression(expression.right) : null), expression.left ? solveExpressionType(expression.left) : null, expression.right ? solveExpressionType(expression.right) : null);
     }
     if (expression.type == "function") {
       var namespace = null;
