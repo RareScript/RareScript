@@ -331,6 +331,50 @@ var operators = {
     "js": (_filename, _line, left, right) => {
       return `${right}(${left})`;
     }
+  },
+  "=": {
+    "type": (filename, line, left, right) => {
+      if (!left) {
+        return new RareScriptError(filename, line, 77, "Expected left side");
+      }
+      if (!right) {
+        return new RareScriptError(filename, line, 78, "Expected right side");
+      }
+      if (left.base != "typing::any" && right.base != "typing::any" && JSON.stringify(left) != JSON.stringify(right)) {
+        return new RareScriptError(filename, line, 79, "Comparing different types is always false");
+      }
+      return {
+        "base": "typing::boolean",
+        "subtype": [],
+        "star": false
+      };
+    },
+    "jsExtra": `var equals = (a, b) => (typeof RSNumber !== "undefined" && a instanceof RSNumber && b instanceof RSNumber) ? a.toString() === b.toString() : a === b;`,
+    "js": (_filename, _line, left, right) => {
+      return `equals(${left}, ${right})`;
+    }
+  },
+  "!=": {
+    "type": (filename, line, left, right) => {
+      if (!left) {
+        return new RareScriptError(filename, line, 80, "Expected left side");
+      }
+      if (!right) {
+        return new RareScriptError(filename, line, 81, "Expected right side");
+      }
+      if (left.base != "typing::any" && right.base != "typing::any" && JSON.stringify(left) != JSON.stringify(right)) {
+        return new RareScriptError(filename, line, 82, "Comparing different types is always false");
+      }
+      return {
+        "base": "typing::boolean",
+        "subtype": [],
+        "star": false
+      };
+    },
+    "jsExtra": `var equals = (a, b) => (typeof RSNumber !== "undefined" && a instanceof RSNumber && b instanceof RSNumber) ? a.toString() === b.toString() : a === b;`,
+    "js": (_filename, _line, left, right) => {
+      return `!equals(${left}, ${right})`;
+    }
   }
 };
 
@@ -1142,6 +1186,9 @@ function compiler(filename, ast) {
         if (cachedError) {
           return cachedError;
         }
+        if (operators[expression.operator].jsExtra && !compiled[1].includes(operators[expression.operator].jsExtra)) {
+          compiled[1].push(operators[expression.operator].jsExtra);
+        }
         var result = operators[expression.operator].type(filename, lastInstruction.line, leftType, rightType);
         if (result instanceof RareScriptError) {
           cachedError = result;
@@ -1166,7 +1213,7 @@ function compiler(filename, ast) {
           return cachedError;
         }
         addedFunctions.add(`${namespace}::${functionName}`);
-        if (namespaces.get(namespace).variables.get(functionName).jsExtra) {
+        if (namespaces.get(namespace).variables.get(functionName).jsExtra && !compiled[1].includes(namespaces.get(namespace).variables.get(functionName).jsExtra)) {
           compiled[1].push(namespaces.get(namespace).variables.get(functionName).jsExtra);
         }
         compiled[2].push(`${namespace}.${functionName} = ${namespaces.get(namespace).variables.get(functionName).js};`);

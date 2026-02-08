@@ -1087,3 +1087,11 @@ expectCode(`import std; std::out("Hello, World!\\n");`, `var std = {};var stdout
 expectError("import typing; typing::string := 1;", 1);
 
 expectError("return 1;", 51);
+
+expectError(`import typing;
+import std;
+
+typing::number a := 1;
+typing::string b := "cat";
+
+std::out(typing::string(a = b));`, 79);
