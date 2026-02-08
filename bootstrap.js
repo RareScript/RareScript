@@ -20,11 +20,12 @@ function getTokenValue(code, token) {
 
 var InstructionType = {
   "IMPORT": 0,
-  "EXPRESSION": 1,
-  "VARIABLE": 2,
-  "CONDITION": 3,
-  "FUNCTION": 4,
-  "RETURN": 5
+  "SCOPE": 1,
+  "EXPRESSION": 2,
+  "VARIABLE": 3,
+  "CONDITION": 4,
+  "FUNCTION": 5,
+  "RETURN": 6
 };
 
 var operators = {
@@ -745,7 +746,7 @@ function lexer(filename, code) {
   var tokenSeparators = [" ", "\n", ";", "(", ")", "{", "}", ","];
   var digits = "0123456789";
   var symbols = "!@#$%^&*-+\\|/=";
-  var keywords = ["import", "as", "return", "cond", "else", "false", "true", "maybe", "and", "or", "final"];
+  var keywords = ["import", "as", "scope", "return", "cond", "else", "false", "true", "maybe", "and", "or", "final"];
   var operators = ["(", ")", "{", "}", ",", "**", "+", "-", "*", "/", "//", "%", "=", "!=", ":=", "..", "->", "->@", "<", ">", "|", "&", "^", "<<", ">>", "<=", ">=", "|>"];
 
   function addToken(index) {
@@ -961,6 +962,18 @@ function parser(filename, code, tokens) {
             "type": InstructionType.IMPORT,
             "module": getTokenValue(code, module),
             "as": getTokenValue(code, as),
+            "line": token.line
+          });
+          continue;
+        case "scope":
+          var module = expectToken(TokenType.IDENTIFIER);
+          if (!module) {
+            return new RareScriptError(filename, token.line, 113, "Expected module name");
+          }
+          requireSeparator();
+          ast.push({
+            "type": InstructionType.SCOPE,
+            "module": getTokenValue(code, module),
             "line": token.line
           });
           continue;
@@ -1451,6 +1464,10 @@ function compiler(filename, ast, target) {
           }
         }
         if (!argumentsTypesCorrect) {
+          if (!globalVariables.has(functionName)) {
+            cachedError = new RareScriptError(filename, lastInstruction.line, 114, `Variable "${functionName}" does not exist`);
+            return cachedError;
+          }
           argumentsTypesCorrect = globalVariables.get(functionName).type.subtype.slice(0, -1);
         }
       }
@@ -1885,7 +1902,7 @@ if (typeof module !== "undefined") {
     var fs = require("fs");
     var path = require("path");
     var code = fs.readFileSync(process.argv[2]).toString("utf-8");
-    var result = processCode(path.basename(process.argv[2]), code, "nodejs", true, false, true);
+    var result = processCode(path.basename(process.argv[2]), code, "crossplatform", true, false, true);
     if (!(result instanceof RareScriptError)) {
       eval(result.compiled);
     }
