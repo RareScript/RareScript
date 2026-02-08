@@ -636,7 +636,7 @@ var builtinModules = {
         },
         "modifiers": ["type", "final"],
         // TODO: Add converter
-        "js": `data => {}`
+        "js": "data => {}"
       }],
       ["number", {
         "type": {
@@ -720,8 +720,16 @@ var builtinModules = {
           "star": false
         },
         "modifiers": ["final"],
-        "jsExtra": `var stdoutBuffer = "";`,
-        "js": `data => {if (typeof process === "undefined") {stdoutBuffer += data;if (data.includes("\\n")) {var lines = stdoutBuffer.split("\\n");stdoutBuffer = lines.pop();console.log(lines.join("\\n"));}} else {process.stdout.write(data);}}`
+        "jsExtra": {
+          "crossplatform": `var stdoutBuffer = "";`,
+          "browser": `var stdoutBuffer = "";`,
+          "nodejs": null
+        },
+        "js": {
+          "crossplatform": `data => {if (typeof process === "undefined") {stdoutBuffer += data;if (data.includes("\\n")) {var lines = stdoutBuffer.split("\\n");stdoutBuffer = lines.pop();console.log(lines.join("\\n"));}} else {process.stdout.write(data);}}`,
+          "browser": `data => {stdoutBuffer += data;if (data.includes("\\n")) {var lines = stdoutBuffer.split("\\n");stdoutBuffer = lines.pop();console.log(lines.join("\\n"));}}`,
+          "nodejs": "data => process.stdout.write(data)"
+        }
       }]
     ])
   }
@@ -1339,7 +1347,7 @@ function renderType(type) {
   return `${type.star ? "*" : ""}${type.base}${type.subtype.length ? `<${type.subtype.map(renderType).join(", ")}>` : ""}`;
 }
 
-function compiler(filename, ast) {
+function compiler(filename, ast, target) {
   var namespaces = new Map;
   var typeTransformationTable = new Map;
   var globalVariables = new Map;
@@ -1416,10 +1424,17 @@ function compiler(filename, ast) {
           return cachedError;
         }
         addedFunctions.add(`${namespace}::${functionName}`);
-        if (namespaces.get(namespace).variables.get(functionName).jsExtra && !compiled[1].includes(namespaces.get(namespace).variables.get(functionName).jsExtra)) {
-          compiled[1].push(namespaces.get(namespace).variables.get(functionName).jsExtra);
+        if (namespaces.get(namespace).variables.get(functionName).jsExtra && typeof namespaces.get(namespace).variables.get(functionName).jsExtra === "object") {
+          var jsExtra = namespaces.get(namespace).variables.get(functionName).jsExtra[target];
+          if (jsExtra && !compiled[1].includes(jsExtra)) {
+            compiled[1].push(jsExtra);
+          }
         }
-        compiled[2].push(`${namespace}.${functionName} = ${namespaces.get(namespace).variables.get(functionName).js};`);
+        if (typeof namespaces.get(namespace).variables.get(functionName).js === "object") {
+          compiled[2].push(`${namespace}.${functionName} = ${namespaces.get(namespace).variables.get(functionName).js[target]};`);
+        } else {
+          compiled[2].push(`${namespace}.${functionName} = ${namespaces.get(namespace).variables.get(functionName).js};`);
+        }
       }
       if (namespace && namespaces.get(namespace).variables.get(functionName).modifiers.includes("numbers")) {
         numberClassAdded = true;
@@ -1590,6 +1605,18 @@ function compiler(filename, ast) {
     return type;
   }
 
+  function checkMissingReturns(ast) {
+    for (var instruction of ast) {
+      if (instruction.false && instruction.type == InstructionType.CONDITION && checkMissingReturns(instruction.true) && checkMissingReturns(instruction.false)) {
+        return true;
+      }
+      if (instruction.type == InstructionType.RETURN) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   function compileAST(ast) {
     for (var instruction of ast) {
       lastInstruction = instruction;
@@ -1717,6 +1744,9 @@ function compiler(filename, ast) {
             }
           ]))
         });
+        if (instruction.returnType.base != "typing::void" && !checkMissingReturns(instruction.content)) {
+          return new RareScriptError(filename, instruction.line, 112, "Not all code paths return");
+        }
         var result = compileAST(instruction.content);
         if (result instanceof RareScriptError) {
           return result;
@@ -1755,7 +1785,11 @@ function compiler(filename, ast) {
   return (numberClassAdded ? numberClass : "") + compiled.flat().join("");
 }
 
-function processCode(filename, code, debug, supressErrors, minify) {
+function processCode(filename, code, target, debug, supressErrors, minify) {
+  if (!["crossplatform", "browser", "nodejs"].includes(target)) {
+    throw `Target "${target}" does not exist.`;
+  }
+
   code = code.split("\r\n").join("\n");
 
   var tokens = lexer(filename, code);
@@ -1804,7 +1838,7 @@ function processCode(filename, code, debug, supressErrors, minify) {
     console.log(util.inspect(ast, false, null, true));
   }
 
-  var compiled = compiler(filename, ast);
+  var compiled = compiler(filename, ast, target);
   if (compiled instanceof RareScriptError) {
     if (supressErrors) {
       return compiled;
@@ -1851,7 +1885,7 @@ if (typeof module !== "undefined") {
     var fs = require("fs");
     var path = require("path");
     var code = fs.readFileSync(process.argv[2]).toString("utf-8");
-    var result = processCode(path.basename(process.argv[2]), code, true, false, true);
+    var result = processCode(path.basename(process.argv[2]), code, "nodejs", true, false, true);
     if (!(result instanceof RareScriptError)) {
       eval(result.compiled);
     }

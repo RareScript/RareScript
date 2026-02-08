@@ -5,7 +5,7 @@ var testNum = 0;
 function expectError(code, errCode) {
   testNum++;
   try {
-    var result = RareScript.processCode("test.rare", code, false, true, false);
+    var result = RareScript.processCode("test.rare", code, "nodejs", false, true, false);
   } catch {
     return console.log(`\x1b[31m❌ Test #${testNum} failed: Compiler crashed.\x1b[0m`);
   }
@@ -21,7 +21,7 @@ function expectError(code, errCode) {
 function expectTokens(code, tokens) {
   testNum++;
   try {
-    var result = RareScript.processCode("test.rare", code, false, true, false);
+    var result = RareScript.processCode("test.rare", code, "nodejs", false, true, false);
   } catch {
     return console.log(`\x1b[31m❌ Test #${testNum} failed: Compiler crashed.\x1b[0m`);
   }
@@ -48,7 +48,7 @@ function expectTokens(code, tokens) {
 function expectAST(code, ast) {
   testNum++;
   try {
-    var result = RareScript.processCode("test.rare", code, false, true, false);
+    var result = RareScript.processCode("test.rare", code, "nodejs", false, true, false);
   } catch {
     return console.log(`\x1b[31m❌ Test #${testNum} failed: Compiler crashed.\x1b[0m`);
   }
@@ -71,7 +71,7 @@ function expectAST(code, ast) {
 function expectTokensAndAST(code, tokens, ast) {
   testNum++;
   try {
-    var result = RareScript.processCode("test.rare", code, false, true, false);
+    var result = RareScript.processCode("test.rare", code, "nodejs", false, true, false);
   } catch {
     return console.log(`\x1b[31m❌ Test #${testNum} failed: Compiler crashed.\x1b[0m`);
   }
@@ -108,7 +108,7 @@ function expectTokensAndAST(code, tokens, ast) {
 function expectCode(code, compiled) {
   testNum++;
   try {
-    var result = RareScript.processCode("test.rare", code, false, true, false);
+    var result = RareScript.processCode("test.rare", code, "nodejs", false, true, false);
   } catch {
     return console.log(`\x1b[31m❌ Test #${testNum} failed: Compiler crashed.\x1b[0m`);
   }
@@ -893,7 +893,7 @@ typing::number getOne(typing::string test, typing::number *a) {
   "line": 2
 }]);
 
-expectTokensAndAST(`import typing; typing::number test() { cond true { return 1; } }`, [{
+expectTokensAndAST(`import typing; typing::number test() { cond true { return 1; } else { return 2; } }`, [{
   "type": RareScript.TokenType.KEYWORD,
   "value": "import"
 }, {
@@ -939,6 +939,24 @@ expectTokensAndAST(`import typing; typing::number test() { cond true { return 1;
   "type": RareScript.TokenType.OPERATOR,
   "value": "}"
 }, {
+  "type": RareScript.TokenType.KEYWORD,
+  "value": "else"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": "{"
+}, {
+  "type": RareScript.TokenType.KEYWORD,
+  "value": "return"
+}, {
+  "type": RareScript.TokenType.NUMBER,
+  "value": "2"
+}, {
+  "type": RareScript.TokenType.SEPARATOR,
+  "value": ";"
+}, {
+  "type": RareScript.TokenType.OPERATOR,
+  "value": "}"
+}, {
   "type": RareScript.TokenType.OPERATOR,
   "value": "}"
 }], [{
@@ -969,7 +987,14 @@ expectTokensAndAST(`import typing; typing::number test() { cond true { return 1;
       },
       "line": 1
     }],
-    "false": null,
+    "false": [{
+      "type": RareScript.InstructionType.RETURN,
+      "value": {
+        "type": "number",
+        "value": "2"
+      },
+      "line": 1
+    }],
     "line": 1
   }],
   "line": 1
@@ -1082,9 +1107,9 @@ expectTokensAndAST(`import typing; typing::number test() { cond true { return 1;
 }]);
 
 expectCode("import std;", "var std = {};");
-expectCode(`import std; std::out("Hello, World!\\n");`, `var std = {};var stdoutBuffer = "";std.out = data => {if (typeof process === "undefined") {stdoutBuffer += data;if (data.includes("\\n")) {var lines = stdoutBuffer.split("\\n");stdoutBuffer = lines.pop();console.log(lines.join("\\n"));}} else {process.stdout.write(data);}};std.out("Hello, World!\\n");`);
+expectCode(`import std; std::out("Hello, World!\\n");`, `var std = {};std.out = data => process.stdout.write(data);std.out("Hello, World!\\n");`);
 
-expectError("import typing; typing::string := 1;", 106);
+expectError("import typing; typing::string := 1;", 111);
 
 expectError("return 1;", 51);
 
