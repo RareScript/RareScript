@@ -620,6 +620,24 @@ var builtinModules = {
         "modifiers": ["type", "final"],
         "js": `data => data === void 0 ? "" : data.toString()`
       }],
+      ["char", {
+        "type": {
+          "base": "typing::function",
+          "subtype": [{
+            "base": "typing::any",
+            "subtype": [],
+            "star": true
+          }, {
+            "base": "typing::char",
+            "subtype": [],
+            "star": false
+          }],
+          "star": false
+        },
+        "modifiers": ["type", "final"],
+        // TODO: Add converter
+        "js": `data => {}`
+      }],
       ["number", {
         "type": {
           "base": "typing::function",
