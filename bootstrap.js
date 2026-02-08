@@ -1244,7 +1244,7 @@ function compiler(filename, ast) {
           "type": transformedType,
           "modifiers": instruction.modifiers
         });
-        compiled.push(`var ${instruction.name} = ${compileExpression(instruction.value)};`);
+        compiled.push(`let ${instruction.name} = ${compileExpression(instruction.value)};`);
       }
       if (instruction.type == InstructionType.CONDITION) {
         compiled.push(`if (${compileExpression(instruction.condition)}) {`);
