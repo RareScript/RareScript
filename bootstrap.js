@@ -522,6 +522,27 @@ var operators = {
     "js": (_filename, _line, left, right) => {
       return `${left} && ${right}`;
     }
+  },
+  ":=": {
+    "leftRaw": true,
+    "type": (filename, line, left, right) => {
+      if (!left) {
+        return new RareScriptError(filename, line, 104, "Expected left side");
+      }
+      if (!right) {
+        return new RareScriptError(filename, line, 105, "Expected right side");
+      }
+      if (JSON.stringify(left) != JSON.stringify(right)) {
+        return new RareScriptError(filename, line, 106, `Cannot assign "${renderType(right)}" as "${renderType(left)}"`);
+      }
+      return right;
+    },
+    "js": (filename, line, left, right) => {
+      if (left.type != "identifier") {
+        return new RareScriptError(filename, line, 107, "Expected identifier on left side");
+      }
+      return `(${left.value} = ${right})`;
+    }
   }
 };
 
@@ -1342,7 +1363,15 @@ function compiler(filename, ast) {
           return result;
         }
       }
-      return operators[expression.operator].js(filename, lastInstruction.line, (expression.left ? compileExpression(expression.left) : null), (expression.right ? compileExpression(expression.right) : null), expression.left ? solveExpressionType(expression.left) : null, expression.right ? solveExpressionType(expression.right) : null);
+      var left = expression.left;
+      var right = expression.right;
+      if (!operators[expression.operator].leftRaw) {
+        left = (left ? compileExpression(left) : null);
+      }
+      if (!operators[expression.operator].rightRaw) {
+        right = (right ? compileExpression(right) : null);
+      }
+      return operators[expression.operator].js(filename, lastInstruction.line, left, right, expression.left ? solveExpressionType(expression.left) : null, expression.right ? solveExpressionType(expression.right) : null);
     }
     if (expression.type == "function") {
       var namespace = null;
