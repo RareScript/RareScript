@@ -544,7 +544,12 @@ var operators = {
       if (left.type != "identifier") {
         return new RareScriptError(filename, line, 107, "Expected identifier on left side");
       }
-      return `(${left.value} = ${right})`;
+      var namespace = null;
+      var variableName = left.value;
+      if (variableName.includes("::")) {
+        [namespace, variableName] = variableName.split("::");
+      }
+      return `(${namespace ? `${namespace}.` : ""}${variableName} = ${right})`;
     }
   }
 };
@@ -595,7 +600,7 @@ var builtinModules = {
           }],
           "star": false
         },
-        "modifiers": ["type"],
+        "modifiers": ["type", "final"],
         "js": "() => {}"
       }],
       ["string", {
@@ -612,7 +617,7 @@ var builtinModules = {
           }],
           "star": false
         },
-        "modifiers": ["type"],
+        "modifiers": ["type", "final"],
         "js": `data => data === void 0 ? "" : data.toString()`
       }],
       ["number", {
@@ -629,7 +634,7 @@ var builtinModules = {
           }],
           "star": false
         },
-        "modifiers": ["type", "numbers"],
+        "modifiers": ["type", "numbers", "final"],
         "js": `data => new RSNumber(data === void 0 ? 0 : (typeof data === "boolean" ? +data : data))`
       }],
       ["boolean", {
@@ -646,7 +651,7 @@ var builtinModules = {
           }],
           "star": false
         },
-        "modifiers": ["type"],
+        "modifiers": ["type", "final"],
         "js": `data => new Boolean((typeof RSNumber !== "undefined" && data instanceof RSNumber) ? parseFloat(data.toString()) : data) == 1`
       }],
       ["function", {
@@ -667,7 +672,7 @@ var builtinModules = {
           }],
           "star": false
         },
-        "modifiers": ["type"],
+        "modifiers": ["type", "final"],
         "js": "data => data"
       }],
       ["any", {
@@ -676,7 +681,7 @@ var builtinModules = {
           "subtype": [],
           "star": false
         },
-        "modifiers": ["type"]
+        "modifiers": ["type", "final"]
       }]
     ])
   },
@@ -696,7 +701,7 @@ var builtinModules = {
           }],
           "star": false
         },
-        "modifiers": [],
+        "modifiers": ["final"],
         "jsExtra": `var stdoutBuffer = "";`,
         "js": `data => {if (typeof process === "undefined") {stdoutBuffer += data;if (data.includes("\\n")) {var lines = stdoutBuffer.split("\\n");stdoutBuffer = lines.pop();console.log(lines.join("\\n"));}} else {process.stdout.write(data);}}`
       }]
@@ -1313,7 +1318,7 @@ function parseExpression(filename, code, tokens) {
 }
 
 function renderType(type) {
-  return `${type.base}${type.subtype.length ? `<${type.subtype.map(renderType).join(", ")}>` : ""}`;
+  return `${type.star ? "*" : ""}${type.base}${type.subtype.length ? `<${type.subtype.map(renderType).join(", ")}>` : ""}`;
 }
 
 function compiler(filename, ast) {
@@ -1690,7 +1695,7 @@ function compiler(filename, ast) {
             argument.name,
             {
               "type": argument.type,
-              "modifiers": []
+              "modifiers": ["argument"]
             }
           ]))
         });
