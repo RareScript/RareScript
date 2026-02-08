@@ -45,8 +45,8 @@ var operators = {
         "star": false
       };
     },
-    "js": ".pow(parseFloat((",
-    "jsAppend": ").toString()))"
+    "js": ".pow((",
+    "jsAppend": ").toNumber())"
   },
   "*": {
     "type": (filename, line, left, right) => {
@@ -210,6 +210,111 @@ var operators = {
     "jsAppend": left => {
       return left ? ")" : ".neg()";
     }
+  },
+  "<<": {
+    "type": (filename, line, left, right) => {
+      if (!left) {
+        return new RareScriptError(filename, line, 59, "Expected left side");
+      }
+      if (!right) {
+        return new RareScriptError(filename, line, 60, "Expected right side");
+      }
+      if (left.base != "typing::number" || right.base != "typing::number") {
+        return new RareScriptError(filename, line, 61, "Operator expects typing::number");
+      }
+      return {
+        "base": "typing::number",
+        "subtype": [],
+        "star": false
+      };
+    },
+    "jsPrepend": "new RSNumber(",
+    "js": " << ",
+    "jsAppend": ")"
+  },
+  ">>": {
+    "type": (filename, line, left, right) => {
+      if (!left) {
+        return new RareScriptError(filename, line, 62, "Expected left side");
+      }
+      if (!right) {
+        return new RareScriptError(filename, line, 63, "Expected right side");
+      }
+      if (left.base != "typing::number" || right.base != "typing::number") {
+        return new RareScriptError(filename, line, 64, "Operator expects typing::number");
+      }
+      return {
+        "base": "typing::number",
+        "subtype": [],
+        "star": false
+      };
+    },
+    "jsPrepend": "new RSNumber(",
+    "js": " >> ",
+    "jsAppend": ")"
+  },
+  "|": {
+    "type": (filename, line, left, right) => {
+      if (!left) {
+        return new RareScriptError(filename, line, 65, "Expected left side");
+      }
+      if (!right) {
+        return new RareScriptError(filename, line, 66, "Expected right side");
+      }
+      if (left.base != "typing::number" || right.base != "typing::number") {
+        return new RareScriptError(filename, line, 67, "Operator expects typing::number");
+      }
+      return {
+        "base": "typing::number",
+        "subtype": [],
+        "star": false
+      };
+    },
+    "jsPrepend": "new RSNumber(",
+    "js": " | ",
+    "jsAppend": ")"
+  },
+  "&": {
+    "type": (filename, line, left, right) => {
+      if (!left) {
+        return new RareScriptError(filename, line, 68, "Expected left side");
+      }
+      if (!right) {
+        return new RareScriptError(filename, line, 69, "Expected right side");
+      }
+      if (left.base != "typing::number" || right.base != "typing::number") {
+        return new RareScriptError(filename, line, 70, "Operator expects typing::number");
+      }
+      return {
+        "base": "typing::number",
+        "subtype": [],
+        "star": false
+      };
+    },
+    "jsPrepend": "new RSNumber(",
+    "js": " & ",
+    "jsAppend": ")"
+  },
+  "^": {
+    "type": (filename, line, left, right) => {
+      if (!left) {
+        return new RareScriptError(filename, line, 71, "Expected left side");
+      }
+      if (!right) {
+        return new RareScriptError(filename, line, 72, "Expected right side");
+      }
+      if (left.base != "typing::number" || right.base != "typing::number") {
+        return new RareScriptError(filename, line, 73, "Operator expects typing::number");
+      }
+      return {
+        "base": "typing::number",
+        "subtype": [],
+        "star": false
+      };
+    },
+    "jsPrepend": "new RSNumber(",
+    "js": " ^ ",
+    "jsAppend": ")"
   }
 };
 
@@ -221,7 +326,7 @@ var operatorPriority = [
   ["+", "-"],
   ["<<", ">>"],
   ["|", "&", "^"],
-  ["<|"],
+  ["|>"],
   ["=", "!=", "<", ">", "<=", ">="],
   ["!"],
   ["or", "and"],
@@ -379,7 +484,7 @@ function lexer(filename, code) {
   var digits = "0123456789";
   var symbols = "!@#$%^&*-+\\|/=";
   var keywords = ["import", "as", "return", "cond", "else", "false", "true", "maybe", "and", "or", "final"];
-  var operators = ["(", ")", "{", "}", ",", "**", "+", "-", "*", "/", "//", "%", "=", "!=", ":=", "..", "->", "->@", "<", ">", "|", "&", "^", "<<", ">>", "<=", ">="];
+  var operators = ["(", ")", "{", "}", ",", "**", "+", "-", "*", "/", "//", "%", "=", "!=", ":=", "..", "->", "->@", "<", ">", "|", "&", "^", "<<", ">>", "<=", ">=", "|>"];
 
   function addToken(index) {
     var type = TokenType.IDENTIFIER;
