@@ -7,7 +7,15 @@ async function build(platform, arch, cpuType, clib) {
     "entrypoints": ["./bootstrap.js", ...builtinModules],
     "compile": {
       "outfile": `./dist/rare-${platform.toLowerCase()}-${arch.toLowerCase()}${arch == "x64" ? `-${cpuType}` : ""}${platform.toLowerCase() == "linux" ? `-${clib.toLowerCase()}` : ""}`,
-      "target": `bun-${platform.toLowerCase() == "macos" ? "darwin" : platform.toLowerCase()}-${arch.toLowerCase()}${arch == "x64" ? `-${cpuType}` : ""}${platform.toLowerCase() == "linux" && clib.toLowerCase() != "glibc" ? `-${clib.toLowerCase()}` : ""}`
+      "target": `bun-${platform.toLowerCase() == "macos" ? "darwin" : platform.toLowerCase()}-${arch.toLowerCase()}${arch == "x64" ? `-${cpuType}` : ""}${platform.toLowerCase() == "linux" && clib.toLowerCase() != "glibc" ? `-${clib.toLowerCase()}` : ""}`,
+      "windows": (platform.toLowerCase() == "windows" ? {
+        "icon": "./rarescript.ico",
+        "title": "RareScript",
+        "publisher": "RareScript",
+        "version": (process.env.RARE_VERSION ? process.env.RARE_VERSION.slice(1) : "0.0.0"),
+        "description": "RareScript CLI",
+        "copyright": `Copyright ${(new Date).getFullYear()}`,
+      } : undefined)
     },
     "minify": true,
     "bytecode": true,

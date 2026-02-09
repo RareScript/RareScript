@@ -1463,14 +1463,14 @@ function compiler(filename, ast, target) {
       if (functionName.includes("::")) {
         [namespace, functionName] = functionName.split("::");
       }
-      if (namespace && !namespaces.get(namespace).variables.has(functionName)) {
-        cachedError = new RareScriptError(filename, lastInstruction.line, 45, `Variable "${namespace ? `${namespace}::` : ""}${functionName}" does not exist`);
-        return cachedError;
-      }
       function applyNamespace(namespace) {
         if (namespace && !addedFunctions.has(`${namespace}::${functionName}`)) {
           if (!namespaces.has(namespace)) {
             cachedError = new RareScriptError(filename, lastInstruction.line, 17, `Namespace "${namespace}" does not exist`);
+            return cachedError;
+          }
+          if (namespace && !namespaces.get(namespace).variables.has(functionName)) {
+        cachedError = new RareScriptError(filename, lastInstruction.line, 45, `Variable "${namespace ? `${namespace}::` : ""}${functionName}" does not exist`);
             return cachedError;
           }
           addedFunctions.add(`${namespace}::${functionName}`);
@@ -1987,6 +1987,9 @@ async function handleCLI() {
   if (target === undefined) {
     return console.log("\x1b[31mExpected a target.\x1b[0m");
   }
+  if (!target) {
+    target = "crossplatform";
+  }
   if (process.argv[2] == "setup") {
     if (fs.existsSync(".rareproject") || fs.existsSync("rare_modules")) {
       return console.log("\x1b[31mThis folder already contains a RareScript project.\x1b[0m");
@@ -2042,7 +2045,7 @@ async function handleCLI() {
     }
     var cache = fs.readFileSync(rareproject.file).toString("utf-8");
     while(true) {
-      var proc = child_process.spawn(process.argv[0], process.argv.slice(1).map(a => a == "watch" ? "start" : a));
+      var proc = child_process.spawn(process.execPath, process.argv.slice(bun ? 2 : 0).map(arg => arg == "watch" ? "start" : arg));
       proc.stdout.on("data", data => {
         process.stdout.write(data);
       });
@@ -2055,7 +2058,7 @@ async function handleCLI() {
       });
       await new Promise(res => {
         var i = setInterval(() => {
-          fs.readFile(file, (e, buf) => {
+          fs.readFile(rareproject.file, (e, buf) => {
             var code = buf.toString("utf-8");
             if (!e && code != cache) {
               cache = code;
@@ -2086,5 +2089,5 @@ if (typeof module !== "undefined") {
   if (require.main == module) {
     handleCLI();
   }
-  module.exports = { TokenType, getTokenValue, InstructionType, RareScriptError, lexer, parser, parseExpression, processCode };
+  module.exports = { version, TokenType, getTokenValue, InstructionType, RareScriptError, lexer, parser, parseExpression, processCode };
 }
