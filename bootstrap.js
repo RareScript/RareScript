@@ -742,6 +742,19 @@ var builtinModules = {
           "browser": `data => {stdoutBuffer += data;if (data.includes("\\n")) {var lines = stdoutBuffer.split("\\n");stdoutBuffer = lines.pop();console.log(lines.join("\\n"));}}`,
           "nodejs": "data => process.stdout.write(data)"
         }
+      }],
+      ["clear", {
+        "type": {
+          "base": "typing::function",
+          "subtype": [{
+            "base": "typing::void",
+            "subtype": [],
+            "star": false
+          }],
+          "star": false
+        },
+        "modifiers": ["final"],
+        "js": "() => console.clear()"
       }]
     ])
   }
@@ -1956,7 +1969,6 @@ function processCode(filename, code, target, debug, supressErrors, minify) {
 
 if (typeof module !== "undefined") {
   if (require.main == module) {
-    var fs = require("fs");
     var path = require("path");
     var code = fs.readFileSync(process.argv[2]).toString("utf-8");
     var result = processCode(path.basename(process.argv[2]), code, "crossplatform", true, false, true);

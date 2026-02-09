@@ -4,3 +4,7 @@ import std;
 typing::void out(typing::any *data) {
   std::out(typing::string(data));
 }
+
+typing::void clear() {
+  std::clear();
+}
