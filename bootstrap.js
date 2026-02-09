@@ -1,5 +1,17 @@
+var fs = require("fs");
 var util = require("util");
 var babelCore = null;
+var babelPresetMinify = null;
+var bun = null;
+if (typeof RARE_BUILD !== "undefined" && RARE_BUILD) {
+  bun = require("bun");
+}
+var builtinModules = [];
+if (bun) {
+  builtinModules = bun.embeddedFiles.map(file => file.name);
+} else {
+  builtinModules = fs.readdirSync("lib");
+}
 
 var TokenType = {
   "SEPARATOR": 0,
@@ -1914,10 +1926,11 @@ function processCode(filename, code, target, debug, supressErrors, minify) {
   if (minify) {
     if (!babelCore) {
       babelCore = require("@babel/core");
+      babelPresetMinify = require("babel-preset-minify");
     }
     compiled = babelCore.transformSync(compiled, {
       "presets": [
-        ["minify", {
+        [babelPresetMinify, {
           "mangle": {
             "topLevel": true
           }
