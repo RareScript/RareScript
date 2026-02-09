@@ -636,8 +636,7 @@ var builtinModules = {
           "star": false
         },
         "modifiers": ["type", "final"],
-        // TODO: Add converter
-        "js": "data => {}"
+        "js": `data => data === void 0 ? "\\x00" : data.toString()[0]`
       }],
       ["number", {
         "type": {
