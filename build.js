@@ -15,7 +15,8 @@ async function build(platform, arch, cpuType, clib) {
       "asset": "[name].[ext]"
     },
     "define": {
-      "RARE_BUILD": "true"
+      "RARE_BUILD": "true",
+      "RARE_VERSION": (process.env.RARE_VERSION || "DEV")
     }
   });
   console.log(`\x1b[32m✅ Compiled for ${platform} (${arch}${arch == "x64" ? `, ${cpuType}` : ""})${platform.toLowerCase() == "linux" ? ` with ${clib}` : ""}.\x1b[0m`);

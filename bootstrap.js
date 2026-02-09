@@ -1,5 +1,7 @@
 var fs = require("fs");
+var path = require("path");
 var util = require("util");
+var child_process = require("child_process");
 var babelCore = null;
 var babelPresetMinify = null;
 var bun = null;
@@ -11,6 +13,11 @@ if (bun) {
   builtinModules = bun.embeddedFiles.map(file => file.name);
 } else {
   builtinModules = fs.readdirSync("lib");
+}
+
+var version = "DEV";
+if (typeof RARE_VERSION !== "undefined" && RARE_VERSION) {
+  version = RARE_VERSION;
 }
 
 var TokenType = {
@@ -1967,14 +1974,117 @@ function processCode(filename, code, target, debug, supressErrors, minify) {
   return { tokens, ast, compiled };
 }
 
-if (typeof module !== "undefined") {
-  if (require.main == module) {
-    var path = require("path");
-    var code = fs.readFileSync(process.argv[2]).toString("utf-8");
-    var result = processCode(path.basename(process.argv[2]), code, "crossplatform", true, false, true);
+async function handleCLI() {
+  var debug = (process.argv.includes("/debug") || process.argv.includes("--debug"));
+  var noMinify = (process.argv.includes("/nominify") || process.argv.includes("--no-minify"));
+  var target = null;
+  if (process.argv.includes("/target")) {
+    target = process.argv[process.argv.indexOf("/target") + 1];
+  }
+  if (process.argv.includes("--target")) {
+    target = process.argv[process.argv.indexOf("--target") + 1];
+  }
+  if (target === undefined) {
+    return console.log("\x1b[31mExpected a target.\x1b[0m");
+  }
+  if (process.argv[2] == "setup") {
+    if (fs.existsSync(".rareproject") || fs.existsSync("rare_modules")) {
+      return console.log("\x1b[31mThis folder already contains a RareScript project.\x1b[0m");
+    }
+    fs.writeFileSync(".rareproject", JSON.stringify({
+      "name": "New Project",
+      "file": "main.rare",
+      "output": "main.js",
+      "modules": []
+    }, null, 2));
+    return console.log("\x1b[32mInitialized a new project in this folder.\x1b[0m");
+  }
+  if (process.argv[2] == "build") {
+    if (!fs.existsSync(".rareproject")) {
+      return console.log("\x1b[31mThis folder is not a RareScript project.\x1b[0m");
+    }
+    try {
+      var rareproject = JSON.parse(fs.readFileSync(".rareproject").toString("utf-8"));
+    } catch {
+      return console.log("\x1b[31mThis project is invalid.\x1b[0m");
+    }
+    var code = fs.readFileSync(rareproject.file).toString("utf-8");
+    var result = processCode(path.basename(rareproject.file), code, target, debug, false, !noMinify);
+    if (!(result instanceof RareScriptError)) {
+      fs.writeFileSync(rareproject.output, result.compiled);
+    }
+    return;
+  }
+  if (process.argv[2] == "start") {
+    if (!fs.existsSync(".rareproject")) {
+      return console.log("\x1b[31mThis folder is not a RareScript project.\x1b[0m");
+    }
+    try {
+      var rareproject = JSON.parse(fs.readFileSync(".rareproject").toString("utf-8"));
+    } catch {
+      return console.log("\x1b[31mThis project is invalid.\x1b[0m");
+    }
+    var code = fs.readFileSync(rareproject.file).toString("utf-8");
+    var result = processCode(path.basename(rareproject.file), code, target, debug, false, !noMinify);
     if (!(result instanceof RareScriptError)) {
       eval(result.compiled);
     }
+    return;
+  }
+  if (process.argv[2] == "watch") {
+    if (!fs.existsSync(".rareproject")) {
+      return console.log("\x1b[31mThis folder is not a RareScript project.\x1b[0m");
+    }
+    try {
+      var rareproject = JSON.parse(fs.readFileSync(".rareproject").toString("utf-8"));
+    } catch {
+      return console.log("\x1b[31mThis project is invalid.\x1b[0m");
+    }
+    var cache = fs.readFileSync(rareproject.file).toString("utf-8");
+    while(true) {
+      var proc = child_process.spawn(process.argv[0], process.argv.slice(1).map(a => a == "watch" ? "start" : a));
+      proc.stdout.on("data", data => {
+        process.stdout.write(data);
+      });
+      proc.stderr.on("data", data => {
+        process.stderr.write(data);
+      });
+      proc.on("error", () => {});
+      proc.on("close", code => {
+        console.log(`\x1B[33mProcess exited with code ${code}.\x1B[39m\n`);
+      });
+      await new Promise(res => {
+        var i = setInterval(() => {
+          fs.readFile(file, (e, buf) => {
+            var code = buf.toString("utf-8");
+            if (!e && code != cache) {
+              cache = code;
+              clearInterval(i);
+              res();
+            }
+          });
+        }, 10);
+      });
+      proc.kill("SIGKILL");
+    }
+  }
+  var commands = {
+    "setup": "Initialize a new project",
+    "build": "Build this project",
+    "start": "Start this project",
+    "watch": "Start this project and restart on changes"
+  };
+  var flags = {
+    "--debug": "Enable debug mode",
+    "--no-minify": "Do not minify compiled code",
+    "--target [crossplatform/browser/nodejs]": "Target to optimize the compiled code for"
+  };
+  return console.log(`\x1b[1mUsage: rare \x1b[35m<command>\x1b[39m \x1b[36m[...flags]\x1b[39m [...args]\x1b[0m\n\n\x1b[1mCommands:\x1b[0m${Object.keys(commands).map(command => `\n  \x1b[1m\x1b[35m${command}\x1b[0m${" ".repeat(40 - command.length)}${commands[command]}`).join("")}\n\n\x1b[1mFlags:\x1b[0m${Object.keys(flags).map(flag => `\n  \x1b[1m\x1b[36m${flag}\x1b[0m${" ".repeat(40 - flag.length)}${flags[flag]}`).join("")}\n\n\x1b[2mRareScript ${version}\x1b[0m`);
+}
+
+if (typeof module !== "undefined") {
+  if (require.main == module) {
+    handleCLI();
   }
   module.exports = { TokenType, getTokenValue, InstructionType, RareScriptError, lexer, parser, parseExpression, processCode };
 }
