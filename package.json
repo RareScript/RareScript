@@ -4,7 +4,8 @@
   "description": "RareScript is a new programming language.",
   "main": "bootstrap.js",
   "scripts": {
-    "test": "node test.js"
+    "build": "bun build.js",
+    "test": "bun test.js"
   },
   "repository": {
     "type": "git",
