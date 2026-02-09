@@ -8,11 +8,11 @@ var bun = null;
 if (typeof RARE_BUILD !== "undefined" && RARE_BUILD) {
   bun = require("bun");
 }
-var builtinModules = [];
+var builtinRareModules = {};
 if (bun) {
-  builtinModules = bun.embeddedFiles.map(file => file.name);
+  builtinRareModules = Object.fromEntries(bun.embeddedFiles.map(async file => [file.name, fs.readFileSync(file).toString("utf-8")]));
 } else {
-  builtinModules = fs.readdirSync("lib");
+  builtinRareModules = Object.fromEntries(fs.readdirSync("lib").map(file => [file, fs.readFileSync(`lib/${file}`).toString("utf-8")]));
 }
 
 var version = "DEV";
@@ -1395,7 +1395,7 @@ function renderType(type) {
   return `${type.star ? "*" : ""}${type.base}${type.subtype.length ? `<${type.subtype.map(renderType).join(", ")}>` : ""}`;
 }
 
-function compiler(filename, ast, target) {
+function compiler(filename, ast, target, debug, minify) {
   var namespaces = new Map;
   var scopes = [];
   var typeTransformationTable = new Map;
@@ -1711,11 +1711,23 @@ function compiler(filename, ast, target) {
         if (!importStreak) {
           return new RareScriptError(filename, instruction.line, 108, "Imports should be at the start of top-level");
         }
+        if (instruction.as) {
+          typeTransformationTable.set(instruction.as, instruction.module);
+        }
         if (builtinModules[instruction.module]) {
-          if (instruction.as) {
-            typeTransformationTable.set(instruction.as, instruction.module);
-          }
           namespaces.set(instruction.as || instruction.module, builtinModules[instruction.module]);
+          compiled[0].push(`var ${instruction.as || instruction.module} = {};`);
+          continue;
+        }
+        if (builtinRareModules[`${instruction.module}.rare`]) {
+          var result = processCode(`${instruction.module}.rare`, builtinRareModules[`${instruction.module}.rare`], target, debug, true, minify);
+          // TODO: Fix errors thrown from modules
+          if (result instanceof RareScriptError) {
+            return result;
+          }
+          namespaces.set(instruction.as || instruction.module, {
+            "variables": new Map
+          });
           compiled[0].push(`var ${instruction.as || instruction.module} = {};`);
           continue;
         }
@@ -1931,7 +1943,7 @@ function processCode(filename, code, target, debug, supressErrors, minify) {
     console.log(util.inspect(ast, false, null, true));
   }
 
-  var compiled = compiler(filename, ast, target);
+  var compiled = compiler(filename, ast, target, debug, minify);
   if (compiled instanceof RareScriptError) {
     if (supressErrors) {
       return compiled;
