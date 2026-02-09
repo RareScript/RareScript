@@ -1184,9 +1184,13 @@ function parser(filename, code, tokens) {
       }
       expression.push(expressionToken);
     }
+    expression = parseExpression(filename, code, expression);
+    if (!expression) {
+      return new RareScriptError(filename, token.line, 117, "Invalid expression");
+    }
     ast.push({
       "type": InstructionType.EXPRESSION,
-      "expression": parseExpression(filename, code, expression),
+      expression,
       "line": token.line
     });
   }
@@ -1817,7 +1821,7 @@ function processCode(filename, code, target, debug, supressErrors, minify) {
     throw `Target "${target}" does not exist.`;
   }
 
-  code = code.split("\r\n").join("\n");
+  code = code.split("\ufeff").join("").split("\r\n").join("\n");
 
   var tokens = lexer(filename, code);
   if (tokens instanceof RareScriptError) {
