@@ -1436,26 +1436,32 @@ function compiler(filename, ast, target) {
         cachedError = new RareScriptError(filename, lastInstruction.line, 45, `Variable "${namespace ? `${namespace}::` : ""}${functionName}" does not exist`);
         return cachedError;
       }
-      if (namespace && !addedFunctions.has(`${namespace}::${functionName}`)) {
-        if (!namespaces.has(namespace)) {
-          cachedError = new RareScriptError(filename, lastInstruction.line, 17, `Namespace "${namespace}" does not exist`);
-          return cachedError;
-        }
-        addedFunctions.add(`${namespace}::${functionName}`);
-        if (namespaces.get(namespace).variables.get(functionName).jsExtra && typeof namespaces.get(namespace).variables.get(functionName).jsExtra === "object") {
-          var jsExtra = namespaces.get(namespace).variables.get(functionName).jsExtra[target];
-          if (jsExtra && !compiled[1].includes(jsExtra)) {
-            compiled[1].push(jsExtra);
+      function applyNamespace(namespace) {
+        if (namespace && !addedFunctions.has(`${namespace}::${functionName}`)) {
+          if (!namespaces.has(namespace)) {
+            cachedError = new RareScriptError(filename, lastInstruction.line, 17, `Namespace "${namespace}" does not exist`);
+            return cachedError;
+          }
+          addedFunctions.add(`${namespace}::${functionName}`);
+          if (namespaces.get(namespace).variables.get(functionName).jsExtra && typeof namespaces.get(namespace).variables.get(functionName).jsExtra === "object") {
+            var jsExtra = namespaces.get(namespace).variables.get(functionName).jsExtra[target];
+            if (jsExtra && !compiled[1].includes(jsExtra)) {
+              compiled[1].push(jsExtra);
+            }
+          }
+          if (typeof namespaces.get(namespace).variables.get(functionName).js === "object") {
+            compiled[2].push(`${namespace}.${functionName} = ${namespaces.get(namespace).variables.get(functionName).js[target]};`);
+          } else {
+            compiled[2].push(`${namespace}.${functionName} = ${namespaces.get(namespace).variables.get(functionName).js};`);
           }
         }
-        if (typeof namespaces.get(namespace).variables.get(functionName).js === "object") {
-          compiled[2].push(`${namespace}.${functionName} = ${namespaces.get(namespace).variables.get(functionName).js[target]};`);
-        } else {
-          compiled[2].push(`${namespace}.${functionName} = ${namespaces.get(namespace).variables.get(functionName).js};`);
+        if (namespace && namespaces.get(namespace).variables.get(functionName).modifiers.includes("numbers")) {
+          numberClassAdded = true;
         }
       }
-      if (namespace && namespaces.get(namespace).variables.get(functionName).modifiers.includes("numbers")) {
-        numberClassAdded = true;
+      var applyResult = applyNamespace(namespace);
+      if (applyResult instanceof RareScriptError) {
+        return applyResult;
       }
       var argumentsTypesCorrect = null;
       if (namespace) {
@@ -1469,11 +1475,25 @@ function compiler(filename, ast, target) {
           }
         }
         if (!argumentsTypesCorrect) {
-          if (!globalVariables.has(functionName)) {
-            cachedError = new RareScriptError(filename, lastInstruction.line, 114, `Variable "${functionName}" does not exist`);
-            return cachedError;
+          if (globalVariables.has(functionName)) {
+            argumentsTypesCorrect = globalVariables.get(functionName).type.subtype.slice(0, -1);
+          } else {
+            for (var scopedNamespace of scopes) {
+              if (namespaces.get(scopedNamespace).variables.has(functionName)) {
+                namespace = scopedNamespace;
+                argumentsTypesCorrect = namespaces.get(scopedNamespace).variables.get(functionName).type.subtype.slice(0, -1);
+                break;
+              }
+            }
+            if (!argumentsTypesCorrect) {
+              cachedError = new RareScriptError(filename, lastInstruction.line, 114, `Variable "${functionName}" does not exist`);
+              return cachedError;
+            }
+            var applyResult = applyNamespace(namespace);
+            if (applyResult instanceof RareScriptError) {
+              return applyResult;
+            }
           }
-          argumentsTypesCorrect = globalVariables.get(functionName).type.subtype.slice(0, -1);
         }
       }
       var argumentsTypes = expression.arguments.map(solveExpressionType).map(argument => argument.type);
@@ -1610,6 +1630,14 @@ function compiler(filename, ast, target) {
           "modifiers": []
         };
       }
+      for (var scopedNamespace of scopes) {
+        if (namespaces.get(scopedNamespace).variables.has(functionName)) {
+          return {
+            "type": namespaces.get(scopedNamespace).variables.get(functionName).type.subtype.at(-1),
+            "modifiers": []
+          };
+        }
+      }
       cachedError = new RareScriptError(filename, lastInstruction.line, 50, `Variable "${functionName}" does not exist`);
       return cachedError;
     }
@@ -1663,6 +1691,9 @@ function compiler(filename, ast, target) {
         return new RareScriptError(filename, instruction.line, 16, `Module "${instruction.module}" not found`);
       }
       if (instruction.type == InstructionType.SCOPE) {
+        if (!importStreak) {
+          return new RareScriptError(filename, instruction.line, 118, "Scopes should be at the start of top-level");
+        }
         if (!namespaces.has(instruction.module)) {
           return new RareScriptError(filename, instruction.line, 115, `Namespace "${namespace}" does not exist`);
         }
