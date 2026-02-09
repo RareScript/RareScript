@@ -1362,6 +1362,7 @@ function renderType(type) {
 
 function compiler(filename, ast, target) {
   var namespaces = new Map;
+  var scopes = [];
   var typeTransformationTable = new Map;
   var globalVariables = new Map;
   var contexts = [];
@@ -1640,7 +1641,7 @@ function compiler(filename, ast, target) {
       if (cachedError) {
         return cachedError;
       }
-      if (instruction.type != InstructionType.IMPORT) {
+      if (instruction.type != InstructionType.IMPORT && instruction.type != InstructionType.SCOPE) {
         importStreak = false;
       }
       if (instruction.type == InstructionType.IMPORT) {
@@ -1656,6 +1657,15 @@ function compiler(filename, ast, target) {
           continue;
         }
         return new RareScriptError(filename, instruction.line, 16, `Module "${instruction.module}" not found`);
+      }
+      if (instruction.type == InstructionType.SCOPE) {
+        if (!namespaces.has(instruction.module)) {
+          return new RareScriptError(filename, instruction.line, 115, `Namespace "${namespace}" does not exist`);
+        }
+        if (scopes.includes(instruction.module)) {
+          return new RareScriptError(filename, instruction.line, 116, `Namespace "${namespace}" is already in the scope`);
+        }
+        scopes.push(instruction.module);
       }
       if (instruction.type == InstructionType.EXPRESSION) {
         compiled.push(compileExpression(instruction.expression) + ";");
