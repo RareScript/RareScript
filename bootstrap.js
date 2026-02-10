@@ -1395,7 +1395,7 @@ function renderType(type) {
   return `${type.star ? "*" : ""}${type.base}${type.subtype.length ? `<${type.subtype.map(renderType).join(", ")}>` : ""}`;
 }
 
-function compiler(filename, ast, target, debug, minify) {
+function compiler(filename, ast, target, debug) {
   var namespaces = new Map;
   var scopes = [];
   var typeTransformationTable = new Map;
@@ -1409,6 +1409,8 @@ function compiler(filename, ast, target, debug, minify) {
   var cachedError = null;
   var lastInstruction = null;
   var importStreak = true;
+  var saveFunctionCode = null;
+  var functionCodes = new Map;
 
   function compileExpression(expression) {
     if (cachedError) {
@@ -1707,6 +1709,7 @@ function compiler(filename, ast, target, debug, minify) {
       if (instruction.type != InstructionType.IMPORT && instruction.type != InstructionType.SCOPE) {
         importStreak = false;
       }
+      var compiledLength = compiled.length;
       if (instruction.type == InstructionType.IMPORT) {
         if (!importStreak) {
           return new RareScriptError(filename, instruction.line, 108, "Imports should be at the start of top-level");
@@ -1720,7 +1723,7 @@ function compiler(filename, ast, target, debug, minify) {
           continue;
         }
         if (builtinRareModules[`${instruction.module}.rare`]) {
-          var result = processCode(`${instruction.module}.rare`, builtinRareModules[`${instruction.module}.rare`], target, debug, true, minify);
+          var result = processCode(`${instruction.module}.rare`, builtinRareModules[`${instruction.module}.rare`], target, debug, true, false);
           // TODO: Fix errors thrown from modules
           if (result instanceof RareScriptError) {
             return result;
@@ -1728,6 +1731,23 @@ function compiler(filename, ast, target, debug, minify) {
           namespaces.set(instruction.as || instruction.module, {
             "variables": result.compiled.globalVariables
           });
+          for (var i = 0; i < 3; i++) {
+            for (var codePart of result.compiled.compiled[i]) {
+              if (!compiled[i].includes(codePart)) {
+                compiled[i].push(codePart);
+              }
+            }
+          }
+          for (var [functionName, functionCode] of result.compiled.functionCodes.entries()) {
+            var functionArgs = functionCode[0].slice(9 + functionName.length, -2);
+            if (namespaces.get(instruction.as || instruction.module).variables.get(functionName).type.subtype.length == 2) {
+              functionArgs = functionArgs.slice(1, -1);
+            }
+            namespaces.get(instruction.as || instruction.module).variables.get(functionName).js = `${functionArgs} => {${functionCode.slice(1, -1).join("")}}`;
+          }
+          if (result.compiled.numberClassAdded) {
+            numberClassAdded = true;
+          }
           compiled[0].push(`var ${instruction.as || instruction.module} = {};`);
           continue;
         }
@@ -1839,6 +1859,10 @@ function compiler(filename, ast, target, debug, minify) {
           "modifiers": []
         });
         compiled.push(`function ${instruction.name}(${instruction.arguments.map(argument => argument.name).join(", ")}) {`);
+        if (!contexts.length) {
+          saveFunctionCode = instruction.name;
+          functionCodes.set(saveFunctionCode, [`function ${instruction.name}(${instruction.arguments.map(argument => argument.name).join(", ")}) {`]);
+        }
         contexts.push({
           "owner": instruction,
           "variables": new Map(instruction.arguments.map(argument => [
@@ -1858,6 +1882,8 @@ function compiler(filename, ast, target, debug, minify) {
         }
         contexts.pop();
         compiled.push("}");
+        functionCodes.get(saveFunctionCode).push("}");
+        saveFunctionCode = null;
       }
       if (instruction.type == InstructionType.RETURN) {
         var correctType = null;
@@ -1877,6 +1903,9 @@ function compiler(filename, ast, target, debug, minify) {
         }
         compiled.push(`return ${compileExpression(instruction.value)};`);
       }
+      if (saveFunctionCode) {
+        functionCodes.get(saveFunctionCode).push(...compiled.slice(compiledLength - compiled.length));
+      }
     }
   }
   var result = compileAST(ast);
@@ -1888,8 +1917,11 @@ function compiler(filename, ast, target, debug, minify) {
   }
 
   return {
+    numberClassAdded,
     globalVariables,
-    "code": (numberClassAdded ? numberClass : "") + compiled.flat().join("")
+    compiled,
+    "code": (numberClassAdded ? numberClass : "") + compiled.flat().join(""),
+    functionCodes
   };
 }
 
@@ -1908,7 +1940,7 @@ function processCode(filename, code, target, debug, supressErrors, minify) {
     return throwError(tokens, code);
   }
   if (debug) {
-    console.log(`\x1b[32m[DEBUG / ${tokens.length} TOKENS]\x1b[0m`);
+    console.log(`\x1b[32m[DEBUG / ${filename} / ${tokens.length} TOKENS]\x1b[0m`);
     console.log(tokens.map(token => {
       var color = 37;
       if (token.type == TokenType.SEPARATOR) {
@@ -1942,11 +1974,11 @@ function processCode(filename, code, target, debug, supressErrors, minify) {
     return throwError(ast, code);
   }
   if (debug) {
-    console.log(`\x1b[32m[DEBUG / ${ast.length} INSTRUCTIONS]\x1b[0m`);
+    console.log(`\x1b[32m[DEBUG / ${filename} / ${ast.length} INSTRUCTIONS]\x1b[0m`);
     console.log(util.inspect(ast, false, null, true));
   }
 
-  var compiled = compiler(filename, ast, target, debug, minify);
+  var compiled = compiler(filename, ast, target, debug);
   if (compiled instanceof RareScriptError) {
     if (supressErrors) {
       return compiled;
@@ -1954,7 +1986,7 @@ function processCode(filename, code, target, debug, supressErrors, minify) {
     return throwError(compiled, code);
   }
   if (debug) {
-    console.log(`\x1b[32m[DEBUG / ${compiled.code.length} CHARACTERS]\x1b[0m`);
+    console.log(`\x1b[32m[DEBUG / ${filename} / ${compiled.code.length} CHARACTERS]\x1b[0m`);
     console.log(compiled.code);
   }
 
@@ -1981,7 +2013,7 @@ function processCode(filename, code, target, debug, supressErrors, minify) {
       compiled.code = compiled.code.slice(0, -1);
     }
     if (debug) {
-      console.log(`\x1b[32m[DEBUG / ${compiled.code.length} CHARACTERS / MINIFIED]\x1b[0m`);
+      console.log(`\x1b[32m[DEBUG / ${filename} / ${compiled.code.length} CHARACTERS / MINIFIED]\x1b[0m`);
       console.log(compiled.code);
     }
   }
@@ -2043,10 +2075,11 @@ async function handleCLI() {
       return console.log("\x1b[31mThis project is invalid.\x1b[0m");
     }
     var code = fs.readFileSync(rareproject.file).toString("utf-8");
-    var result = processCode(path.basename(rareproject.file), code, target, debug, false, !noMinify);
+    var filename = path.basename(rareproject.file);
+    var result = processCode(filename, code, target, debug, false, !noMinify);
     if (!(result instanceof RareScriptError)) {
       if (debug) {
-        console.log(`\x1b[32m[DEBUG / EVALUATING CODE]\x1b[0m`);
+        console.log(`\x1b[32m[DEBUG / ${filename} / EVALUATING CODE]\x1b[0m`);
       }
       eval(result.compiled.code);
     }

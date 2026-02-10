@@ -115,7 +115,7 @@ function expectCode(code, compiled) {
   if (result instanceof RareScript.RareScriptError) {
     return console.log(`\x1b[31m❌ Test #${testNum} failed: Got an error ${result.code}.\x1b[0m`);
   }
-  if (result.compiled != compiled) {
+  if (result.compiled.code != compiled) {
     return console.log(`\x1b[31m❌ Test #${testNum} failed: Compiled code does not match.`);
   }
   console.log(`\x1b[32m✅ Test #${testNum} passed.\x1b[0m`);
