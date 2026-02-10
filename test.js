@@ -1,18 +1,22 @@
 var RareScript = require("./bootstrap.js");
 
 var testNum = 0;
+var isFailed = false;
 
 function expectError(code, errCode) {
   testNum++;
   try {
     var result = RareScript.processCode("test.rare", code, "nodejs", false, true, false);
   } catch {
+    isFailed = true;
     return console.log(`\x1b[31m❌ Test #${testNum} failed: Compiler crashed.\x1b[0m`);
   }
   if (!(result instanceof RareScript.RareScriptError)) {
+    isFailed = true;
     return console.log(`\x1b[31m❌ Test #${testNum} failed: Didn't got an error.\x1b[0m`);
   }
   if (result.code != errCode) {
+    isFailed = true;
     return console.log(`\x1b[31m❌ Test #${testNum} failed: Expected code ${errCode}, but got ${result.code}.\x1b[0m`);
   }
   console.log(`\x1b[32m✅ Test #${testNum} passed.\x1b[0m`);
@@ -23,21 +27,26 @@ function expectTokens(code, tokens) {
   try {
     var result = RareScript.processCode("test.rare", code, "nodejs", false, true, false);
   } catch {
+    isFailed = true;
     return console.log(`\x1b[31m❌ Test #${testNum} failed: Compiler crashed.\x1b[0m`);
   }
   if (result instanceof RareScript.RareScriptError) {
+    isFailed = true;
     return console.log(`\x1b[31m❌ Test #${testNum} failed: Got an error ${result.code}.\x1b[0m`);
   }
   if (result.tokens.length != tokens.length) {
+    isFailed = true;
     return console.log(`\x1b[31m❌ Test #${testNum} failed: Expected ${tokens.length} tokens, but got ${result.tokens.length}.\x1b[0m`);
   }
   for (var tokenIndex = 0; tokenIndex < tokens.length; tokenIndex++) {
     for (var prop of Object.keys(tokens[tokenIndex])) {
       if (prop == "value") {
         if (RareScript.getTokenValue(code, result.tokens[tokenIndex]) != tokens[tokenIndex][prop]) {
+          isFailed = true;
           return console.log(`\x1b[31m❌ Test #${testNum} failed: Token #${tokenIndex + 1} value doesn't match.\x1b[0m`);
         }
       } else if (result.tokens[tokenIndex][prop] != tokens[tokenIndex][prop]) {
+        isFailed = true;
         return console.log(`\x1b[31m❌ Test #${testNum} failed: Token #${tokenIndex + 1} property "${prop}" doesn't match.\x1b[0m`);
       }
     }
@@ -50,17 +59,21 @@ function expectAST(code, ast) {
   try {
     var result = RareScript.processCode("test.rare", code, "nodejs", false, true, false);
   } catch {
+    isFailed = true;
     return console.log(`\x1b[31m❌ Test #${testNum} failed: Compiler crashed.\x1b[0m`);
   }
   if (result instanceof RareScript.RareScriptError) {
+    isFailed = true;
     return console.log(`\x1b[31m❌ Test #${testNum} failed: Got an error ${result.code}.\x1b[0m`);
   }
   if (result.ast.length != ast.length) {
+    isFailed = true;
     return console.log(`\x1b[31m❌ Test #${testNum} failed: Expected ${ast.length} instructions, but got ${result.ast.length}.\x1b[0m`);
   }
   for (var astIndex = 0; astIndex < ast.length; astIndex++) {
     for (var prop of Object.keys(ast[astIndex])) {
       if (result.ast[astIndex][prop] != ast[astIndex][prop]) {
+        isFailed = true;
         return console.log(`\x1b[31m❌ Test #${testNum} failed: Instruction #${astIndex + 1} property "${prop}" doesn't match.\x1b[0m`);
       }
     }
@@ -73,31 +86,38 @@ function expectTokensAndAST(code, tokens, ast) {
   try {
     var result = RareScript.processCode("test.rare", code, "nodejs", false, true, false);
   } catch {
+    isFailed = true;
     return console.log(`\x1b[31m❌ Test #${testNum} failed: Compiler crashed.\x1b[0m`);
   }
   if (result instanceof RareScript.RareScriptError) {
+    isFailed = true;
     return console.log(`\x1b[31m❌ Test #${testNum} failed: Got an error ${result.code}.\x1b[0m`);
   }
   if (result.tokens.length != tokens.length) {
+    isFailed = true;
     return console.log(`\x1b[31m❌ Test #${testNum} failed: Expected ${tokens.length} tokens, but got ${result.tokens.length}.\x1b[0m`);
   }
   for (var tokenIndex = 0; tokenIndex < tokens.length; tokenIndex++) {
     for (var prop of Object.keys(tokens[tokenIndex])) {
       if (prop == "value") {
         if (RareScript.getTokenValue(code, result.tokens[tokenIndex]) != tokens[tokenIndex][prop]) {
+          isFailed = true;
           return console.log(`\x1b[31m❌ Test #${testNum} failed: Token #${tokenIndex + 1} value doesn't match.\x1b[0m`);
         }
       } else if (result.tokens[tokenIndex][prop] != tokens[tokenIndex][prop]) {
+        isFailed = true;
         return console.log(`\x1b[31m❌ Test #${testNum} failed: Token #${tokenIndex + 1} property "${prop}" doesn't match.\x1b[0m`);
       }
     }
   }
   if (result.ast.length != ast.length) {
+    isFailed = true;
     return console.log(`\x1b[31m❌ Test #${testNum} failed: Expected ${ast.length} instructions, but got ${result.ast.length}.\x1b[0m`);
   }
   for (var astIndex = 0; astIndex < ast.length; astIndex++) {
     for (var prop of Object.keys(ast[astIndex])) {
       if (JSON.stringify(result.ast[astIndex][prop]) != JSON.stringify(ast[astIndex][prop])) {
+        isFailed = true;
         return console.log(`\x1b[31m❌ Test #${testNum} failed: Instruction #${astIndex + 1} property "${prop}" doesn't match.\x1b[0m`);
       }
     }
@@ -110,12 +130,15 @@ function expectCode(code, compiled) {
   try {
     var result = RareScript.processCode("test.rare", code, "nodejs", false, true, false);
   } catch {
+    isFailed = true;
     return console.log(`\x1b[31m❌ Test #${testNum} failed: Compiler crashed.\x1b[0m`);
   }
   if (result instanceof RareScript.RareScriptError) {
+    isFailed = true;
     return console.log(`\x1b[31m❌ Test #${testNum} failed: Got an error ${result.code}.\x1b[0m`);
   }
   if (result.compiled.code != compiled) {
+    isFailed = true;
     return console.log(`\x1b[31m❌ Test #${testNum} failed: Compiled code does not match.`);
   }
   console.log(`\x1b[32m✅ Test #${testNum} passed.\x1b[0m`);
@@ -1120,3 +1143,7 @@ typing::number a := 1;
 typing::string b := "cat";
 
 std::out(typing::string(a = b));`, 79);
+
+if (isFailed) {
+  process.exit(1);
+}

@@ -17,4 +17,4 @@ jobs:
     - uses: actions/checkout@v4
     - uses: oven-sh/setup-bun@v2
     - name: Test
-      run: bun test.js
+      run: bun run test
