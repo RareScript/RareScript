@@ -1726,7 +1726,7 @@ function compiler(filename, ast, target, debug, minify) {
             return result;
           }
           namespaces.set(instruction.as || instruction.module, {
-            "variables": new Map
+            "variables": result.compiled.globalVariables
           });
           compiled[0].push(`var ${instruction.as || instruction.module} = {};`);
           continue;
@@ -1887,7 +1887,10 @@ function compiler(filename, ast, target, debug, minify) {
     return cachedError;
   }
 
-  return (numberClassAdded ? numberClass : "") + compiled.flat().join("");
+  return {
+    globalVariables,
+    "code": (numberClassAdded ? numberClass : "") + compiled.flat().join("")
+  };
 }
 
 function processCode(filename, code, target, debug, supressErrors, minify) {
@@ -1951,7 +1954,7 @@ function processCode(filename, code, target, debug, supressErrors, minify) {
     return throwError(compiled, code);
   }
   if (debug) {
-    console.log(`\x1b[32m[DEBUG / ${compiled.length} CHARACTERS]\x1b[0m`);
+    console.log(`\x1b[32m[DEBUG / ${compiled.code.length} CHARACTERS]\x1b[0m`);
     console.log(compiled);
   }
 
@@ -1960,7 +1963,7 @@ function processCode(filename, code, target, debug, supressErrors, minify) {
       babelCore = require("@babel/core");
       babelPresetMinify = require("babel-preset-minify");
     }
-    compiled = babelCore.transformSync(compiled, {
+    compiled.code = babelCore.transformSync(compiled.code, {
       "presets": [
         [babelPresetMinify, {
           "mangle": {
@@ -1974,12 +1977,12 @@ function processCode(filename, code, target, debug, supressErrors, minify) {
         }
       }
     }).code;
-    if (compiled.endsWith(";")) {
-      compiled = compiled.slice(0, -1);
+    if (compiled.code.endsWith(";")) {
+      compiled.code = compiled.code.slice(0, -1);
     }
     if (debug) {
-      console.log(`\x1b[32m[DEBUG / ${compiled.length} CHARACTERS / MINIFIED]\x1b[0m`);
-      console.log(compiled);
+      console.log(`\x1b[32m[DEBUG / ${compiled.code.length} CHARACTERS / MINIFIED]\x1b[0m`);
+      console.log(compiled.code);
     }
   }
 
@@ -2042,7 +2045,10 @@ async function handleCLI() {
     var code = fs.readFileSync(rareproject.file).toString("utf-8");
     var result = processCode(path.basename(rareproject.file), code, target, debug, false, !noMinify);
     if (!(result instanceof RareScriptError)) {
-      eval(result.compiled);
+      if (debug) {
+        console.log(`\x1b[32m[DEBUG / EVALUATING CODE]\x1b[0m`);
+      }
+      eval(result.compiled.code);
     }
     return;
   }
