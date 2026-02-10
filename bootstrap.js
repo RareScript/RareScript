@@ -1458,7 +1458,11 @@ function compiler(filename, code, ast, target, debug) {
       if (!operators[expression.operator].rightRaw) {
         right = (right ? compileExpression(right) : null);
       }
-      return operators[expression.operator].js(filename, code, lastInstruction.line, left, right, expression.left ? solveExpressionType(expression.left) : null, expression.right ? solveExpressionType(expression.right) : null);
+      var result = operators[expression.operator].js(filename, code, lastInstruction.line, left, right, expression.left ? solveExpressionType(expression.left) : null, expression.right ? solveExpressionType(expression.right) : null);
+      if (result instanceof RareScriptError) {
+        cachedError = result;
+      }
+      return result;
     }
     if (expression.type == "function") {
       var namespace = null;
