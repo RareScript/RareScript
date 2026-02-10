@@ -49,7 +49,7 @@ var InstructionType = {
 
 var operators = {
   "**": {
-    "type": (filename, line, left, right) => {
+    "type": (filename, code, line, left, right) => {
       if (!left) {
         return new RareScriptError(filename, code, line, 53, "Expected left side");
       }
@@ -65,12 +65,12 @@ var operators = {
         "star": false
       };
     },
-    "js": (_filename, _line, left, right) => {
+    "js": (_filename, _code, _line, left, right) => {
       return `${left}.pow((${right}).toNumber())`;
     }
   },
   "*": {
-    "type": (filename, line, left, right) => {
+    "type": (filename, code, line, left, right) => {
       if (!left) {
         return new RareScriptError(filename, code, line, 37, "Expected left side");
       }
@@ -86,12 +86,12 @@ var operators = {
         "star": false
       };
     },
-    "js": (_filename, _line, left, right) => {
+    "js": (_filename, _code, _line, left, right) => {
       return `${left}.mul(${right})`;
     }
   },
   "/": {
-    "type": (filename, line, left, right) => {
+    "type": (filename, code, line, left, right) => {
       if (!left) {
         return new RareScriptError(filename, code, line, 39, "Expected left side");
       }
@@ -107,12 +107,12 @@ var operators = {
         "star": false
       };
     },
-    "js": (_filename, _line, left, right) => {
+    "js": (_filename, _code, _line, left, right) => {
       return `${left}.div(${right})`;
     }
   },
   "//": {
-    "type": (filename, line, left, right) => {
+    "type": (filename, code, line, left, right) => {
       if (!left) {
         return new RareScriptError(filename, code, line, 56, "Expected left side");
       }
@@ -128,12 +128,12 @@ var operators = {
         "star": false
       };
     },
-    "js": (_filename, _line, left, right) => {
+    "js": (_filename, _code, _line, left, right) => {
       return `${left}.div(${right}).round(0, RSNumber.roundDown)`;
     }
   },
   "%": {
-    "type": (filename, line, left, right) => {
+    "type": (filename, code, line, left, right) => {
       if (!left) {
         return new RareScriptError(filename, code, line, 41, "Expected left side");
       }
@@ -149,12 +149,12 @@ var operators = {
         "star": false
       };
     },
-    "js": (_filename, _line, left, right) => {
+    "js": (_filename, _code, _line, left, right) => {
       return `${left}.mod(${right})`;
     }
   },
   "+": {
-    "type": (filename, line, left, right) => {
+    "type": (filename, code, line, left, right) => {
       if (!right) {
         return new RareScriptError(filename, code, line, 34, "Expected right side");
       }
@@ -190,7 +190,7 @@ var operators = {
       }
       return new RareScriptError(filename, code, line, 22, "Operator does not accept this type");
     },
-    "js": (_filename, _line, left, right, leftType) => {
+    "js": (_filename, _code, _line, left, right, leftType) => {
       if (!left) {
         return `${right}.abs()`;
       }
@@ -203,7 +203,7 @@ var operators = {
     }
   },
   "-": {
-    "type": (filename, line, left, right) => {
+    "type": (filename, code, line, left, right) => {
       if (!right) {
         return new RareScriptError(filename, code, line, 36, "Expected right side");
       }
@@ -226,12 +226,12 @@ var operators = {
         "star": false
       };
     },
-    "js": (_filename, _line, left, right) => {
+    "js": (_filename, _code, _line, left, right) => {
       return left ? `${left}.sub(${right})` : `${right}.neg()`;
     }
   },
   "<<": {
-    "type": (filename, line, left, right) => {
+    "type": (filename, code, line, left, right) => {
       if (!left) {
         return new RareScriptError(filename, code, line, 59, "Expected left side");
       }
@@ -247,12 +247,12 @@ var operators = {
         "star": false
       };
     },
-    "js": (_filename, _line, left, right) => {
+    "js": (_filename, _code, _line, left, right) => {
       return `new RSNumber(${left} << ${right})`
     }
   },
   ">>": {
-    "type": (filename, line, left, right) => {
+    "type": (filename, code, line, left, right) => {
       if (!left) {
         return new RareScriptError(filename, code, line, 62, "Expected left side");
       }
@@ -268,12 +268,12 @@ var operators = {
         "star": false
       };
     },
-    "js": (_filename, _line, left, right) => {
+    "js": (_filename, _code, _line, left, right) => {
       return `new RSNumber(${left} >> ${right})`
     }
   },
   "|": {
-    "type": (filename, line, left, right) => {
+    "type": (filename, code, line, left, right) => {
       if (!left) {
         return new RareScriptError(filename, code, line, 65, "Expected left side");
       }
@@ -294,7 +294,7 @@ var operators = {
     }
   },
   "&": {
-    "type": (filename, line, left, right) => {
+    "type": (filename, code, line, left, right) => {
       if (!left) {
         return new RareScriptError(filename, code, line, 68, "Expected left side");
       }
@@ -310,12 +310,12 @@ var operators = {
         "star": false
       };
     },
-    "js": (_filename, _line, left, right) => {
+    "js": (_filename, _code, _line, left, right) => {
       return `new RSNumber(${left} & ${right})`
     }
   },
   "^": {
-    "type": (filename, line, left, right) => {
+    "type": (filename, code, line, left, right) => {
       if (!left) {
         return new RareScriptError(filename, code, line, 71, "Expected left side");
       }
@@ -331,12 +331,12 @@ var operators = {
         "star": false
       };
     },
-    "js": (_filename, _line, left, right) => {
+    "js": (_filename, _code, _line, left, right) => {
       return `new RSNumber(${left} ^ ${right})`
     }
   },
   "|>": {
-    "type": (filename, line, left, right) => {
+    "type": (filename, code, line, left, right) => {
       if (!left) {
         return new RareScriptError(filename, code, line, 74, "Expected left side");
       }
@@ -348,12 +348,12 @@ var operators = {
       }
       return right.type.subtype[1];
     },
-    "js": (_filename, _line, left, right) => {
+    "js": (_filename, _code, _line, left, right) => {
       return `${right}(${left})`;
     }
   },
   "=": {
-    "type": (filename, line, left, right) => {
+    "type": (filename, code, line, left, right) => {
       if (!left) {
         return new RareScriptError(filename, code, line, 77, "Expected left side");
       }
@@ -370,12 +370,12 @@ var operators = {
       };
     },
     "jsExtra": `var equals = (a, b) => (typeof RSNumber !== "undefined" && a instanceof RSNumber && b instanceof RSNumber) ? a.toString() === b.toString() : a === b;`,
-    "js": (_filename, _line, left, right) => {
+    "js": (_filename, _code, _line, left, right) => {
       return `equals(${left}, ${right})`;
     }
   },
   "!=": {
-    "type": (filename, line, left, right) => {
+    "type": (filename, code, line, left, right) => {
       if (!left) {
         return new RareScriptError(filename, code, line, 80, "Expected left side");
       }
@@ -392,12 +392,12 @@ var operators = {
       };
     },
     "jsExtra": `var equals = (a, b) => (typeof RSNumber !== "undefined" && a instanceof RSNumber && b instanceof RSNumber) ? a.toString() === b.toString() : a === b;`,
-    "js": (_filename, _line, left, right) => {
+    "js": (_filename, _code, _line, left, right) => {
       return `!equals(${left}, ${right})`;
     }
   },
   "<": {
-    "type": (filename, line, left, right) => {
+    "type": (filename, code, line, left, right) => {
       if (!left) {
         return new RareScriptError(filename, code, line, 83, "Expected left side");
       }
@@ -413,12 +413,12 @@ var operators = {
         "star": false
       };
     },
-    "js": (_filename, _line, left, right) => {
+    "js": (_filename, _code, _line, left, right) => {
       return `${left}.cmp(${right}) == -1`;
     }
   },
   ">": {
-    "type": (filename, line, left, right) => {
+    "type": (filename, code, line, left, right) => {
       if (!left) {
         return new RareScriptError(filename, code, line, 86, "Expected left side");
       }
@@ -434,12 +434,12 @@ var operators = {
         "star": false
       };
     },
-    "js": (_filename, _line, left, right) => {
+    "js": (_filename, _code, _line, left, right) => {
       return `${left}.cmp(${right}) == 1`;
     }
   },
   "<=": {
-    "type": (filename, line, left, right) => {
+    "type": (filename, code, line, left, right) => {
       if (!left) {
         return new RareScriptError(filename, code, line, 89, "Expected left side");
       }
@@ -455,12 +455,12 @@ var operators = {
         "star": false
       };
     },
-    "js": (_filename, _line, left, right) => {
+    "js": (_filename, _code, _line, left, right) => {
       return `${left}.cmp(${right}) < 1`;
     }
   },
   ">=": {
-    "type": (filename, line, left, right) => {
+    "type": (filename, code, line, left, right) => {
       if (!left) {
         return new RareScriptError(filename, code, line, 92, "Expected left side");
       }
@@ -476,12 +476,12 @@ var operators = {
         "star": false
       };
     },
-    "js": (_filename, _line, left, right) => {
+    "js": (_filename, _code, _line, left, right) => {
       return `${left}.cmp(${right}) > -1`;
     }
   },
   "!": {
-    "type": (filename, line, left, right) => {
+    "type": (filename, code, line, left, right) => {
       if (left) {
         return new RareScriptError(filename, code, line, 95, "Operator does not accept left side");
       }
@@ -497,12 +497,12 @@ var operators = {
         "star": false
       };
     },
-    "js": (_filename, _line, _left, right) => {
+    "js": (_filename, _code, _line, _left, right) => {
       return `!${right}`;
     }
   },
   "or": {
-    "type": (filename, line, left, right) => {
+    "type": (filename, code, line, left, right) => {
       if (!left) {
         return new RareScriptError(filename, code, line, 98, "Expected left side");
       }
@@ -518,12 +518,12 @@ var operators = {
         "star": false
       };
     },
-    "js": (_filename, _line, left, right) => {
+    "js": (_filename, _code, _line, left, right) => {
       return `${left} || ${right}`;
     }
   },
   "and": {
-    "type": (filename, line, left, right) => {
+    "type": (filename, code, line, left, right) => {
       if (!left) {
         return new RareScriptError(filename, code, line, 101, "Expected left side");
       }
@@ -539,13 +539,13 @@ var operators = {
         "star": false
       };
     },
-    "js": (_filename, _line, left, right) => {
+    "js": (_filename, _code, _line, left, right) => {
       return `${left} && ${right}`;
     }
   },
   ":=": {
     "leftRaw": true,
-    "type": (filename, line, left, right) => {
+    "type": (filename, code, line, left, right) => {
       if (!left) {
         return new RareScriptError(filename, code, line, 104, "Expected left side");
       }
@@ -560,7 +560,7 @@ var operators = {
       }
       return right;
     },
-    "js": (filename, line, left, right) => {
+    "js": (filename, code, line, left, right) => {
       if (left.type != "identifier") {
         return new RareScriptError(filename, code, line, 107, "Expected identifier on left side");
       }
@@ -1444,7 +1444,7 @@ function compiler(filename, code, ast, target, debug) {
         if (operators[expression.operator].jsExtra && !compiled[1].includes(operators[expression.operator].jsExtra)) {
           compiled[1].push(operators[expression.operator].jsExtra);
         }
-        var result = operators[expression.operator].type(filename, lastInstruction.line, leftType, rightType);
+        var result = operators[expression.operator].type(filename, code, lastInstruction.line, leftType, rightType);
         if (result instanceof RareScriptError) {
           cachedError = result;
           return result;
@@ -1458,7 +1458,7 @@ function compiler(filename, code, ast, target, debug) {
       if (!operators[expression.operator].rightRaw) {
         right = (right ? compileExpression(right) : null);
       }
-      return operators[expression.operator].js(filename, lastInstruction.line, left, right, expression.left ? solveExpressionType(expression.left) : null, expression.right ? solveExpressionType(expression.right) : null);
+      return operators[expression.operator].js(filename, code, lastInstruction.line, left, right, expression.left ? solveExpressionType(expression.left) : null, expression.right ? solveExpressionType(expression.right) : null);
     }
     if (expression.type == "function") {
       var namespace = null;
@@ -1620,7 +1620,7 @@ function compiler(filename, code, ast, target, debug) {
       if (cachedError) {
         return cachedError;
       }
-      var result = operators[expression.operator].type(filename, lastInstruction.line, left, right);
+      var result = operators[expression.operator].type(filename, code, lastInstruction.line, left, right);
       if (result instanceof RareScriptError) {
         cachedError = result;
       }
