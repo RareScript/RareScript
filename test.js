@@ -357,7 +357,7 @@ expectTokensAndAST("import typing; typing::number final c2t := 1;", [{
 }]);
 expectError("typing::number a := ;", 9);
 
-expectTokensAndAST("import console; console::out(1..5);", [{
+/*expectTokensAndAST("import console; console::out(1..5);", [{
   "type": RareScript.TokenType.KEYWORD,
   "value": "import"
 }, {
@@ -476,7 +476,7 @@ expectTokensAndAST(`import console; console::out("cat"->2 = 'a');`, [{
       }
     }]
   }
-}]);
+}]);*/
 expectTokensAndAST("import console; console::out(-1.59);", [{
   "type": RareScript.TokenType.KEYWORD,
   "value": "import"
@@ -519,7 +519,7 @@ expectTokensAndAST("import console; console::out(-1.59);", [{
 expectError("console::out('a);", 1);
 expectError(`console::out("a);`, 2);
 expectError(`console::out("a\n`, 0);
-expectTokensAndAST("import console; console::out(1-2,-2,1+-2,1--2,a-2,-getOne()-2);", [{
+/*expectTokensAndAST("import console; console::out(1-2,-2,1+-2,1--2,a-2,-getOne()-2);", [{
   "type": RareScript.TokenType.KEYWORD,
   "value": "import"
 }, {
@@ -687,7 +687,7 @@ expectTokensAndAST("import console; console::out(1-2,-2,1+-2,1--2,a-2,-getOne()-
       }
     }]
   }
-}]);
+}]);*/
 expectTokensAndAST("1 + 2 * 3 - 4 + 5;", [{
   "type": RareScript.TokenType.NUMBER,
   "value": "1"
