@@ -51,13 +51,13 @@ var operators = {
   "**": {
     "type": (filename, line, left, right) => {
       if (!left) {
-        return new RareScriptError(filename, line, 53, "Expected left side");
+        return new RareScriptError(filename, code, line, 53, "Expected left side");
       }
       if (!right) {
-        return new RareScriptError(filename, line, 54, "Expected right side");
+        return new RareScriptError(filename, code, line, 54, "Expected right side");
       }
       if (left.type.base != "typing::number" || right.type.base != "typing::number") {
-        return new RareScriptError(filename, line, 55, "Operator expects typing::number");
+        return new RareScriptError(filename, code, line, 55, "Operator expects typing::number");
       }
       return {
         "base": "typing::number",
@@ -72,13 +72,13 @@ var operators = {
   "*": {
     "type": (filename, line, left, right) => {
       if (!left) {
-        return new RareScriptError(filename, line, 37, "Expected left side");
+        return new RareScriptError(filename, code, line, 37, "Expected left side");
       }
       if (!right) {
-        return new RareScriptError(filename, line, 38, "Expected right side");
+        return new RareScriptError(filename, code, line, 38, "Expected right side");
       }
       if (left.type.base != "typing::number" || right.type.base != "typing::number") {
-        return new RareScriptError(filename, line, 24, "Operator expects typing::number");
+        return new RareScriptError(filename, code, line, 24, "Operator expects typing::number");
       }
       return {
         "base": "typing::number",
@@ -93,13 +93,13 @@ var operators = {
   "/": {
     "type": (filename, line, left, right) => {
       if (!left) {
-        return new RareScriptError(filename, line, 39, "Expected left side");
+        return new RareScriptError(filename, code, line, 39, "Expected left side");
       }
       if (!right) {
-        return new RareScriptError(filename, line, 40, "Expected right side");
+        return new RareScriptError(filename, code, line, 40, "Expected right side");
       }
       if (left.type.base != "typing::number" || right.type.base != "typing::number") {
-        return new RareScriptError(filename, line, 25, "Operator expects typing::number");
+        return new RareScriptError(filename, code, line, 25, "Operator expects typing::number");
       }
       return {
         "base": "typing::number",
@@ -114,13 +114,13 @@ var operators = {
   "//": {
     "type": (filename, line, left, right) => {
       if (!left) {
-        return new RareScriptError(filename, line, 56, "Expected left side");
+        return new RareScriptError(filename, code, line, 56, "Expected left side");
       }
       if (!right) {
-        return new RareScriptError(filename, line, 57, "Expected right side");
+        return new RareScriptError(filename, code, line, 57, "Expected right side");
       }
       if (left.type.base != "typing::number" || right.type.base != "typing::number") {
-        return new RareScriptError(filename, line, 58, "Operator expects typing::number");
+        return new RareScriptError(filename, code, line, 58, "Operator expects typing::number");
       }
       return {
         "base": "typing::number",
@@ -135,13 +135,13 @@ var operators = {
   "%": {
     "type": (filename, line, left, right) => {
       if (!left) {
-        return new RareScriptError(filename, line, 41, "Expected left side");
+        return new RareScriptError(filename, code, line, 41, "Expected left side");
       }
       if (!right) {
-        return new RareScriptError(filename, line, 42, "Expected right side");
+        return new RareScriptError(filename, code, line, 42, "Expected right side");
       }
       if (left.type.base != "typing::number" || right.type.base != "typing::number") {
-        return new RareScriptError(filename, line, 26, "Operator expects typing::number");
+        return new RareScriptError(filename, code, line, 26, "Operator expects typing::number");
       }
       return {
         "base": "typing::number",
@@ -156,11 +156,11 @@ var operators = {
   "+": {
     "type": (filename, line, left, right) => {
       if (!right) {
-        return new RareScriptError(filename, line, 34, "Expected right side");
+        return new RareScriptError(filename, code, line, 34, "Expected right side");
       }
       if (!left) {
         if (right.type.base != "typing::number") {
-          return new RareScriptError(filename, line, 33, "Expected right side to be typing::number");
+          return new RareScriptError(filename, code, line, 33, "Expected right side to be typing::number");
         }
         return {
           "base": "typing::number",
@@ -170,7 +170,7 @@ var operators = {
       }
       if (left.type.base == "typing::string" || left.type.base == "typing::char") {
         if (right.type.base != "typing::string" && right.type.base != "typing::char") {
-          return new RareScriptError(filename, line, 20, "Expected right side to be typing::string or typing::char");
+          return new RareScriptError(filename, code, line, 20, "Expected right side to be typing::string or typing::char");
         }
         return {
           "base": "typing::string",
@@ -180,7 +180,7 @@ var operators = {
       }
       if (left.type.base == "typing::number") {
         if (right.type.base != "typing::number") {
-          return new RareScriptError(filename, line, 21, "Expected right side to be typing::number");
+          return new RareScriptError(filename, code, line, 21, "Expected right side to be typing::number");
         }
         return {
           "base": "typing::number",
@@ -188,7 +188,7 @@ var operators = {
           "star": false
         };
       }
-      return new RareScriptError(filename, line, 22, "Operator does not accept this type");
+      return new RareScriptError(filename, code, line, 22, "Operator does not accept this type");
     },
     "js": (_filename, _line, left, right, leftType) => {
       if (!left) {
@@ -205,11 +205,11 @@ var operators = {
   "-": {
     "type": (filename, line, left, right) => {
       if (!right) {
-        return new RareScriptError(filename, line, 36, "Expected right side");
+        return new RareScriptError(filename, code, line, 36, "Expected right side");
       }
       if (!left) {
         if (right.type.base != "typing::number") {
-          return new RareScriptError(filename, line, 35, "Expected right side to be typing::number");
+          return new RareScriptError(filename, code, line, 35, "Expected right side to be typing::number");
         }
         return {
           "base": "typing::number",
@@ -218,7 +218,7 @@ var operators = {
         };
       }
       if (left.type.base != "typing::number" || right.type.base != "typing::number") {
-        return new RareScriptError(filename, line, 23, "Operator expects typing::number");
+        return new RareScriptError(filename, code, line, 23, "Operator expects typing::number");
       }
       return {
         "base": "typing::number",
@@ -233,13 +233,13 @@ var operators = {
   "<<": {
     "type": (filename, line, left, right) => {
       if (!left) {
-        return new RareScriptError(filename, line, 59, "Expected left side");
+        return new RareScriptError(filename, code, line, 59, "Expected left side");
       }
       if (!right) {
-        return new RareScriptError(filename, line, 60, "Expected right side");
+        return new RareScriptError(filename, code, line, 60, "Expected right side");
       }
       if (left.type.base != "typing::number" || right.type.base != "typing::number") {
-        return new RareScriptError(filename, line, 61, "Operator expects typing::number");
+        return new RareScriptError(filename, code, line, 61, "Operator expects typing::number");
       }
       return {
         "base": "typing::number",
@@ -254,13 +254,13 @@ var operators = {
   ">>": {
     "type": (filename, line, left, right) => {
       if (!left) {
-        return new RareScriptError(filename, line, 62, "Expected left side");
+        return new RareScriptError(filename, code, line, 62, "Expected left side");
       }
       if (!right) {
-        return new RareScriptError(filename, line, 63, "Expected right side");
+        return new RareScriptError(filename, code, line, 63, "Expected right side");
       }
       if (left.type.base != "typing::number" || right.type.base != "typing::number") {
-        return new RareScriptError(filename, line, 64, "Operator expects typing::number");
+        return new RareScriptError(filename, code, line, 64, "Operator expects typing::number");
       }
       return {
         "base": "typing::number",
@@ -275,13 +275,13 @@ var operators = {
   "|": {
     "type": (filename, line, left, right) => {
       if (!left) {
-        return new RareScriptError(filename, line, 65, "Expected left side");
+        return new RareScriptError(filename, code, line, 65, "Expected left side");
       }
       if (!right) {
-        return new RareScriptError(filename, line, 66, "Expected right side");
+        return new RareScriptError(filename, code, line, 66, "Expected right side");
       }
       if (left.type.base != "typing::number" || right.type.base != "typing::number") {
-        return new RareScriptError(filename, line, 67, "Operator expects typing::number");
+        return new RareScriptError(filename, code, line, 67, "Operator expects typing::number");
       }
       return {
         "base": "typing::number",
@@ -296,13 +296,13 @@ var operators = {
   "&": {
     "type": (filename, line, left, right) => {
       if (!left) {
-        return new RareScriptError(filename, line, 68, "Expected left side");
+        return new RareScriptError(filename, code, line, 68, "Expected left side");
       }
       if (!right) {
-        return new RareScriptError(filename, line, 69, "Expected right side");
+        return new RareScriptError(filename, code, line, 69, "Expected right side");
       }
       if (left.type.base != "typing::number" || right.type.base != "typing::number") {
-        return new RareScriptError(filename, line, 70, "Operator expects typing::number");
+        return new RareScriptError(filename, code, line, 70, "Operator expects typing::number");
       }
       return {
         "base": "typing::number",
@@ -317,13 +317,13 @@ var operators = {
   "^": {
     "type": (filename, line, left, right) => {
       if (!left) {
-        return new RareScriptError(filename, line, 71, "Expected left side");
+        return new RareScriptError(filename, code, line, 71, "Expected left side");
       }
       if (!right) {
-        return new RareScriptError(filename, line, 72, "Expected right side");
+        return new RareScriptError(filename, code, line, 72, "Expected right side");
       }
       if (left.type.base != "typing::number" || right.type.base != "typing::number") {
-        return new RareScriptError(filename, line, 73, "Operator expects typing::number");
+        return new RareScriptError(filename, code, line, 73, "Operator expects typing::number");
       }
       return {
         "base": "typing::number",
@@ -338,13 +338,13 @@ var operators = {
   "|>": {
     "type": (filename, line, left, right) => {
       if (!left) {
-        return new RareScriptError(filename, line, 74, "Expected left side");
+        return new RareScriptError(filename, code, line, 74, "Expected left side");
       }
       if (!right) {
-        return new RareScriptError(filename, line, 75, "Expected right side");
+        return new RareScriptError(filename, code, line, 75, "Expected right side");
       }
       if (right.type.base != "typing::function" || right.type.subtype.length != 2 || JSON.stringify(right.type.subtype[0]) != JSON.stringify(left.type)) {
-        return new RareScriptError(filename, line, 76, `Expected "typing::function<${renderType(left.type)}, typing::any>" on right side`);
+        return new RareScriptError(filename, code, line, 76, `Expected "typing::function<${renderType(left.type)}, typing::any>" on right side`);
       }
       return right.type.subtype[1];
     },
@@ -355,13 +355,13 @@ var operators = {
   "=": {
     "type": (filename, line, left, right) => {
       if (!left) {
-        return new RareScriptError(filename, line, 77, "Expected left side");
+        return new RareScriptError(filename, code, line, 77, "Expected left side");
       }
       if (!right) {
-        return new RareScriptError(filename, line, 78, "Expected right side");
+        return new RareScriptError(filename, code, line, 78, "Expected right side");
       }
       if (left.type.base != "typing::any" && right.type.base != "typing::any" && JSON.stringify(left.type) != JSON.stringify(right.type)) {
-        return new RareScriptError(filename, line, 79, "Comparing different types is always false");
+        return new RareScriptError(filename, code, line, 79, "Comparing different types is always false");
       }
       return {
         "base": "typing::boolean",
@@ -377,13 +377,13 @@ var operators = {
   "!=": {
     "type": (filename, line, left, right) => {
       if (!left) {
-        return new RareScriptError(filename, line, 80, "Expected left side");
+        return new RareScriptError(filename, code, line, 80, "Expected left side");
       }
       if (!right) {
-        return new RareScriptError(filename, line, 81, "Expected right side");
+        return new RareScriptError(filename, code, line, 81, "Expected right side");
       }
       if (left.type.base != "typing::any" && right.type.base != "typing::any" && JSON.stringify(left.type) != JSON.stringify(right.type)) {
-        return new RareScriptError(filename, line, 82, "Comparing different types is always false");
+        return new RareScriptError(filename, code, line, 82, "Comparing different types is always false");
       }
       return {
         "base": "typing::boolean",
@@ -399,13 +399,13 @@ var operators = {
   "<": {
     "type": (filename, line, left, right) => {
       if (!left) {
-        return new RareScriptError(filename, line, 83, "Expected left side");
+        return new RareScriptError(filename, code, line, 83, "Expected left side");
       }
       if (!right) {
-        return new RareScriptError(filename, line, 84, "Expected right side");
+        return new RareScriptError(filename, code, line, 84, "Expected right side");
       }
       if (left.type.base != "typing::number" || right.type.base != "typing::number") {
-        return new RareScriptError(filename, line, 85, "Operator expects typing::number");
+        return new RareScriptError(filename, code, line, 85, "Operator expects typing::number");
       }
       return {
         "base": "typing::boolean",
@@ -420,13 +420,13 @@ var operators = {
   ">": {
     "type": (filename, line, left, right) => {
       if (!left) {
-        return new RareScriptError(filename, line, 86, "Expected left side");
+        return new RareScriptError(filename, code, line, 86, "Expected left side");
       }
       if (!right) {
-        return new RareScriptError(filename, line, 87, "Expected right side");
+        return new RareScriptError(filename, code, line, 87, "Expected right side");
       }
       if (left.type.base != "typing::number" || right.type.base != "typing::number") {
-        return new RareScriptError(filename, line, 88, "Operator expects typing::number");
+        return new RareScriptError(filename, code, line, 88, "Operator expects typing::number");
       }
       return {
         "base": "typing::boolean",
@@ -441,13 +441,13 @@ var operators = {
   "<=": {
     "type": (filename, line, left, right) => {
       if (!left) {
-        return new RareScriptError(filename, line, 89, "Expected left side");
+        return new RareScriptError(filename, code, line, 89, "Expected left side");
       }
       if (!right) {
-        return new RareScriptError(filename, line, 90, "Expected right side");
+        return new RareScriptError(filename, code, line, 90, "Expected right side");
       }
       if (left.type.base != "typing::number" || right.type.base != "typing::number") {
-        return new RareScriptError(filename, line, 91, "Operator expects typing::number");
+        return new RareScriptError(filename, code, line, 91, "Operator expects typing::number");
       }
       return {
         "base": "typing::boolean",
@@ -462,13 +462,13 @@ var operators = {
   ">=": {
     "type": (filename, line, left, right) => {
       if (!left) {
-        return new RareScriptError(filename, line, 92, "Expected left side");
+        return new RareScriptError(filename, code, line, 92, "Expected left side");
       }
       if (!right) {
-        return new RareScriptError(filename, line, 93, "Expected right side");
+        return new RareScriptError(filename, code, line, 93, "Expected right side");
       }
       if (left.type.base != "typing::number" || right.type.base != "typing::number") {
-        return new RareScriptError(filename, line, 94, "Operator expects typing::number");
+        return new RareScriptError(filename, code, line, 94, "Operator expects typing::number");
       }
       return {
         "base": "typing::boolean",
@@ -483,13 +483,13 @@ var operators = {
   "!": {
     "type": (filename, line, left, right) => {
       if (left) {
-        return new RareScriptError(filename, line, 95, "Operator does not accept left side");
+        return new RareScriptError(filename, code, line, 95, "Operator does not accept left side");
       }
       if (!right) {
-        return new RareScriptError(filename, line, 96, "Expected right side");
+        return new RareScriptError(filename, code, line, 96, "Expected right side");
       }
       if (right.type.base != "typing::boolean") {
-        return new RareScriptError(filename, line, 97, "Operator expects typing::boolean");
+        return new RareScriptError(filename, code, line, 97, "Operator expects typing::boolean");
       }
       return {
         "base": "typing::boolean",
@@ -504,13 +504,13 @@ var operators = {
   "or": {
     "type": (filename, line, left, right) => {
       if (!left) {
-        return new RareScriptError(filename, line, 98, "Expected left side");
+        return new RareScriptError(filename, code, line, 98, "Expected left side");
       }
       if (!right) {
-        return new RareScriptError(filename, line, 99, "Expected right side");
+        return new RareScriptError(filename, code, line, 99, "Expected right side");
       }
       if (left.type.base != "typing::boolean" || right.type.base != "typing::boolean") {
-        return new RareScriptError(filename, line, 100, "Operator expects typing::boolean");
+        return new RareScriptError(filename, code, line, 100, "Operator expects typing::boolean");
       }
       return {
         "base": "typing::boolean",
@@ -525,13 +525,13 @@ var operators = {
   "and": {
     "type": (filename, line, left, right) => {
       if (!left) {
-        return new RareScriptError(filename, line, 101, "Expected left side");
+        return new RareScriptError(filename, code, line, 101, "Expected left side");
       }
       if (!right) {
-        return new RareScriptError(filename, line, 102, "Expected right side");
+        return new RareScriptError(filename, code, line, 102, "Expected right side");
       }
       if (left.type.base != "typing::boolean" || right.type.base != "typing::boolean") {
-        return new RareScriptError(filename, line, 103, "Operator expects typing::boolean");
+        return new RareScriptError(filename, code, line, 103, "Operator expects typing::boolean");
       }
       return {
         "base": "typing::boolean",
@@ -547,22 +547,22 @@ var operators = {
     "leftRaw": true,
     "type": (filename, line, left, right) => {
       if (!left) {
-        return new RareScriptError(filename, line, 104, "Expected left side");
+        return new RareScriptError(filename, code, line, 104, "Expected left side");
       }
       if (!right) {
-        return new RareScriptError(filename, line, 105, "Expected right side");
+        return new RareScriptError(filename, code, line, 105, "Expected right side");
       }
       if (left.modifiers.includes("final")) {
-        return new RareScriptError(filename, line, 111, "Cannot assign to a final variable");
+        return new RareScriptError(filename, code, line, 111, "Cannot assign to a final variable");
       }
       if (JSON.stringify(left.type) != JSON.stringify(right.type)) {
-        return new RareScriptError(filename, line, 106, `Cannot assign "${renderType(right.type)}" as "${renderType(left.type)}"`);
+        return new RareScriptError(filename, code, line, 106, `Cannot assign "${renderType(right.type)}" as "${renderType(left.type)}"`);
       }
       return right;
     },
     "js": (filename, line, left, right) => {
       if (left.type != "identifier") {
-        return new RareScriptError(filename, line, 107, "Expected identifier on left side");
+        return new RareScriptError(filename, code, line, 107, "Expected identifier on left side");
       }
       var namespace = null;
       var variableName = left.value;
@@ -590,16 +590,17 @@ var operatorPriority = [
 ];
 
 class RareScriptError {
-  constructor(file, line, code, message) {
+  constructor(file, sourceCode, line, code, message) {
     this.file = file;
+    this.sourceCode = sourceCode;
     this.line = line;
     this.code = code;
     this.message = message;
   }
 };
 
-function throwError(error, code) {
-  console.log(`    \x1B[38;2;119;119;119m╭─\x1B[39m\x1B[35m[${error.file}]\x1B[39m\n    \x1B[38;2;119;119;119m·\x1B[39m\n${((error.line.toString().length > 3) ? "" : " ".repeat(3 - error.line.toString().length))}\x1B[31m${error.line}\x1B[39m${((error.line.toString().length > 3) ? "" : " ")}│ \x1B[33m\x1B[4m${code ? code.split("\n")[error.line - 1] : "[No source code]"}\x1B[24m\x1B[39m\n    \x1B[38;2;119;119;119m·\x1B[39m${" ".repeat((code ? code.split("\n")[error.line - 1].length : 16) - 1)}\x1B[33m╰─────── \x1B[1mE${error.code.toString(16).padStart(2, "0").toUpperCase()}: ${error.message}\x1B[22m\x1B[39m\n    \x1B[38;2;119;119;119m·\x1B[39m\n\x1B[38;2;119;119;119m────╯\x1B[39m`);
+function throwError(error) {
+  console.log(`    \x1B[38;2;119;119;119m╭─\x1B[39m\x1B[35m[${error.file}]\x1B[39m\n    \x1B[38;2;119;119;119m·\x1B[39m\n${((error.line.toString().length > 3) ? "" : " ".repeat(3 - error.line.toString().length))}\x1B[31m${error.line}\x1B[39m${((error.line.toString().length > 3) ? "" : " ")}│ \x1B[33m\x1B[4m${error.sourceCode ? error.sourceCode.split("\n")[error.line - 1] : "[No source code]"}\x1B[24m\x1B[39m\n    \x1B[38;2;119;119;119m·\x1B[39m${" ".repeat((error.sourceCode ? error.sourceCode.split("\n")[error.line - 1].length : 16) - 1)}\x1B[33m╰─────── \x1B[1mE${error.code.toString(16).padStart(2, "0").toUpperCase()}: ${error.message}\x1B[22m\x1B[39m\n    \x1B[38;2;119;119;119m·\x1B[39m\n\x1B[38;2;119;119;119m────╯\x1B[39m`);
   return error;
 }
 
@@ -826,13 +827,13 @@ function lexer(filename, code) {
     var char = code[i];
     if (char == "\n") {
       if (isString) {
-        return new RareScriptError(filename, currentLine, 0, "Got new line before string close");
+        return new RareScriptError(filename, code, currentLine, 0, "Got new line before string close");
       }
       currentLine++;
     }
     if (char == "'") {
       if (code[i + 2] != "'") {
-        return new RareScriptError(filename, currentLine, 1, "Invalid char");
+        return new RareScriptError(filename, code, currentLine, 1, "Invalid char");
       }
       currentToken += char;
       currentToken += code[i + 1];
@@ -892,7 +893,7 @@ function lexer(filename, code) {
     addToken(code.length);
   }
   if (isString) {
-    return new RareScriptError(filename, currentLine, 2, "Got EOF before string close");
+    return new RareScriptError(filename, code, currentLine, 2, "Got EOF before string close");
   }
 
   return tokens;
@@ -963,7 +964,7 @@ function parser(filename, code, tokens) {
 
   function requireSeparator() {
     if (!expectToken(TokenType.SEPARATOR)) {
-      cachedError = new RareScriptError(filename, lastToken.line, 6, "Expected separator");
+      cachedError = new RareScriptError(filename, code, lastToken.line, 6, "Expected separator");
       return cachedError;
     }
   }
@@ -979,13 +980,13 @@ function parser(filename, code, tokens) {
         case "import":
           var module = expectToken(TokenType.IDENTIFIER);
           if (!module) {
-            return new RareScriptError(filename, token.line, 4, "Expected module name");
+            return new RareScriptError(filename, code, token.line, 4, "Expected module name");
           }
           var as = null;
           if (expectToken("as")) {
             as = expectToken(TokenType.IDENTIFIER);
             if (!as) {
-              return new RareScriptError(filename, token.line, 5, "Expected import as name");
+              return new RareScriptError(filename, code, token.line, 5, "Expected import as name");
             }
           }
           requireSeparator();
@@ -999,7 +1000,7 @@ function parser(filename, code, tokens) {
         case "scope":
           var module = expectToken(TokenType.IDENTIFIER);
           if (!module) {
-            return new RareScriptError(filename, token.line, 113, "Expected module name");
+            return new RareScriptError(filename, code, token.line, 113, "Expected module name");
           }
           requireSeparator();
           ast.push({
@@ -1014,7 +1015,7 @@ function parser(filename, code, tokens) {
             condition.push(takeToken());
           }
           if (!condition.length) {
-            return new RareScriptError(filename, token.line, 14, "Expected a condition");
+            return new RareScriptError(filename, code, token.line, 14, "Expected a condition");
           }
           var bracketDepth = 1;
           for (var tokenIndex = 0; tokenIndex < tokens.length; tokenIndex++) {
@@ -1032,7 +1033,7 @@ function parser(filename, code, tokens) {
           expectToken("}");
           if (expectToken("else")) {
             if (!expectToken("{")) {
-              return new RareScriptError(filename, token.line, 15, "Expected {");
+              return new RareScriptError(filename, code, token.line, 15, "Expected {");
             }
             var bracketDepth = 1;
             for (var tokenIndex = 0; tokenIndex < tokens.length; tokenIndex++) {
@@ -1061,12 +1062,12 @@ function parser(filename, code, tokens) {
           while(!expectToken(TokenType.SEPARATOR)) {
             var expressionToken = takeToken();
             if (!expressionToken) {
-              return new RareScriptError(filename, token.line, 10, "Expected separator, got EOF");
+              return new RareScriptError(filename, code, token.line, 10, "Expected separator, got EOF");
             }
             value.push(expressionToken);
           }
           if (!value.length) {
-            return new RareScriptError(filename, token.line, 11, "Expected return value");
+            return new RareScriptError(filename, code, token.line, 11, "Expected return value");
           }
           ast.push({
             "type": InstructionType.RETURN,
@@ -1075,7 +1076,7 @@ function parser(filename, code, tokens) {
           });
           continue;
         default:
-          return new RareScriptError(filename, token.line, 3, `Unexpected keyword "${value}"`);
+          return new RareScriptError(filename, code, token.line, 3, `Unexpected keyword "${value}"`);
       }
     }
     if (token.type == TokenType.IDENTIFIER) {
@@ -1119,12 +1120,12 @@ function parser(filename, code, tokens) {
         while(!expectToken(TokenType.SEPARATOR)) {
           var expressionToken = takeToken();
           if (!expressionToken) {
-            return new RareScriptError(filename, token.line, 8, "Expected separator, got EOF");
+            return new RareScriptError(filename, code, token.line, 8, "Expected separator, got EOF");
           }
           value.push(expressionToken);
         }
         if (!value.length) {
-          return new RareScriptError(filename, token.line, 9, "Expected variable value");
+          return new RareScriptError(filename, code, token.line, 9, "Expected variable value");
         }
         ast.push({
           "type": InstructionType.VARIABLE,
@@ -1145,7 +1146,7 @@ function parser(filename, code, tokens) {
         while(!expectToken(")")) {
           if (args.length) {
             if (!expectToken(",")) {
-              return new RareScriptError(filename, token.line, 13, "Expected comma between arguments");
+              return new RareScriptError(filename, code, token.line, 13, "Expected comma between arguments");
             }
           }
           var argumentTypeBase = takeToken();
@@ -1178,7 +1179,7 @@ function parser(filename, code, tokens) {
           });
         }
         if (!expectToken("{")) {
-          return new RareScriptError(filename, token.line, 12, "Expected {");
+          return new RareScriptError(filename, code, token.line, 12, "Expected {");
         }
         var bracketDepth = 1;
         for (var tokenIndex = 0; tokenIndex < tokens.length; tokenIndex++) {
@@ -1211,13 +1212,13 @@ function parser(filename, code, tokens) {
     while(!expectToken(TokenType.SEPARATOR)) {
       var expressionToken = takeToken();
       if (!expressionToken) {
-        return new RareScriptError(filename, token.line, 7, "Expected separator, got EOF");
+        return new RareScriptError(filename, code, token.line, 7, "Expected separator, got EOF");
       }
       expression.push(expressionToken);
     }
     expression = parseExpression(filename, code, expression);
     if (!expression) {
-      return new RareScriptError(filename, token.line, 117, "Invalid expression");
+      return new RareScriptError(filename, code, token.line, 117, "Invalid expression");
     }
     ast.push({
       "type": InstructionType.EXPRESSION,
@@ -1395,7 +1396,7 @@ function renderType(type) {
   return `${type.star ? "*" : ""}${type.base}${type.subtype.length ? `<${type.subtype.map(renderType).join(", ")}>` : ""}`;
 }
 
-function compiler(filename, ast, target, debug) {
+function compiler(filename, code, ast, target, debug) {
   var namespaces = new Map;
   var scopes = [];
   var typeTransformationTable = new Map;
@@ -1468,11 +1469,11 @@ function compiler(filename, ast, target, debug) {
       function applyNamespace(namespace) {
         if (namespace && !addedFunctions.has(`${namespace}::${functionName}`)) {
           if (!namespaces.has(namespace)) {
-            cachedError = new RareScriptError(filename, lastInstruction.line, 17, `Namespace "${namespace}" does not exist`);
+            cachedError = new RareScriptError(filename, code, lastInstruction.line, 17, `Namespace "${namespace}" does not exist`);
             return cachedError;
           }
           if (namespace && !namespaces.get(namespace).variables.has(functionName)) {
-        cachedError = new RareScriptError(filename, lastInstruction.line, 45, `Variable "${namespace ? `${namespace}::` : ""}${functionName}" does not exist`);
+        cachedError = new RareScriptError(filename, code, lastInstruction.line, 45, `Variable "${namespace ? `${namespace}::` : ""}${functionName}" does not exist`);
             return cachedError;
           }
           addedFunctions.add(`${namespace}::${functionName}`);
@@ -1519,7 +1520,7 @@ function compiler(filename, ast, target, debug) {
               }
             }
             if (!argumentsTypesCorrect) {
-              cachedError = new RareScriptError(filename, lastInstruction.line, 114, `Variable "${functionName}" does not exist`);
+              cachedError = new RareScriptError(filename, code, lastInstruction.line, 114, `Variable "${functionName}" does not exist`);
               return cachedError;
             }
             var applyResult = applyNamespace(namespace);
@@ -1534,7 +1535,7 @@ function compiler(filename, ast, target, debug) {
         return cachedError;
       }
       if (argumentsTypesCorrect.length != argumentsTypes.length) {
-        cachedError = new RareScriptError(filename, lastInstruction.line, 18, `Expected ${argumentsTypesCorrect.length} arguments, but got ${argumentsTypes.length}`);
+        cachedError = new RareScriptError(filename, code, lastInstruction.line, 18, `Expected ${argumentsTypesCorrect.length} arguments, but got ${argumentsTypes.length}`);
         return cachedError;
       }
       for (var argumentIndex = 0; argumentIndex < argumentsTypes.length; argumentIndex++) {
@@ -1542,7 +1543,7 @@ function compiler(filename, ast, target, debug) {
           continue;
         }
         if (JSON.stringify(argumentsTypesCorrect[argumentIndex]) != JSON.stringify(argumentsTypes[argumentIndex])) {
-          cachedError = new RareScriptError(filename, lastInstruction.line, 19, `Expected argument type ${renderType(argumentsTypesCorrect[argumentIndex])}, but got ${renderType(argumentsTypes[argumentIndex])}`);
+          cachedError = new RareScriptError(filename, code, lastInstruction.line, 19, `Expected argument type ${renderType(argumentsTypesCorrect[argumentIndex])}, but got ${renderType(argumentsTypes[argumentIndex])}`);
           return cachedError;
         }
       }
@@ -1569,11 +1570,11 @@ function compiler(filename, ast, target, debug) {
       }
       if (namespace) {
         if (!namespaces.has(namespace)) {
-          cachedError = new RareScriptError(filename, lastInstruction.line, 109, `Namespace "${namespace}" does not exist`);
+          cachedError = new RareScriptError(filename, code, lastInstruction.line, 109, `Namespace "${namespace}" does not exist`);
           return cachedError;
         }
         if (!namespaces.get(namespace).variables.has(variableName)) {
-          cachedError = new RareScriptError(filename, lastInstruction.line, 110, `Variable "${namespace}::${variableName}" does not exist`);
+          cachedError = new RareScriptError(filename, code, lastInstruction.line, 110, `Variable "${namespace}::${variableName}" does not exist`);
           return cachedError;
         }
         return namespaces.get(namespace).variables.get(variableName);
@@ -1587,7 +1588,7 @@ function compiler(filename, ast, target, debug) {
       if (globalVariables.has(expression.value)) {
         return globalVariables.get(expression.value);
       }
-      cachedError = new RareScriptError(filename, lastInstruction.line, 28, `Variable "${expression.value}" does not exist`);
+      cachedError = new RareScriptError(filename, code, lastInstruction.line, 28, `Variable "${expression.value}" does not exist`);
       return cachedError;
     }
     if (expression.type == "number") {
@@ -1636,11 +1637,11 @@ function compiler(filename, ast, target, debug) {
       }
       if (namespace) {
         if (!namespaces.has(namespace)) {
-          cachedError = new RareScriptError(filename, lastInstruction.line, 43, `Namespace "${namespace}" does not exist`);
+          cachedError = new RareScriptError(filename, code, lastInstruction.line, 43, `Namespace "${namespace}" does not exist`);
           return cachedError;
         }
         if (!namespaces.get(namespace).variables.has(functionName)) {
-          cachedError = new RareScriptError(filename, lastInstruction.line, 44, `Variable "${namespace}::${functionName}" does not exist`);
+          cachedError = new RareScriptError(filename, code, lastInstruction.line, 44, `Variable "${namespace}::${functionName}" does not exist`);
           return cachedError;
         }
         return {
@@ -1671,7 +1672,7 @@ function compiler(filename, ast, target, debug) {
           };
         }
       }
-      cachedError = new RareScriptError(filename, lastInstruction.line, 50, `Variable "${functionName}" does not exist`);
+      cachedError = new RareScriptError(filename, code, lastInstruction.line, 50, `Variable "${functionName}" does not exist`);
       return cachedError;
     }
   }
@@ -1712,7 +1713,7 @@ function compiler(filename, ast, target, debug) {
       var compiledLength = compiled.length;
       if (instruction.type == InstructionType.IMPORT) {
         if (!importStreak) {
-          return new RareScriptError(filename, instruction.line, 108, "Imports should be at the start of top-level");
+          return new RareScriptError(filename, code, instruction.line, 108, "Imports should be at the start of top-level");
         }
         if (instruction.as) {
           typeTransformationTable.set(instruction.as, instruction.module);
@@ -1751,17 +1752,17 @@ function compiler(filename, ast, target, debug) {
           compiled[0].push(`var ${instruction.as || instruction.module} = {};`);
           continue;
         }
-        return new RareScriptError(filename, instruction.line, 16, `Module "${instruction.module}" not found`);
+        return new RareScriptError(filename, code, instruction.line, 16, `Module "${instruction.module}" not found`);
       }
       if (instruction.type == InstructionType.SCOPE) {
         if (!importStreak) {
-          return new RareScriptError(filename, instruction.line, 118, "Scopes should be at the start of top-level");
+          return new RareScriptError(filename, code, instruction.line, 118, "Scopes should be at the start of top-level");
         }
         if (!namespaces.has(instruction.module)) {
-          return new RareScriptError(filename, instruction.line, 115, `Namespace "${namespace}" does not exist`);
+          return new RareScriptError(filename, code, instruction.line, 115, `Namespace "${namespace}" does not exist`);
         }
         if (scopes.includes(instruction.module)) {
-          return new RareScriptError(filename, instruction.line, 116, `Namespace "${namespace}" is already in the scope`);
+          return new RareScriptError(filename, code, instruction.line, 116, `Namespace "${namespace}" is already in the scope`);
         }
         scopes.push(instruction.module);
       }
@@ -1774,7 +1775,7 @@ function compiler(filename, ast, target, debug) {
           context = contexts.at(-1).variables;
         }
         if (context.has(instruction.name)) {
-          return new RareScriptError(filename, instruction.line, 27, `Variable "${instruction.name}" already exists`);
+          return new RareScriptError(filename, code, instruction.line, 27, `Variable "${instruction.name}" already exists`);
         }
         var typeNamespace = null;
         var type = instruction.variableType.base;
@@ -1782,18 +1783,18 @@ function compiler(filename, ast, target, debug) {
           [typeNamespace, type] = type.split("::");
         }
         if (typeNamespace && !namespaces.has(typeNamespace)) {
-          return new RareScriptError(filename, instruction.line, 29, `Namespace "${typeNamespace}" does not exist`);
+          return new RareScriptError(filename, code, instruction.line, 29, `Namespace "${typeNamespace}" does not exist`);
         }
         if ((!typeNamespace && !globalVariables.has(type)) || (typeNamespace && !namespaces.get(typeNamespace).variables.has(type))) {
-          return new RareScriptError(filename, instruction.line, 30, `Variable "${typeNamespace ? `${typeNamespace}::` : ""}${type}" does not exist`);
+          return new RareScriptError(filename, code, instruction.line, 30, `Variable "${typeNamespace ? `${typeNamespace}::` : ""}${type}" does not exist`);
         }
         if ((!typeNamespace && !globalVariables.get(type).modifiers.includes("type")) || (typeNamespace && !namespaces.get(typeNamespace).variables.get(type).modifiers.includes("type"))) {
-          return new RareScriptError(filename, instruction.line, 31, `Variable "${typeNamespace ? `${typeNamespace}::` : ""}${type}" is not a type`);
+          return new RareScriptError(filename, code, instruction.line, 31, `Variable "${typeNamespace ? `${typeNamespace}::` : ""}${type}" is not a type`);
         }
         var valueType = solveExpressionType(instruction.value);
         var transformedType = transformType(instruction.variableType);
         if (JSON.stringify(transformedType) != JSON.stringify(valueType.type)) {
-          return new RareScriptError(filename, instruction.line, 32, `Cannot assign "${renderType(valueType.type)}" as "${renderType(instruction.variableType)}"`);
+          return new RareScriptError(filename, code, instruction.line, 32, `Cannot assign "${renderType(valueType.type)}" as "${renderType(instruction.variableType)}"`);
         }
         context.set(instruction.name, {
           "type": transformedType,
@@ -1834,7 +1835,7 @@ function compiler(filename, ast, target, debug) {
           context = contexts.at(-1).variables;
         }
         if (context.has(instruction.name)) {
-          return new RareScriptError(filename, instruction.line, 46, `Variable "${instruction.name}" already exists`);
+          return new RareScriptError(filename, code, instruction.line, 46, `Variable "${instruction.name}" already exists`);
         }
         var typeNamespace = null;
         var type = instruction.returnType.base;
@@ -1842,13 +1843,13 @@ function compiler(filename, ast, target, debug) {
           [typeNamespace, type] = type.split("::");
         }
         if (typeNamespace && !namespaces.has(typeNamespace)) {
-          return new RareScriptError(filename, instruction.line, 47, `Namespace "${typeNamespace}" does not exist`);
+          return new RareScriptError(filename, code, instruction.line, 47, `Namespace "${typeNamespace}" does not exist`);
         }
         if ((!typeNamespace && !globalVariables.has(type)) || (typeNamespace && !namespaces.get(typeNamespace).variables.has(type))) {
-          return new RareScriptError(filename, instruction.line, 48, `Variable "${typeNamespace ? `${typeNamespace}::` : ""}${type}" does not exist`);
+          return new RareScriptError(filename, code, instruction.line, 48, `Variable "${typeNamespace ? `${typeNamespace}::` : ""}${type}" does not exist`);
         }
         if ((!typeNamespace && !globalVariables.get(type).modifiers.includes("type")) || (typeNamespace && !namespaces.get(typeNamespace).variables.get(type).modifiers.includes("type"))) {
-          return new RareScriptError(filename, instruction.line, 49, `Variable "${typeNamespace ? `${typeNamespace}::` : ""}${type}" is not a type`);
+          return new RareScriptError(filename, code, instruction.line, 49, `Variable "${typeNamespace ? `${typeNamespace}::` : ""}${type}" is not a type`);
         }
         context.set(instruction.name, {
           "type": {
@@ -1874,7 +1875,7 @@ function compiler(filename, ast, target, debug) {
           ]))
         });
         if (instruction.returnType.base != "typing::void" && !checkMissingReturns(instruction.content)) {
-          return new RareScriptError(filename, instruction.line, 112, "Not all code paths return");
+          return new RareScriptError(filename, code, instruction.line, 112, "Not all code paths return");
         }
         var result = compileAST(instruction.content);
         if (result instanceof RareScriptError) {
@@ -1895,11 +1896,11 @@ function compiler(filename, ast, target, debug) {
           }
         }
         if (!correctType) {
-          return new RareScriptError(filename, lastInstruction.line, 51, "Cannot use return outside of function");
+          return new RareScriptError(filename, code, lastInstruction.line, 51, "Cannot use return outside of function");
         }
         var valueType = solveExpressionType(instruction.value).type;
         if (JSON.stringify(valueType) != JSON.stringify(correctType)) {
-          return new RareScriptError(filename, lastInstruction.line, 52, `Cannot return type "${renderType(valueType)}", expected "${renderType(correctType)}" instead`);
+          return new RareScriptError(filename, code, lastInstruction.line, 52, `Cannot return type "${renderType(valueType)}", expected "${renderType(correctType)}" instead`);
         }
         compiled.push(`return ${compileExpression(instruction.value)};`);
       }
@@ -1937,7 +1938,7 @@ function processCode(filename, code, target, debug, supressErrors, minify) {
     if (supressErrors) {
       return tokens;
     }
-    return throwError(tokens, code);
+    return throwError(tokens);
   }
   if (debug) {
     console.log(`\x1b[32m[DEBUG / ${filename} / ${tokens.length} TOKENS]\x1b[0m`);
@@ -1971,19 +1972,19 @@ function processCode(filename, code, target, debug, supressErrors, minify) {
     if (supressErrors) {
       return ast;
     }
-    return throwError(ast, code);
+    return throwError(ast);
   }
   if (debug) {
     console.log(`\x1b[32m[DEBUG / ${filename} / ${ast.length} INSTRUCTIONS]\x1b[0m`);
     console.log(util.inspect(ast, false, null, true));
   }
 
-  var compiled = compiler(filename, ast, target, debug);
+  var compiled = compiler(filename, code, ast, target, debug);
   if (compiled instanceof RareScriptError) {
     if (supressErrors) {
       return compiled;
     }
-    return throwError(compiled, code);
+    return throwError(compiled);
   }
   if (debug) {
     console.log(`\x1b[32m[DEBUG / ${filename} / ${compiled.code.length} CHARACTERS]\x1b[0m`);

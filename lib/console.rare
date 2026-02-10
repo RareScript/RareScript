@@ -1,10 +1,1 @@
-import typing;
-import std;
-
-typing::void out(typing::any *data) {
-  std::out(typing::string(data) + "\n");
-}
-
-typing::void clear() {
-  std::clear();
-}
+as
