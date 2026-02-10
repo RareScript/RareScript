@@ -1955,7 +1955,7 @@ function processCode(filename, code, target, debug, supressErrors, minify) {
   }
   if (debug) {
     console.log(`\x1b[32m[DEBUG / ${compiled.code.length} CHARACTERS]\x1b[0m`);
-    console.log(compiled);
+    console.log(compiled.code);
   }
 
   if (minify) {
