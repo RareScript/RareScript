@@ -1970,9 +1970,31 @@ function compiler(filename, code, ast, target, debug) {
         compiled.push("}");
       }
       if (instruction.type == InstructionType.BREAK) {
+        var isWhile = null;
+        for (var contextIndex = (contexts.length - 1); contextIndex >= 0; contextIndex--) {
+          var context = contexts[contextIndex];
+          if (context.owner && context.owner.type == InstructionType.WHILE) {
+            isWhile = true;
+            break;
+          }
+        }
+        if (!isWhile) {
+          return new RareScriptError(filename, code, instruction.line, 120, "Cannot use break outside of a loop");
+        }
         compiled.push("break;");
       }
       if (instruction.type == InstructionType.CONTINUE) {
+        var isWhile = null;
+        for (var contextIndex = (contexts.length - 1); contextIndex >= 0; contextIndex--) {
+          var context = contexts[contextIndex];
+          if (context.owner && context.owner.type == InstructionType.WHILE) {
+            isWhile = true;
+            break;
+          }
+        }
+        if (!isWhile) {
+          return new RareScriptError(filename, code, instruction.line, 121, "Cannot use continue outside of a loop");
+        }
         compiled.push("continue;");
       }
       if (saveFunctionCode) {

@@ -1144,6 +1144,9 @@ typing::string b := "cat";
 
 std::out(typing::string(a = b));`, 79);
 
+expectError("break;", 120);
+expectError("continue;", 121);
+
 if (isFailed) {
   process.exit(1);
 }
