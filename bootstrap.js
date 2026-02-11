@@ -44,7 +44,10 @@ var InstructionType = {
   "VARIABLE": 3,
   "CONDITION": 4,
   "FUNCTION": 5,
-  "RETURN": 6
+  "RETURN": 6,
+  "WHILE": 7,
+  "BREAK": 8,
+  "CONTINUE": 9
 };
 
 var operators = {
@@ -778,7 +781,7 @@ function lexer(filename, code) {
   var tokenSeparators = [" ", "\n", ";", "(", ")", "{", "}", ","];
   var digits = "0123456789";
   var symbols = "!@#$%^&*-+\\|/=";
-  var keywords = ["import", "as", "scope", "return", "cond", "else", "false", "true", "maybe", "and", "or", "final"];
+  var keywords = ["import", "as", "scope", "return", "cond", "else", "false", "true", "maybe", "and", "or", "final", "while", "break", "continue"];
   var operators = ["(", ")", "{", "}", ",", "**", "+", "-", "*", "/", "//", "%", "=", "!=", ":=", "..", "->", "->@", "<", ">", "|", "&", "^", "<<", ">>", "<=", ">=", "|>"];
 
   function addToken(index) {
@@ -1072,6 +1075,48 @@ function parser(filename, code, tokens) {
           ast.push({
             "type": InstructionType.RETURN,
             "value": parseExpression(filename, code, value),
+            "line": token.line
+          });
+          continue;
+        case "while":
+          var condition = [];
+          while(!expectToken("{")) {
+            condition.push(takeToken());
+          }
+          if (!condition.length) {
+            return new RareScriptError(filename, code, token.line, 119, "Expected a condition");
+          }
+          var bracketDepth = 1;
+          for (var tokenIndex = 0; tokenIndex < tokens.length; tokenIndex++) {
+            if (getTokenValue(code, tokens[tokenIndex]) == "{") {
+              bracketDepth++;
+            }
+            if (getTokenValue(code, tokens[tokenIndex]) == "}") {
+              if (!--bracketDepth) {
+                break;
+              }
+            }
+          }
+          var content = tokens.splice(0, tokenIndex);
+          expectToken("}");
+          ast.push({
+            "type": InstructionType.WHILE,
+            "condition": parseExpression(filename, code, condition),
+            "content": parser(filename, code, content),
+            "line": token.line
+          });
+          continue;
+        case "break":
+          requireSeparator();
+          ast.push({
+            "type": InstructionType.BREAK,
+            "line": token.line
+          });
+          continue;
+        case "continue":
+          requireSeparator();
+          ast.push({
+            "type": InstructionType.CONTINUE,
             "line": token.line
           });
           continue;
@@ -1907,6 +1952,25 @@ function compiler(filename, code, ast, target, debug) {
           return new RareScriptError(filename, code, lastInstruction.line, 52, `Cannot return type "${renderType(valueType)}", expected "${renderType(correctType)}" instead`);
         }
         compiled.push(`return ${compileExpression(instruction.value)};`);
+      }
+      if (instruction.type == InstructionType.WHILE) {
+        compiled.push(`while (${compileExpression(instruction.condition)}) {`);
+        contexts.push({
+          "owner": instruction,
+          "variables": new Map
+        });
+        var result = compileAST(instruction.content);
+        if (result instanceof RareScriptError) {
+          return result;
+        }
+        contexts.pop();
+        compiled.push("}");
+      }
+      if (instruction.type == InstructionType.BREAK) {
+        compiled.push("break;");
+      }
+      if (instruction.type == InstructionType.CONTINUE) {
+        compiled.push("continue;");
       }
       if (saveFunctionCode) {
         functionCodes.get(saveFunctionCode).push(...compiled.slice(compiledLength - compiled.length));
