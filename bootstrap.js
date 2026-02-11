@@ -417,7 +417,7 @@ var operators = {
       };
     },
     "js": (_filename, _code, _line, left, right) => {
-      return `${left}.cmp(${right}) == -1`;
+      return `${left}.lt(${right})`;
     }
   },
   ">": {
@@ -438,7 +438,7 @@ var operators = {
       };
     },
     "js": (_filename, _code, _line, left, right) => {
-      return `${left}.cmp(${right}) == 1`;
+      return `${left}.gt(${right})`;
     }
   },
   "<=": {
@@ -459,7 +459,7 @@ var operators = {
       };
     },
     "js": (_filename, _code, _line, left, right) => {
-      return `${left}.cmp(${right}) < 1`;
+      return `${left}.lte(${right})`;
     }
   },
   ">=": {
@@ -480,7 +480,7 @@ var operators = {
       };
     },
     "js": (_filename, _code, _line, left, right) => {
-      return `${left}.cmp(${right}) > -1`;
+      return `${left}.gte(${right})`;
     }
   },
   "!": {
@@ -2364,7 +2364,7 @@ async function handleCLI() {
     }
     var cache = fs.readFileSync(rareproject.file).toString("utf-8");
     while(true) {
-      var proc = child_process.spawn(process.execPath, process.argv.slice(bun ? 2 : 0).map(arg => arg == "watch" ? "start" : arg));
+      var proc = child_process.spawn(process.execPath, process.argv.slice(bun ? 2 : 1).map(arg => arg == "watch" ? "start" : arg));
       proc.stdout.on("data", data => {
         process.stdout.write(data);
       });
