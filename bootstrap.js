@@ -942,6 +942,44 @@ var builtinModules = {
         "js": "num => num.round(0, RSNumber.roundUp)"
       }]
     ])
+  },
+  "base64": {
+    "variables": new Map([
+      ["encode", {
+        "type": {
+          "base": "typing::function",
+          "subtype": [{
+            "base": "typing::string",
+            "subtype": [],
+            "star": false
+          }, {
+            "base": "typing::string",
+            "subtype": [],
+            "star": false
+          }],
+          "star": false
+        },
+        "modifiers": ["final"],
+        "js": "data => btoa(unescape(encodeURIComponent(data)))"
+      }],
+      ["decode", {
+        "type": {
+          "base": "typing::function",
+          "subtype": [{
+            "base": "typing::string",
+            "subtype": [],
+            "star": false
+          }, {
+            "base": "typing::string",
+            "subtype": [],
+            "star": false
+          }],
+          "star": false
+        },
+        "modifiers": ["final"],
+        "js": `data => {try {return decodeURIComponent(escape(atob(data)))} catch {return ""}}`
+      }]
+    ])
   }
 };
 
