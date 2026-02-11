@@ -768,6 +768,180 @@ var builtinModules = {
         "js": "() => console.clear()"
       }]
     ])
+  },
+  "math": {
+    "variables": new Map([
+      ["sqrt", {
+        "type": {
+          "base": "typing::function",
+          "subtype": [{
+            "base": "typing::number",
+            "subtype": [],
+            "star": false
+          }, {
+            "base": "typing::number",
+            "subtype": [],
+            "star": false
+          }],
+          "star": false
+        },
+        "modifiers": ["final"],
+        "js": "num => num.sqrt()"
+      }],
+      ["cos", {
+        "type": {
+          "base": "typing::function",
+          "subtype": [{
+            "base": "typing::number",
+            "subtype": [],
+            "star": false
+          }, {
+            "base": "typing::number",
+            "subtype": [],
+            "star": false
+          }],
+          "star": false
+        },
+        "modifiers": ["final"],
+        "js": "num => new RSNumber(Math.cos(num))"
+      }],
+      ["acos", {
+        "type": {
+          "base": "typing::function",
+          "subtype": [{
+            "base": "typing::number",
+            "subtype": [],
+            "star": false
+          }, {
+            "base": "typing::number",
+            "subtype": [],
+            "star": false
+          }],
+          "star": false
+        },
+        "modifiers": ["final"],
+        "js": "num => new RSNumber(Math.acos(num))"
+      }],
+      ["sin", {
+        "type": {
+          "base": "typing::function",
+          "subtype": [{
+            "base": "typing::number",
+            "subtype": [],
+            "star": false
+          }, {
+            "base": "typing::number",
+            "subtype": [],
+            "star": false
+          }],
+          "star": false
+        },
+        "modifiers": ["final"],
+        "js": "num => new RSNumber(Math.sin(num))"
+      }],
+      ["asin", {
+        "type": {
+          "base": "typing::function",
+          "subtype": [{
+            "base": "typing::number",
+            "subtype": [],
+            "star": false
+          }, {
+            "base": "typing::number",
+            "subtype": [],
+            "star": false
+          }],
+          "star": false
+        },
+        "modifiers": ["final"],
+        "js": "num => new RSNumber(Math.asin(num))"
+      }],
+      ["tan", {
+        "type": {
+          "base": "typing::function",
+          "subtype": [{
+            "base": "typing::number",
+            "subtype": [],
+            "star": false
+          }, {
+            "base": "typing::number",
+            "subtype": [],
+            "star": false
+          }],
+          "star": false
+        },
+        "modifiers": ["final"],
+        "js": "num => new RSNumber(Math.tan(num))"
+      }],
+      ["atan", {
+        "type": {
+          "base": "typing::function",
+          "subtype": [{
+            "base": "typing::number",
+            "subtype": [],
+            "star": false
+          }, {
+            "base": "typing::number",
+            "subtype": [],
+            "star": false
+          }],
+          "star": false
+        },
+        "modifiers": ["final"],
+        "js": "num => new RSNumber(Math.atan(num))"
+      }],
+      ["floor", {
+        "type": {
+          "base": "typing::function",
+          "subtype": [{
+            "base": "typing::number",
+            "subtype": [],
+            "star": false
+          }, {
+            "base": "typing::number",
+            "subtype": [],
+            "star": false
+          }],
+          "star": false
+        },
+        "modifiers": ["final"],
+        "js": "num => num.round(0, RSNumber.roundDown)"
+      }],
+      ["round", {
+        "type": {
+          "base": "typing::function",
+          "subtype": [{
+            "base": "typing::number",
+            "subtype": [],
+            "star": false
+          }, {
+            "base": "typing::number",
+            "subtype": [],
+            "star": false
+          }],
+          "star": false
+        },
+        "modifiers": ["final"],
+        "js": "num => num.round(0, RSNumber.roundHalfUp)"
+      }],
+      ["ceil", {
+        "type": {
+          "base": "typing::function",
+          "subtype": [{
+            "base": "typing::number",
+            "subtype": [],
+            "star": false
+          }, {
+            "base": "typing::number",
+            "subtype": [],
+            "star": false
+          }],
+          "star": false
+        },
+        "modifiers": ["final"],
+        "js": "num => num.round(0, RSNumber.roundUp)"
+      }]
+    ])
   }
 };
 
