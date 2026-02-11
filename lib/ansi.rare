@@ -1,0 +1,84 @@
+import typing;
+
+typing::string bold(typing::string text) {
+  return "\x1b[1m" + text + "\x1b[22m";
+}
+typing::string dim(typing::string text) {
+  return "\x1b[2m" + text + "\x1b[22m";
+}
+typing::string italic(typing::string text) {
+  return "\x1b[3m" + text + "\x1b[23m";
+}
+typing::string underline(typing::string text) {
+  return "\x1b[4m" + text + "\x1b[24m";
+}
+typing::string inverse(typing::string text) {
+  return "\x1b[7m" + text + "\x1b[27m";
+}
+typing::string strikethrough(typing::string text) {
+  return "\x1b[9m" + text + "\x1b[29m";
+}
+
+typing::string black(typing::string text) {
+  return "\x1b[30m" + text + "\x1b[39m";
+}
+typing::string red(typing::string text) {
+  return "\x1b[31m" + text + "\x1b[39m";
+}
+typing::string green(typing::string text) {
+  return "\x1b[32m" + text + "\x1b[39m";
+}
+typing::string yellow(typing::string text) {
+  return "\x1b[33m" + text + "\x1b[39m";
+}
+typing::string blue(typing::string text) {
+  return "\x1b[34m" + text + "\x1b[39m";
+}
+typing::string magenta(typing::string text) {
+  return "\x1b[35m" + text + "\x1b[39m";
+}
+typing::string cyan(typing::string text) {
+  return "\x1b[36m" + text + "\x1b[39m";
+}
+typing::string white(typing::string text) {
+  return "\x1b[37m" + text + "\x1b[39m";
+}
+
+typing::string bgBlack(typing::string text) {
+  return "\x1b[40m" + text + "\x1b[49m";
+}
+typing::string bgRed(typing::string text) {
+  return "\x1b[41m" + text + "\x1b[49m";
+}
+typing::string bgGreen(typing::string text) {
+  return "\x1b[42m" + text + "\x1b[49m";
+}
+typing::string bgYellow(typing::string text) {
+  return "\x1b[43m" + text + "\x1b[49m";
+}
+typing::string bgBlue(typing::string text) {
+  return "\x1b[44m" + text + "\x1b[49m";
+}
+typing::string bgMagenta(typing::string text) {
+  return "\x1b[45m" + text + "\x1b[49m";
+}
+typing::string bgCyan(typing::string text) {
+  return "\x1b[46m" + text + "\x1b[49m";
+}
+typing::string bgWhite(typing::string text) {
+  return "\x1b[47m" + text + "\x1b[49m";
+}
+
+typing::string color(typing::string text, typing::number color) {
+  return "\x1b[38;5;" + typing::string(color) + "m" + text + "\x1b[39m";
+}
+typing::string bgColor(typing::string text, typing::number color) {
+  return "\x1b[48;5;" + typing::string(color) + "m" + text + "\x1b[49m";
+}
+
+typing::string rgb(typing::string text, typing::number r, typing::number g, typing::number b) {
+  return "\x1b[38;2;" + typing::string(r) + ";" + typing::string(g) + ";" + typing::string(b) + "m" + text + "\x1b[39m";
+}
+typing::string bgRgb(typing::string text, typing::number r, typing::number g, typing::number b) {
+  return "\x1b[48;2;" + typing::string(r) + ";" + typing::string(g) + ";" + typing::string(b) + "m" + text + "\x1b[49m";
+}
