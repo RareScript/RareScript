@@ -1841,6 +1841,9 @@ function compiler(filename, code, ast, target, debug) {
           return new RareScriptError(filename, code, instruction.line, 31, `Variable "${typeNamespace ? `${typeNamespace}::` : ""}${type}" is not a type`);
         }
         var valueType = solveExpressionType(instruction.value);
+        if (cachedError) {
+          return cachedError;
+        }
         var transformedType = transformType(instruction.variableType);
         if (JSON.stringify(transformedType) != JSON.stringify(valueType.type)) {
           return new RareScriptError(filename, code, instruction.line, 32, `Cannot assign "${renderType(valueType.type)}" as "${renderType(instruction.variableType)}"`);
