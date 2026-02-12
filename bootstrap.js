@@ -50,7 +50,130 @@ var InstructionType = {
   "CONTINUE": 9
 };
 
+var getProperties = String.raw`var getProperties = (obj, propType) => new Proxy({}, {
+  get(_, prop) {
+    if (typeof obj === "string") {
+      if (propType === "number") {
+        return obj[prop > -1 ? prop - 1 : (obj.length + +prop)];
+      }
+      if (prop == "width") {
+        return new RSNumber(Math.max.apply(null, obj.split("\n").map(line => line.length).length));
+      }
+      if (prop == "height") {
+        return new RSNumber(obj.split("\n").length);
+      }
+      if (prop == "count") {
+        return new RSNumber(obj.length);
+      }
+      if (prop == "starts") {
+        return text => obj.startsWith(text);
+      }
+      if (prop == "ends") {
+        return text => obj.endsWith(text);
+      }
+      if (prop == "repeat") {
+        return amount => obj.repeat(amount);
+      }
+      if (prop == "from") {
+        return index => obj.slice(index);
+      }
+      if (prop == "to") {
+        return index => obj.slice(0, index);
+      }
+    }
+    return obj[prop];
+  },
+  set(_, prop) {}
+});`.split("\n").join("");
+
 var operators = {
+  "->": {
+    "rightRaw": true,
+    "type": (filename, code, line, left, right, _leftValue, rightValue) => {
+      if (!left) {
+        return new RareScriptError(filename, code, line, 122, "Expected left side");
+      }
+      if (!right) {
+        return new RareScriptError(filename, code, line, 123, "Expected right side");
+      }
+      if (rightValue.type != "identifier" && rightValue.type != "number") {
+        return new RareScriptError(filename, code, line, 124, "Expected identifier or number on right side");
+      }
+      if (left.type.base == "typing::string") {
+        if (rightValue.type == "number") {
+          return {
+            "base": "typing::char",
+            "subtype": [],
+            "star": false
+          };
+        }
+        if (["width", "height", "count"].includes(rightValue.value)) {
+          return {
+            "base": "typing::number",
+            "subtype": [],
+            "star": false
+          };
+        }
+        if (["starts", "ends"].includes(rightValue.value)) {
+          return {
+            "base": "typing::function",
+            "subtype": [{
+              "base": "typing::string",
+              "subtype": [],
+              "star": false
+            }, {
+              "base": "typing::string",
+              "subtype": [],
+              "star": false
+            }],
+            "star": false
+          };
+        }
+        if (["repeat", "from", "to"].includes(rightValue.value)) {
+          return {
+            "base": "typing::function",
+            "subtype": [{
+              "base": "typing::number",
+              "subtype": [],
+              "star": false
+            }, {
+              "base": "typing::string",
+              "subtype": [],
+              "star": false
+            }],
+            "star": false
+          };
+        }
+      }
+      return new RareScriptError(filename, code, line, 125, `Unknown property "${rightValue.value}"`);
+    },
+    "jsExtra": getProperties,
+    "js": (_filename, _code, _line, left, right) => {
+      return `getProperties(${left}, "${right.type}")[${right.type == "identifier" ? `"` : ""}${right.value}${right.type == "identifier" ? `"` : ""}]`;
+    }
+  },
+  "->@": {
+    "type": (filename, code, line, left, right) => {
+      if (!left) {
+        return new RareScriptError(filename, code, line, 126, "Expected left side");
+      }
+      if (!right) {
+        return new RareScriptError(filename, code, line, 127, "Expected right side");
+      }
+      if (right.type.base != "typing::string" && right.type.base != "typing::number") {
+        return new RareScriptError(filename, code, line, 128, "Expected typing::string or typing::number on right side");
+      }
+      return {
+        "base": "typing::any",
+        "subtype": [],
+        "star": false
+      };
+    },
+    "jsExtra": getProperties,
+    "js": (_filename, _code, _line, left, right, _leftType, rightType) => {
+      return `getProperties(${left}, "${rightType.type.base == "typing::number" ? "number" : "identifier"}")[${right}]`;
+    }
+  },
   "**": {
     "type": (filename, code, line, left, right) => {
       if (!left) {
@@ -1701,7 +1824,7 @@ function compiler(filename, code, ast, target, debug) {
         if (operators[expression.operator].jsExtra && !compiled[1].includes(operators[expression.operator].jsExtra)) {
           compiled[1].push(operators[expression.operator].jsExtra);
         }
-        var result = operators[expression.operator].type(filename, code, lastInstruction.line, leftType, rightType);
+        var result = operators[expression.operator].type(filename, code, lastInstruction.line, leftType, rightType, expression.left, expression.right);
         if (result instanceof RareScriptError) {
           cachedError = result;
           return result;
@@ -1881,7 +2004,7 @@ function compiler(filename, code, ast, target, debug) {
       if (cachedError) {
         return cachedError;
       }
-      var result = operators[expression.operator].type(filename, code, lastInstruction.line, left, right);
+      var result = operators[expression.operator].type(filename, code, lastInstruction.line, left, right, expression.left, expression.right);
       if (result instanceof RareScriptError) {
         cachedError = result;
       }
