@@ -3,6 +3,21 @@ var RareScript = require("./bootstrap.js");
 var testNum = 0;
 var isFailed = false;
 
+function expectSuccess(code) {
+  testNum++;
+  try {
+    var result = RareScript.processCode("test.rare", code, "nodejs", false, true, false);
+  } catch {
+    isFailed = true;
+    return console.log(`\x1b[31m❌ Test #${testNum} failed: Compiler crashed.\x1b[0m`);
+  }
+  if (result instanceof RareScript.RareScriptError) {
+    isFailed = true;
+    return console.log(`\x1b[31m❌ Test #${testNum} failed: Got an error ${result.code}.\x1b[0m`);
+  }
+  console.log(`\x1b[32m✅ Test #${testNum} passed.\x1b[0m`);
+}
+
 function expectError(code, errCode) {
   testNum++;
   try {
@@ -1167,6 +1182,8 @@ std::out(typing::string(a = b));`, 79);
 
 expectError("break;", 120);
 expectError("continue;", 121);
+
+expectSuccess("import console; (console::out)(1);");
 
 if (isFailed) {
   process.exit(1);
