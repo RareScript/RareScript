@@ -1763,7 +1763,7 @@ function parseExpression(filename, code, tokens) {
 
   if (!expression && tokens.length == 2 && (tokens[0].type == TokenType.IDENTIFIER || Array.isArray(tokens[0])) && Array.isArray(tokens[1])) {
     if (Array.isArray(tokens[0])) {
-      if (tokens[0].length != 1) {
+      if (tokens[0].length != 1 || typeof tokens[0][0].type === "number") {
         tokens[0] = parseExpression(filename, code, tokens[0]);
       }
       if (!tokens[0]) {
