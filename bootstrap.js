@@ -93,7 +93,7 @@ var operators = {
       if (!left) {
         return new RareScriptError(filename, code, line, 122, "Expected left side");
       }
-      if (!right) {
+      if (!rightValue) {
         return new RareScriptError(filename, code, line, 123, "Expected right side");
       }
       if (rightValue.type != "identifier" && rightValue.type != "number") {
@@ -671,8 +671,9 @@ var operators = {
   },
   ":=": {
     "leftRaw": true,
-    "type": (filename, code, line, left, right) => {
-      if (!left) {
+    "leftRawType": true,
+    "type": (filename, code, line, left, right, leftType) => {
+      if (!leftType) {
         return new RareScriptError(filename, code, line, 104, "Expected left side");
       }
       if (!right) {
@@ -1634,35 +1635,6 @@ function parseExpression(filename, code, tokens) {
     }
   }
 
-  for (var tokenIndex = 0; tokenIndex < tokens.length; tokenIndex++) {
-    if (tokens[tokenIndex].type == TokenType.IDENTIFIER && tokens[tokenIndex + 1] && Array.isArray(tokens[tokenIndex + 1])) {
-      var args = [[]];
-      var bracketDepth = 0;
-      for (var tokenIndex2 = 0; tokenIndex2 < tokens[tokenIndex + 1].length; tokenIndex2++) {
-        var token2 = tokens[tokenIndex + 1][tokenIndex2];
-        if (getTokenValue(code, token2) == "(") {
-          bracketDepth++;
-        }
-        if (getTokenValue(code, token2) == ")") {
-          bracketDepth--;
-        }
-        if (getTokenValue(code, token2) == "," && !bracketDepth) {
-          args.push([]);
-        } else {
-          args.at(-1).push(token2);
-        }
-      }
-      if (args.length == 1 && !args[0].length) {
-        args = [];
-      }
-      tokens.splice(tokenIndex, 2, {
-        "type": "function",
-        "function": getTokenValue(code, tokens[tokenIndex]),
-        "arguments": args.map(argument => parseExpression(filename, code, argument))
-      });
-    }
-  }
-
   if (tokens.length == 1) {
     if (tokens[0].type == "function") {
       return tokens[0];
@@ -1731,7 +1703,11 @@ function parseExpression(filename, code, tokens) {
           };
         }
       } else {
-        expression.left = parseExpression(filename, code, tokens.slice(0, foundIndex).flat());
+        var leftTokens = tokens.slice(0, foundIndex);
+        if (leftTokens.length == 1 && Array.isArray(leftTokens)) {
+          leftTokens = leftTokens.flat(1);
+        }
+        expression.left = parseExpression(filename, code, leftTokens);
       }
       if (foundIndex == tokens.length - 2 && !Array.isArray(tokens.at(-1))) {
         if (tokens.at(-1).function) {
@@ -1763,10 +1739,63 @@ function parseExpression(filename, code, tokens) {
           };
         }
       } else {
-        expression.right = parseExpression(filename, code, tokens.slice(foundIndex + 1).flat());
+        var rightTokens = tokens.slice(foundIndex + 1);
+        if (rightTokens.length == 1 && Array.isArray(rightTokens)) {
+          rightTokens = rightTokens.flat(1);
+        }
+        expression.right = parseExpression(filename, code, rightTokens);
+      }
+      if ((expression.operator == "->" || expression.operator == "->@") && expression.right.type == "function") {
+        expression = {
+          "type": "function",
+          "function": {
+            "type": "operator",
+            "operator": expression.operator,
+            "left": expression.left,
+            "right": expression.right.function
+          },
+          "arguments": expression.right.arguments
+        };
       }
       break;
     }
+  }
+
+  if (!expression && tokens.length == 2 && (tokens[0].type == TokenType.IDENTIFIER || Array.isArray(tokens[0])) && Array.isArray(tokens[1])) {
+    if (Array.isArray(tokens[0])) {
+      if (tokens[0].length != 1) {
+        tokens[0] = parseExpression(filename, code, tokens[0]);
+      }
+      if (!tokens[0]) {
+        return null;
+      }
+    } else {
+      tokens[0] = parseExpression(filename, code, [tokens[0]]);
+    }
+    var args = [[]];
+    var bracketDepth = 0;
+    for (var tokenIndex = 0; tokenIndex < tokens[1].length; tokenIndex++) {
+      var token = tokens[1][tokenIndex];
+      if (getTokenValue(code, token) == "(") {
+        bracketDepth++;
+      }
+      if (getTokenValue(code, token) == ")") {
+        bracketDepth--;
+      }
+      if (getTokenValue(code, token) == "," && !bracketDepth) {
+        args.push([]);
+      } else {
+        args.at(-1).push(token);
+      }
+    }
+    if (args.length == 1 && !args[0].length) {
+      args = [];
+    }
+    return {
+      "type": "function",
+      "function": tokens[0],
+      "arguments": args.map(argument => parseExpression(filename, code, argument))
+    };
   }
 
   return expression;
@@ -1816,8 +1845,8 @@ function compiler(filename, code, ast, target, debug) {
     }
     if (expression.type == "operator") {
       if (typeof operators[expression.operator].type === "function") {
-        var leftType = expression.left ? solveExpressionType(expression.left) : null;
-        var rightType = expression.right ? solveExpressionType(expression.right) : null;
+        var leftType = (expression.left && (!operators[expression.operator].leftRaw || operators[expression.operator].leftRawType)) ? solveExpressionType(expression.left) : null;
+        var rightType = (expression.right && (!operators[expression.operator].rightRaw || operators[expression.operator].rightRawType)) ? solveExpressionType(expression.right) : null;
         if (cachedError) {
           return cachedError;
         }
@@ -1838,7 +1867,7 @@ function compiler(filename, code, ast, target, debug) {
       if (!operators[expression.operator].rightRaw) {
         right = (right ? compileExpression(right) : null);
       }
-      var result = operators[expression.operator].js(filename, code, lastInstruction.line, left, right, expression.left ? solveExpressionType(expression.left) : null, expression.right ? solveExpressionType(expression.right) : null);
+      var result = operators[expression.operator].js(filename, code, lastInstruction.line, left, right, (expression.left && (!operators[expression.operator].leftRaw || operators[expression.operator].leftRawType)) ? solveExpressionType(expression.left) : null, (expression.right && (!operators[expression.operator].rightRaw || operators[expression.operator].rightRawType)) ? solveExpressionType(expression.right) : null);
       if (result instanceof RareScriptError) {
         cachedError = result;
       }
@@ -1846,9 +1875,19 @@ function compiler(filename, code, ast, target, debug) {
     }
     if (expression.type == "function") {
       var namespace = null;
-      var functionName = expression.function;
-      if (functionName.includes("::")) {
-        [namespace, functionName] = functionName.split("::");
+      var functionName = expression.function.value;
+      var dynamicFunctionName = false;
+      if (expression.function.type == "identifier") {
+        if (functionName.includes("::")) {
+          [namespace, functionName] = functionName.split("::");
+        }
+      } else {
+        dynamicFunctionName = true;
+        functionName = compileExpression(expression.function);
+        if (functionName instanceof RareScriptError) {
+          cachedError = functionName;
+          return functionName;
+        }
       }
       function applyNamespace(namespace) {
         if (namespace && !addedFunctions.has(`${namespace}::${functionName}`)) {
@@ -1882,7 +1921,9 @@ function compiler(filename, code, ast, target, debug) {
         return applyResult;
       }
       var argumentsTypesCorrect = null;
-      if (namespace) {
+      if (dynamicFunctionName) {
+        argumentsTypesCorrect = solveExpressionType(expression.function).type.subtype.slice(0, -1);
+      } else if (namespace) {
         argumentsTypesCorrect = namespaces.get(namespace).variables.get(functionName).type.subtype.slice(0, -1);
       } else {
         for (var contextIndex = (contexts.length - 1); contextIndex >= 0; contextIndex--) {
@@ -1999,8 +2040,8 @@ function compiler(filename, code, ast, target, debug) {
       if (typeof operators[expression.operator].type === "object") {
         return operators[expression.operator].type;
       }
-      var left = (expression.left ? solveExpressionType(expression.left) : null);
-      var right = (expression.right ? solveExpressionType(expression.right) : null);
+      var left = ((expression.left && !operators[expression.operator].leftRaw) ? solveExpressionType(expression.left) : null);
+      var right = ((expression.right && !operators[expression.operator].rightRaw) ? solveExpressionType(expression.right) : null);
       if (cachedError) {
         return cachedError;
       }
@@ -2015,9 +2056,18 @@ function compiler(filename, code, ast, target, debug) {
     }
     if (expression.type == "function") {
       var namespace = null;
-      var functionName = expression.function;
-      if (functionName.includes("::")) {
-        [namespace, functionName] = functionName.split("::");
+      var functionName = expression.function.value;
+      if (expression.function.type == "identifier") {
+        if (functionName.includes("::")) {
+          [namespace, functionName] = functionName.split("::");
+        }
+      } else {
+        functionName = solveExpressionType(expression.function);
+        if (functionName instanceof RareScriptError) {
+          cachedError = functionName;
+          return functionName;
+        }
+        return functionName.type.subtype.at(-1);
       }
       if (namespace) {
         if (!namespaces.has(namespace)) {

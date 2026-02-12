@@ -242,7 +242,10 @@ console::out(60 + 1);`, [{
   "type": RareScript.InstructionType.EXPRESSION,
   "expression": {
     "type": "function",
-    "function": "console::out",
+    "function": {
+      "type": "identifier",
+      "value": "console::out"
+    },
     "arguments": [{
       "type": "string",
       "value": "\"Hello, World!\""
@@ -252,7 +255,10 @@ console::out(60 + 1);`, [{
   "type": RareScript.InstructionType.EXPRESSION,
   "expression": {
     "type": "function",
-    "function": "console::out",
+    "function": {
+      "type": "identifier",
+      "value": "console::out"
+    },
     "arguments": [{
       "type": "operator",
       "operator": "+",
@@ -395,7 +401,10 @@ expectError("typing::number a := ;", 9);
   "type": RareScript.InstructionType.EXPRESSION,
   "expression": {
     "type": "function",
-    "function": "console::out",
+    "function": {
+      "type": "identifier",
+      "value": "console::out"
+    },
     "arguments": [{
       "type": "operator",
       "operator": "..",
@@ -454,7 +463,10 @@ expectTokensAndAST(`import console; console::out("cat"->2 = 'a');`, [{
   "type": RareScript.InstructionType.EXPRESSION,
   "expression": {
     "type": "function",
-    "function": "console::out",
+    "function": {
+      "type": "identifier",
+      "value": "console::out"
+    },
     "arguments": [{
       "type": "operator",
       "operator": "=",
@@ -509,7 +521,10 @@ expectTokensAndAST("import console; console::out(-1.59);", [{
   "type": RareScript.InstructionType.EXPRESSION,
   "expression": {
     "type": "function",
-    "function": "console::out",
+    "function": {
+      "type": "identifier",
+      "value": "console::out"
+    },
     "arguments": [{
       "type": "number",
       "value": "-1.59"
@@ -620,7 +635,10 @@ expectError(`console::out("a\n`, 0);
   "type": RareScript.InstructionType.EXPRESSION,
   "expression": {
     "type": "function",
-    "function": "console::out",
+    "function": {
+      "type": "identifier",
+      "value": "console::out"
+    },
     "arguments": [{
       "type": "operator",
       "operator": "-",
@@ -677,7 +695,10 @@ expectError(`console::out("a\n`, 0);
         "left": null,
         "right": {
           "type": "function",
-          "function": "getOne",
+          "function": {
+            "type": "identifier",
+            "value": "getOne"
+          },
           "arguments": []
         }
       },
