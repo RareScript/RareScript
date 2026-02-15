@@ -52,10 +52,10 @@ var InstructionType = {
 
 var getProperties = String.raw`var getProperties = (obj, propType) => new Proxy({}, {
   get(_, prop) {
+    if ((typeof obj === "string" || Array.isArray(obj)) && propType === "number") {
+      return obj[prop > -1 ? prop - 1 : (obj.length + +prop)];
+    }
     if (typeof obj === "string") {
-      if (propType === "number") {
-        return obj[prop > -1 ? prop - 1 : (obj.length + +prop)];
-      }
       if (prop == "width") {
         return new RSNumber(Math.max.apply(null, obj.split("\n").map(line => line.length).length));
       }
@@ -87,9 +87,35 @@ var getProperties = String.raw`var getProperties = (obj, propType) => new Proxy(
 });`.split("\n").join("");
 
 var operators = {
+  "..": {
+    "type": (filename, code, line, left, right) => {
+      if (!left) {
+        return new RareScriptError(filename, code, line, 133, "Expected left side");
+      }
+      if (!right) {
+        return new RareScriptError(filename, code, line, 134, "Expected right side");
+      }
+      if (left.type.base != "typing::number" || right.type.base != "typing::number") {
+        return new RareScriptError(filename, code, line, 135, "Operator expects typing::number");
+      }
+      return {
+        "base": "typing::array",
+        "subtype": [{
+          "base": "typing::number",
+          "subtype": [],
+          "star": false
+        }],
+        "star": false
+      };
+    },
+    "jsExtra": `var range = (a, b) => {var result = [];if (a > b) {for (var i = a; i >= b; i--) {result.push(i)}} else {for (var i = a; i <= b; i++) {result.push(i)}}return result};`,
+    "js": (_filename, _code, _line, left, right) => {
+      return `range(${left}, ${right})`;
+    }
+  },
   "->": {
     "rightRaw": true,
-    "type": (filename, code, line, left, right, _leftValue, rightValue) => {
+    "type": (filename, code, line, left, _right, _leftValue, rightValue) => {
       if (!left) {
         return new RareScriptError(filename, code, line, 122, "Expected left side");
       }
@@ -98,6 +124,9 @@ var operators = {
       }
       if (rightValue.type != "identifier" && rightValue.type != "number") {
         return new RareScriptError(filename, code, line, 124, "Expected identifier or number on right side");
+      }
+      if (left.type.base == "typing::array" && rightValue.type == "number") {
+        return left.type.subtype[0];
       }
       if (left.type.base == "typing::string") {
         if (rightValue.type == "number") {
@@ -629,18 +658,17 @@ var operators = {
   },
   "as": {
     "type": (filename, code, line, left, right) => {
-      // TODO: Errors
       if (!left) {
-        return new RareScriptError(filename, code, line, 98, "Expected left side");
+        return new RareScriptError(filename, code, line, 129, "Expected left side");
       }
       if (!right) {
-        return new RareScriptError(filename, code, line, 99, "Expected right side");
+        return new RareScriptError(filename, code, line, 130, "Expected right side");
       }
       if (left.type.base != "typing::any") {
-        return new RareScriptError(filename, code, line, 100, "Operator expects typing::boolean");
+        return new RareScriptError(filename, code, line, 131, "Operator expects explicit typing::any");
       }
       if (!right.modifiers.includes("type")) {
-        return new RareScriptError(filename, code, line, 100, "Operator expects typing::boolean");
+        return new RareScriptError(filename, code, line, 132, "Operator expects a type on right side");
       }
       return right.type;
     },
@@ -779,7 +807,7 @@ var builtinModules = {
           "subtype": [{
             "base": "typing::any",
             "subtype": [],
-            "star": true
+            "star": false
           }, {
             "base": "typing::string",
             "subtype": [],
@@ -788,7 +816,7 @@ var builtinModules = {
           "star": false
         },
         "modifiers": ["type", "final"],
-        "js": `data => data === void 0 ? "" : data.toString()`
+        "js": `function(data) {return Array.isArray(data) ? "[" + data.map(arguments.callee).join(", ") + "]" : (data === void 0 ? "" : data.toString())}`
       }],
       ["char", {
         "type": {
@@ -796,7 +824,7 @@ var builtinModules = {
           "subtype": [{
             "base": "typing::any",
             "subtype": [],
-            "star": true
+            "star": false
           }, {
             "base": "typing::char",
             "subtype": [],
@@ -813,7 +841,7 @@ var builtinModules = {
           "subtype": [{
             "base": "typing::any",
             "subtype": [],
-            "star": true
+            "star": false
           }, {
             "base": "typing::number",
             "subtype": [],
@@ -830,7 +858,7 @@ var builtinModules = {
           "subtype": [{
             "base": "typing::any",
             "subtype": [],
-            "star": true
+            "star": false
           }, {
             "base": "typing::boolean",
             "subtype": [],
@@ -847,7 +875,7 @@ var builtinModules = {
           "subtype": [{
             "base": "typing::any",
             "subtype": [],
-            "star": true
+            "star": false
           }, {
             "base": "typing::function",
             "subtype": [{
@@ -871,29 +899,25 @@ var builtinModules = {
         "modifiers": ["type", "final"]
       }],
       ["array", {
-        "type": {
+        "type": ([T]) => ({
           "base": "typing::function",
           "subtype": [{
             "base": "typing::any",
             "subtype": [],
             "star": false
           }, {
-            "base": "typing::any",
-            "subtype": [],
+            "base": T.value.base,
+            "subtype": T.value.subtype,
             "star": true
           }, {
             "base": "typing::array",
-            "subtype": [{
-              "base": "typing::any",
-              "subtype": [],
-              "star": false
-            }],
+            "subtype": [T.value],
             "star": false
           }],
           "star": false
-        },
+        }),
         "modifiers": ["type", "final"],
-        "js": "(_, ...data) => [data]"
+        "js": "(_, ...data) => data"
       }]
     ])
   },
@@ -1165,7 +1189,7 @@ function lexer(filename, code) {
   var digits = "0123456789";
   var symbols = "!@#$%^&*-+\\|/=";
   var keywords = ["import", "as", "scope", "return", "cond", "else", "false", "true", "maybe", "and", "or", "final", "while", "break", "continue"];
-  var operators = ["(", ")", "{", "}", ",", "**", "+", "-", "*", "/", "//", "%", "=", "!=", ":=", "..", "->", "->@", "<", ">", "|", "&", "^", "<<", ">>", "<=", ">=", "|>"];
+  var operators = ["(", ")", "{", "}", ",", "**", "+", "-", "*", "/", "//", "%", "=", "!=", ":=", "..", "->", "->@", "<", ">", "|", "&", "^", "<<", ">>", "<=", ">=", "|>", "#"];
 
   function addToken(index) {
     var type = TokenType.IDENTIFIER;
@@ -1247,7 +1271,7 @@ function lexer(filename, code) {
       i += code.slice(i).indexOf("\n") - 1;
       continue;
     }
-    if (tokenSeparators.includes(char) || (currentToken.at(-1) == "-" && digits.includes(char) && tokens.at(-1) && (tokens.at(-1).type == TokenType.NUMBER || tokens.at(-1).type == TokenType.IDENTIFIER || code.slice(tokens.at(-1).start, tokens.at(-1).start + tokens.at(-1).length) == ")")) || (currentToken.at(-1) != "-" && canBeIdentifier(currentToken.at(-1)) != canBeIdentifier(char) && !(isNumber(currentToken) && char == ".") && !(isNumber(currentToken) && currentToken.at(-1) == "." && digits.includes(char)) && !(currentToken == ":" && char == "=")) || (isNumber(currentToken) && currentToken.includes(".") && char == ".") || (currentToken.at(-1) == "-" && canBeIdentifier(char) && !digits.includes(char)) || (currentToken.length && !currentToken.split("").find(char2 => !symbols.includes(char2)) && char == "-") || (currentToken == "->" && char == "-")) {
+    if (tokenSeparators.includes(char) || (currentToken.at(-1) == "-" && digits.includes(char) && tokens.at(-1) && (tokens.at(-1).type == TokenType.NUMBER || tokens.at(-1).type == TokenType.IDENTIFIER || code.slice(tokens.at(-1).start, tokens.at(-1).start + tokens.at(-1).length) == ")")) || (currentToken.at(-1) != "-" && canBeIdentifier(currentToken.at(-1)) != canBeIdentifier(char) && !(isNumber(currentToken) && char == ".") && !(isNumber(currentToken) && currentToken.at(-1) == "." && digits.includes(char)) && !(currentToken == ":" && char == "=")) || (isNumber(currentToken) && currentToken.includes(".") && char == ".") || (currentToken.at(-1) == "-" && canBeIdentifier(char) && !digits.includes(char)) || (currentToken.length && !currentToken.split("").find(char2 => !symbols.includes(char2)) && char == "-") || (currentToken == "->" && char == "-") || (currentToken == ".." && char == "-")) {
       if (isNumber(currentToken) && currentToken.at(-1) == "." && char == ".") {
         currentToken = currentToken.slice(0, -1);
         addToken(i - 1);
@@ -1555,11 +1579,14 @@ function parser(filename, code, tokens) {
         if (!value.length) {
           return new RareScriptError(filename, code, token.line, 9, "Expected variable value");
         }
+        value = parseExpression(filename, code, value);
+        if (!value) {
+          return new RareScriptError(filename, code, token.line, 136, "Invalid expression");
+        }
         ast.push({
           "type": InstructionType.VARIABLE,
           "variableType": type,
-          name, modifiers,
-          "value": parseExpression(filename, code, value),
+          name, modifiers, value,
           "line": token.line
         });
         continue;
@@ -1713,6 +1740,13 @@ function parseExpression(filename, code, tokens) {
     }
   }
 
+  if (tokens.length == 2 && tokens[0].type == TokenType.OPERATOR && getTokenValue(code, tokens[0]) == "#") {
+    return {
+      "type": "type",
+      "value": parseType(code, tokens.slice(1))
+    };
+  }
+
   for (var operatorsIndex = (operatorPriority.length - 1); operatorsIndex >= 0; operatorsIndex--) {
     var operators = operatorPriority[operatorsIndex];
     var foundIndex = tokens.findLastIndex(token => operators.includes(getTokenValue(code, token)));
@@ -1838,10 +1872,18 @@ function parseExpression(filename, code, tokens) {
     if (args.length == 1 && !args[0].length) {
       args = [];
     }
+    var args2 = [];
+    for (var arg of args) {
+      var parsedArg = parseExpression(filename, code, arg);
+      if (!parsedArg) {
+        return null;
+      }
+      args2.push(parsedArg);
+    }
     return {
       "type": "function",
       "function": tokens[0],
-      "arguments": args.map(argument => parseExpression(filename, code, argument))
+      "arguments": args2
     };
   }
 
@@ -1880,8 +1922,21 @@ function compiler(filename, code, ast, target, debug) {
         return expression.value;
       }
     }
+    if (expression.type == "type") {
+      var namespace = null;
+      var typeName = expression.value.base;
+      if (typeName.includes("::")) {
+        [namespace, typeName] = typeName.split("::");
+      }
+      return `${namespace ? `${namespace}.` : ""}${typeName}`;
+    }
     if (expression.type == "identifier") {
-      return expression.value;
+      var namespace = null;
+      var variableName = expression.value;
+      if (variableName.includes("::")) {
+        [namespace, variableName] = variableName.split("::");
+      }
+      return `${namespace ? `${namespace}.` : ""}${variableName}`;
     }
     if (expression.type == "number") {
       numberClassAdded = true;
@@ -1971,7 +2026,11 @@ function compiler(filename, code, ast, target, debug) {
       if (dynamicFunctionName) {
         argumentsTypesCorrect = solveExpressionType(expression.function).type.subtype.slice(0, -1);
       } else if (namespace) {
-        argumentsTypesCorrect = namespaces.get(namespace).variables.get(functionName).type.subtype.slice(0, -1);
+        var type = namespaces.get(namespace).variables.get(functionName).type;
+        if (typeof type === "function") {
+          type = type(expression.arguments, expression.arguments.map(solveExpressionType).map(argument => argument.type));
+        }
+        argumentsTypesCorrect = type.subtype.slice(0, -1);
       } else {
         for (var contextIndex = (contexts.length - 1); contextIndex >= 0; contextIndex--) {
           var context = contexts[contextIndex];
@@ -1987,7 +2046,11 @@ function compiler(filename, code, ast, target, debug) {
             for (var scopedNamespace of scopes) {
               if (namespaces.get(scopedNamespace).variables.has(functionName)) {
                 namespace = scopedNamespace;
-                argumentsTypesCorrect = namespaces.get(scopedNamespace).variables.get(functionName).type.subtype.slice(0, -1);
+                var type = namespaces.get(scopedNamespace).variables.get(functionName).type;
+                if (typeof type === "function") {
+                  type = type(expression.arguments, expression.arguments.map(solveExpressionType).map(argument => argument.type));
+                }
+                argumentsTypesCorrect = type.subtype.slice(0, -1);
                 break;
               }
             }
@@ -2006,18 +2069,31 @@ function compiler(filename, code, ast, target, debug) {
       if (cachedError) {
         return cachedError;
       }
-      if (argumentsTypesCorrect.length != argumentsTypes.length) {
+      if (!argumentsTypesCorrect.find(argument => argument.star) && argumentsTypesCorrect.length != argumentsTypes.length) {
         cachedError = new RareScriptError(filename, code, lastInstruction.line, 18, `Expected ${argumentsTypesCorrect.length} arguments, but got ${argumentsTypes.length}`);
         return cachedError;
       }
+      var starIndex = argumentsTypesCorrect.findIndex(argument => argument.star);
+      var endArgs = (argumentsTypesCorrect.length - starIndex - 1);
       for (var argumentIndex = 0; argumentIndex < argumentsTypes.length; argumentIndex++) {
-        if (argumentsTypesCorrect[argumentIndex].base == "typing::any") {
+        var correctType = argumentsTypesCorrect[argumentIndex];
+        if (starIndex > -1 && argumentIndex >= starIndex) {
+          if (argumentIndex < (argumentsTypes.length - endArgs)) {
+            correctType = argumentsTypesCorrect[starIndex];
+          } else {
+            correctType = argumentsTypesCorrect[starIndex - (argumentsTypesCorrect.length - argumentsTypes.length)];
+          }
+        }
+        if (correctType.base == "typing::any") {
           continue;
         }
-        if (JSON.stringify(argumentsTypesCorrect[argumentIndex]) != JSON.stringify(argumentsTypes[argumentIndex])) {
-          cachedError = new RareScriptError(filename, code, lastInstruction.line, 19, `Expected argument type ${renderType(argumentsTypesCorrect[argumentIndex])}, but got ${renderType(argumentsTypes[argumentIndex])}`);
+        var wasStar = correctType.star;
+        correctType.star = false;
+        if (JSON.stringify(correctType) != JSON.stringify(argumentsTypes[argumentIndex])) {
+          cachedError = new RareScriptError(filename, code, lastInstruction.line, 19, `Expected argument type ${renderType(correctType)}, but got ${renderType(argumentsTypes[argumentIndex])}`);
           return cachedError;
         }
+        correctType.star = wasStar;
       }
       return `${namespace ? `${namespace}.` : ""}${functionName}(${expression.arguments.map(compileExpression).join(", ")})`;
     }
@@ -2034,9 +2110,12 @@ function compiler(filename, code, ast, target, debug) {
         "modifiers": []
       };
     }
-    if (expression.type == "identifier") {
+    if (expression.type == "type" || expression.type == "identifier") {
       var namespace = null;
       var variableName = expression.value;
+      if (expression.type == "type") {
+        variableName = variableName.base;
+      }
       if (variableName.includes("::")) {
         [namespace, variableName] = variableName.split("::");
       }
@@ -2125,8 +2204,12 @@ function compiler(filename, code, ast, target, debug) {
           cachedError = new RareScriptError(filename, code, lastInstruction.line, 44, `Variable "${namespace}::${functionName}" does not exist`);
           return cachedError;
         }
+        var type = namespaces.get(namespace).variables.get(functionName).type;
+        if (typeof type === "function") {
+          type = type(expression.arguments, expression.arguments.map(solveExpressionType).map(argument => argument.type));
+        }
         return {
-          "type": namespaces.get(namespace).variables.get(functionName).type.subtype.at(-1),
+          "type": type.subtype.at(-1),
           "modifiers": []
         };
       }
@@ -2147,8 +2230,12 @@ function compiler(filename, code, ast, target, debug) {
       }
       for (var scopedNamespace of scopes) {
         if (namespaces.get(scopedNamespace).variables.has(functionName)) {
+          var type = namespaces.get(scopedNamespace).variables.get(functionName).type;
+          if (typeof type === "function") {
+            type = type(...expression.arguments.map(solveExpressionType).map(argument => argument.type));
+          }
           return {
-            "type": namespaces.get(scopedNamespace).variables.get(functionName).type.subtype.at(-1),
+            "type": type.subtype.at(-1),
             "modifiers": []
           };
         }
@@ -2206,7 +2293,6 @@ function compiler(filename, code, ast, target, debug) {
         }
         if (builtinRareModules[`${instruction.module}.rare`]) {
           var result = processCode(`${instruction.module}.rare`, builtinRareModules[`${instruction.module}.rare`], target, debug, true, false);
-          // TODO: Fix errors thrown from modules
           if (result instanceof RareScriptError) {
             return result;
           }
@@ -2222,7 +2308,7 @@ function compiler(filename, code, ast, target, debug) {
           }
           for (var [functionName, functionCode] of result.compiled.functionCodes.entries()) {
             var functionArgs = functionCode[0].slice(9 + functionName.length, -2);
-            if (namespaces.get(instruction.as || instruction.module).variables.get(functionName).type.subtype.length == 2) {
+            if (namespaces.get(instruction.as || instruction.module).variables.get(functionName).type.subtype.length == 2 && !namespaces.get(instruction.as || instruction.module).variables.get(functionName).type.subtype[0].star) {
               functionArgs = functionArgs.slice(1, -1);
             }
             namespaces.get(instruction.as || instruction.module).variables.get(functionName).js = `${functionArgs} => {${functionCode.slice(1, -1).join("")}}`;
@@ -2343,17 +2429,21 @@ function compiler(filename, code, ast, target, debug) {
           },
           "modifiers": []
         });
-        compiled.push(`function ${instruction.name}(${instruction.arguments.map(argument => argument.name).join(", ")}) {`);
+        compiled.push(`function ${instruction.name}(${instruction.arguments.map(argument => `${argument.type.star ? "..." : ""}${argument.name}`).join(", ")}) {`);
         if (!contexts.length) {
           saveFunctionCode = instruction.name;
-          functionCodes.set(saveFunctionCode, [`function ${instruction.name}(${instruction.arguments.map(argument => argument.name).join(", ")}) {`]);
+          functionCodes.set(saveFunctionCode, [`function ${instruction.name}(${instruction.arguments.map(argument => `${argument.type.star ? "..." : ""}${argument.name}`).join(", ")}) {`]);
         }
         contexts.push({
           "owner": instruction,
           "variables": new Map(instruction.arguments.map(argument => [
             argument.name,
             {
-              "type": argument.type,
+              "type": argument.type.star ? {
+                "base": "typing::array",
+                "subtype": [argument.type],
+                "star": false
+              } : argument.type,
               "modifiers": ["argument"]
             }
           ]))
