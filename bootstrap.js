@@ -657,7 +657,9 @@ var operators = {
     }
   },
   "as": {
-    "type": (filename, code, line, left, right) => {
+    "rightRaw": true,
+    "rightRawType": true,
+    "type": (filename, code, line, left, right, _leftValue, rightValue) => {
       if (!left) {
         return new RareScriptError(filename, code, line, 129, "Expected left side");
       }
@@ -667,10 +669,10 @@ var operators = {
       if (left.type.base != "typing::any") {
         return new RareScriptError(filename, code, line, 131, "Operator expects explicit typing::any");
       }
-      if (!right.modifiers.includes("type")) {
+      if (rightValue.type != "type" || !right.modifiers.includes("type")) {
         return new RareScriptError(filename, code, line, 132, "Operator expects a type on right side");
       }
-      return right.type;
+      return rightValue.value;
     },
     "js": (_filename, _code, _line, left) => {
       return left;
@@ -2166,8 +2168,8 @@ function compiler(filename, code, ast, target, debug) {
       if (typeof operators[expression.operator].type === "object") {
         return operators[expression.operator].type;
       }
-      var left = ((expression.left && !operators[expression.operator].leftRaw) ? solveExpressionType(expression.left) : null);
-      var right = ((expression.right && !operators[expression.operator].rightRaw) ? solveExpressionType(expression.right) : null);
+      var left = ((expression.left && (!operators[expression.operator].leftRaw || operators[expression.operator].leftRawType)) ? solveExpressionType(expression.left) : null);
+      var right = ((expression.right && (!operators[expression.operator].rightRaw || operators[expression.operator].rightRawType)) ? solveExpressionType(expression.right) : null);
       if (cachedError) {
         return cachedError;
       }
