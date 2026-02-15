@@ -627,6 +627,27 @@ var operators = {
       return `!${right}`;
     }
   },
+  "as": {
+    "type": (filename, code, line, left, right) => {
+      // TODO: Errors
+      if (!left) {
+        return new RareScriptError(filename, code, line, 98, "Expected left side");
+      }
+      if (!right) {
+        return new RareScriptError(filename, code, line, 99, "Expected right side");
+      }
+      if (left.type.base != "typing::any") {
+        return new RareScriptError(filename, code, line, 100, "Operator expects typing::boolean");
+      }
+      if (!right.modifiers.includes("type")) {
+        return new RareScriptError(filename, code, line, 100, "Operator expects typing::boolean");
+      }
+      return right.type;
+    },
+    "js": (_filename, _code, _line, left) => {
+      return left;
+    }
+  },
   "or": {
     "type": (filename, code, line, left, right) => {
       if (!left) {
@@ -712,6 +733,7 @@ var operatorPriority = [
   ["|>"],
   ["=", "!=", "<", ">", "<=", ">="],
   ["!"],
+  ["as"],
   ["or", "and"],
   [":="]
 ];
@@ -847,6 +869,31 @@ var builtinModules = {
           "star": false
         },
         "modifiers": ["type", "final"]
+      }],
+      ["array", {
+        "type": {
+          "base": "typing::function",
+          "subtype": [{
+            "base": "typing::any",
+            "subtype": [],
+            "star": false
+          }, {
+            "base": "typing::any",
+            "subtype": [],
+            "star": true
+          }, {
+            "base": "typing::array",
+            "subtype": [{
+              "base": "typing::any",
+              "subtype": [],
+              "star": false
+            }],
+            "star": false
+          }],
+          "star": false
+        },
+        "modifiers": ["type", "final"],
+        "js": "(_, ...data) => [data]"
       }]
     ])
   },
