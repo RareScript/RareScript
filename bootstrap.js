@@ -2475,6 +2475,9 @@ function compiler(filename, code, ast, target, debug) {
           return new RareScriptError(filename, code, lastInstruction.line, 51, "Cannot use return outside of function");
         }
         var valueType = solveExpressionType(instruction.value).type;
+        if (valueType instanceof RareScriptError) {
+          return valueType;
+        }
         if (JSON.stringify(valueType) != JSON.stringify(correctType)) {
           return new RareScriptError(filename, code, lastInstruction.line, 52, `Cannot return type "${renderType(valueType)}", expected "${renderType(correctType)}" instead`);
         }
