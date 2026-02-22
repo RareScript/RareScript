@@ -50,6 +50,7 @@ var InstructionType = {
   "CONTINUE": 9
 };
 
+// TODO: Runtime errors
 var getProperties = String.raw`var getProperties = (obj, propType) => new Proxy({}, {
   get(_, prop) {
     if ((typeof obj === "string" || Array.isArray(obj))) {
@@ -60,7 +61,7 @@ var getProperties = String.raw`var getProperties = (obj, propType) => new Proxy(
         return new RSNumber(obj.length);
       }
     }
-    if (Array.isArray(obj)) && prop == "join") {
+    if (Array.isArray(obj) && prop == "join") {
       return separator => obj.join(separator);
     }
     if (obj instanceof Map) {
@@ -97,7 +98,6 @@ var getProperties = String.raw`var getProperties = (obj, propType) => new Proxy(
         return index => obj.slice(0, index);
       }
     }
-    // TODO: Runtime errors
   },
   set(_, prop) {}
 });`.split("\n").join("");
@@ -1265,6 +1265,224 @@ var builtinModules = {
         },
         "modifiers": ["final"],
         "js": `data => {try {return decodeURIComponent(escape(atob(data)))} catch {return ""}}`
+      }]
+    ])
+  },
+  "env": {
+    "variables": new Map([
+      ["get", {
+        "type": {
+          "base": "typing::function",
+          "subtype": [{
+            "base": "typing::string",
+            "subtype": [],
+            "star": false
+          }, {
+            "base": "typing::string",
+            "subtype": [],
+            "star": false
+          }, {
+            "base": "typing::string",
+            "subtype": [],
+            "star": false
+          }],
+          "star": false
+        },
+        "modifiers": ["final"],
+        "js": {
+          "crossplatform": `(name, defaultValue) => typeof process === "undefined" ? defaultValue : (process.env[name] || defaultValue)`,
+          "browser": "(_, defaultValue) => defaultValue",
+          "nodejs": "(name, defaultValue) => process.env[name] || defaultValue"
+        }
+      }]
+    ])
+  },
+  "fs": {
+    "variables": new Map([
+      ["readdir", {
+        "type": {
+          "base": "typing::function",
+          "subtype": [{
+            "base": "typing::string",
+            "subtype": [],
+            "star": false
+          }, {
+            "base": "typing::array",
+            "subtype": [{
+              "base": "typing::string",
+              "subtype": [],
+              "star": false
+            }],
+            "star": false
+          }],
+          "star": false
+        },
+        "modifiers": ["final"],
+        "jsExtra": {
+          "crossplatform": `var nodeFs = null;try {nodeFs = require("fs");} catch {}`,
+          "browser": "",
+          "nodejs": `var nodeFs = require("fs");`
+        },
+        "js": {
+          "crossplatform": "dir => nodeFs ? nodeFs.readdirSync(dir) : []",
+          "browser": "() => []",
+          "nodejs": "dir => nodeFs.readdirSync(dir)"
+        }
+      }],
+      ["mkdir", {
+        "type": {
+          "base": "typing::function",
+          "subtype": [{
+            "base": "typing::string",
+            "subtype": [],
+            "star": false
+          }, {
+            "base": "typing::void",
+            "subtype": [],
+            "star": false
+          }],
+          "star": false
+        },
+        "modifiers": ["final"],
+        "jsExtra": {
+          "crossplatform": `var nodeFs = null;try {nodeFs = require("fs");} catch {}`,
+          "browser": "",
+          "nodejs": `var nodeFs = require("fs");`
+        },
+        "js": {
+          "crossplatform": "dir => nodeFs ? nodeFs.mkdirSync(dir) : undefined",
+          "browser": "() => {}",
+          "nodejs": "dir => nodeFs.mkdirSync(dir)"
+        }
+      }],
+      ["rmdir", {
+        "type": {
+          "base": "typing::function",
+          "subtype": [{
+            "base": "typing::string",
+            "subtype": [],
+            "star": false
+          }, {
+            "base": "typing::void",
+            "subtype": [],
+            "star": false
+          }],
+          "star": false
+        },
+        "modifiers": ["final"],
+        "jsExtra": {
+          "crossplatform": `var nodeFs = null;try {nodeFs = require("fs");} catch {}`,
+          "browser": "",
+          "nodejs": `var nodeFs = require("fs");`
+        },
+        "js": {
+          "crossplatform": `dir => nodeFs ? nodeFs.rmSync(dir, {"recursive": true}) : undefined`,
+          "browser": "() => {}",
+          "nodejs": `dir => nodeFs.rmSync(dir, {"recursive": true})`
+        }
+      }],
+      ["remove", {
+        "type": {
+          "base": "typing::function",
+          "subtype": [{
+            "base": "typing::string",
+            "subtype": [],
+            "star": false
+          }, {
+            "base": "typing::void",
+            "subtype": [],
+            "star": false
+          }],
+          "star": false
+        },
+        "modifiers": ["final"],
+        "jsExtra": {
+          "crossplatform": `var nodeFs = null;try {nodeFs = require("fs");} catch {}`,
+          "browser": "",
+          "nodejs": `var nodeFs = require("fs");`
+        },
+        "js": {
+          "crossplatform": "file => nodeFs ? nodeFs.unlinkSync(file) : undefined",
+          "browser": "() => {}",
+          "nodejs": "file => nodeFs.unlinkSync(file)"
+        }
+      }],
+      ["readString", {
+        "type": {
+          "base": "typing::function",
+          "subtype": [{
+            "base": "typing::string",
+            "subtype": [],
+            "star": false
+          }, {
+            "base": "typing::string",
+            "subtype": [],
+            "star": false
+          }],
+          "star": false
+        },
+        "modifiers": ["final"],
+        "jsExtra": {
+          "crossplatform": `var nodeFs = null;try {nodeFs = require("fs");} catch {}`,
+          "browser": "",
+          "nodejs": `var nodeFs = require("fs");`
+        },
+        "js": {
+          "crossplatform": `file => nodeFs ? nodeFs.readFileSync(file).toString("utf-8") : ""`,
+          "browser": `() => ""`,
+          "nodejs": `file => nodeFs.readFileSync(file).toString("utf-8")`
+        }
+      }],
+      ["writeString", {
+        "type": {
+          "base": "typing::function",
+          "subtype": [{
+            "base": "typing::string",
+            "subtype": [],
+            "star": false
+          }, {
+            "base": "typing::string",
+            "subtype": [],
+            "star": false
+          }],
+          "star": false
+        },
+        "modifiers": ["final"],
+        "jsExtra": {
+          "crossplatform": `var nodeFs = null;try {nodeFs = require("fs");} catch {}`,
+          "browser": "",
+          "nodejs": `var nodeFs = require("fs");`
+        },
+        "js": {
+          "crossplatform": `(file, content) => nodeFs ? (nodeFs.writeFileSync(file, content), content) : content`,
+          "browser": "(_, content) => content",
+          "nodejs": "(file, content) => nodeFs.writeFileSync(file, content), content"
+        }
+      }]
+    ])
+  },
+  "cli": {
+    "variables": new Map([
+      ["args", {
+        "type": {
+          "base": "typing::function",
+          "subtype": [{
+            "base": "typing::array",
+            "subtype": [{
+              "base": "typing::string",
+              "subtype": [],
+              "star": false
+            }],
+            "star": false
+          }],
+          "star": false
+        },
+        "modifiers": ["final"],
+        "js": {
+          "crossplatform": `() => typeof process === "undefined" ? [] : process.argv.slice(2)`,
+          "browser": "() => []",
+          "nodejs": "() => process.argv.slice(2)"
+        }
       }]
     ])
   }
@@ -2772,7 +2990,7 @@ async function handleCLI() {
     var code = fs.readFileSync(rareproject.file).toString("utf-8");
     var result = processCode(path.basename(rareproject.file), code, target, debug, false, !noMinify);
     if (!(result instanceof RareScriptError)) {
-      fs.writeFileSync(rareproject.output, result.compiled);
+      fs.writeFileSync(rareproject.output, result.compiled.code);
     }
     return;
   }
@@ -2792,6 +3010,7 @@ async function handleCLI() {
       if (debug) {
         console.log(`\x1b[32m[DEBUG / ${filename} / EVALUATING CODE]\x1b[0m`);
       }
+      process.argv.splice(2, 1);
       eval(result.compiled.code);
     }
     return;
