@@ -1,14 +1,9 @@
 .vscode/
 node_modules/
-
-tests/
-test.rare
+rare_modules/
 
 package-lock.json
 bun.lock
-
-.rareproject
-rare_modules/
 
 dist/
 rare.exe

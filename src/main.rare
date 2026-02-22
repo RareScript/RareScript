@@ -1,0 +1,26 @@
+import typing;
+import cli;
+import fs;
+import console;
+import ansi;
+%% Current compiler does not work well with scopes
+%%scope typing;
+
+typing::void handleCLI() {
+  typing::array<typing::string> args := cli::args();
+  typing::boolean debug := args->has("--debug");
+  typing::boolean noMinify := args->has("--no-minify");
+
+  typing::string target := "crossplatform";
+  typing::boolean defaultTarget := true;
+  cond args->has("--target") {
+    cond args->count < args->where("--target") + 1 {
+      console::out(ansi::red("Expected a target."));
+      return;
+    }
+    target := args->@(args->where("--target") + 1) as #typing::string;
+    defaultTarget := false;
+  }
+}
+
+handleCLI();
