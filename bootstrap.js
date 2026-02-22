@@ -63,6 +63,9 @@ var getProperties = String.raw`var getProperties = (obj, propType) => new Proxy(
       if (prop == "has") {
         return value => obj.includes(value);
       }
+      if (prop == "where") {
+        return value => obj.indexOf(value) + 1;
+      }
     }
     if (Array.isArray(obj) && prop == "join") {
       return separator => obj.join(separator);
@@ -174,6 +177,17 @@ var operators = {
             "star": false
           };
         }
+        if (rightValue.value == "where") {
+          return {
+            "base": "typing::function",
+            "subtype": [left.type.subtype[0], {
+              "base": "typing::number",
+              "subtype": [],
+              "star": false
+            }],
+            "star": false
+          };
+        }
       }
       if (left.type.base == "typing::map") {
         if (rightValue.value == "has") {
@@ -265,6 +279,21 @@ var operators = {
               "star": false
             }, {
               "base": "typing::boolean",
+              "subtype": [],
+              "star": false
+            }],
+            "star": false
+          };
+        }
+        if (rightValue.value == "where") {
+          return {
+            "base": "typing::function",
+            "subtype": [{
+              "base": "typing::string",
+              "subtype": [],
+              "star": false
+            }, {
+              "base": "typing::number",
               "subtype": [],
               "star": false
             }],
