@@ -64,7 +64,7 @@ var getProperties = String.raw`var getProperties = (obj, propType) => new Proxy(
         return value => obj.includes(value);
       }
       if (prop == "where") {
-        return value => obj.indexOf(value) + 1;
+        return value => new RSNumber(obj.indexOf(value) + 1);
       }
     }
     if (Array.isArray(obj) && prop == "join") {
