@@ -3133,7 +3133,7 @@ async function handleCLI() {
     var result = processCode(rareproject.code.file, code, target, debug, false, !noMinify, rareproject.project.folder);
     if (!(result instanceof RareScriptError)) {
       if (debug) {
-        console.log(`\x1b[32m[DEBUG / ${path.basename(rareproject.file)} / EVALUATING CODE]\x1b[0m`);
+        console.log(`\x1b[32m[DEBUG / ${path.basename(rareproject.code.file)} / EVALUATING CODE]\x1b[0m`);
       }
       process.argv.splice(2, 1);
       eval(result.compiled.code);
