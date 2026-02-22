@@ -2778,7 +2778,18 @@ function compiler(filename, code, ast, target, debug, currentDir, projectDir) {
           return new RareScriptError(filename, code, instruction.line, 47, `Namespace "${typeNamespace}" does not exist`);
         }
         if ((!typeNamespace && !globalVariables.has(type)) || (typeNamespace && !namespaces.get(typeNamespace).variables.has(type))) {
-          return new RareScriptError(filename, code, instruction.line, 48, `Variable "${typeNamespace ? `${typeNamespace}::` : ""}${type}" does not exist`);
+          if (typeNamespace) {
+            return new RareScriptError(filename, code, instruction.line, 48, `Variable "${typeNamespace ? `${typeNamespace}::` : ""}${type}" does not exist`);
+          }
+          for (var scopedNamespace of scopes) {
+            if (namespaces.get(scopedNamespace).variables.has(type)) {
+              typeNamespace = scopedNamespace;
+              break;
+            }
+          }
+          if (!typeNamespace) {
+            return new RareScriptError(filename, code, instruction.line, 48, `Variable "${typeNamespace ? `${typeNamespace}::` : ""}${type}" does not exist`);
+          }
         }
         if ((!typeNamespace && !globalVariables.get(type).modifiers.includes("type")) || (typeNamespace && !namespaces.get(typeNamespace).variables.get(type).modifiers.includes("type"))) {
           return new RareScriptError(filename, code, instruction.line, 49, `Variable "${typeNamespace ? `${typeNamespace}::` : ""}${type}" is not a type`);
@@ -2786,7 +2797,11 @@ function compiler(filename, code, ast, target, debug, currentDir, projectDir) {
         context.set(instruction.name, {
           "type": {
             "base": "typing::function",
-            "subtype": [...instruction.arguments.map(argument => argument.type), transformType(instruction.returnType)],
+            "subtype": [...instruction.arguments.map(argument => argument.type), transformType({
+              "base": `${typeNamespace ? `${typeNamespace}::` : ""}${type}`,
+              "subtype": instruction.returnType.subtype,
+              "star": instruction.returnType.star
+            })],
             "star": false
           },
           "modifiers": []
