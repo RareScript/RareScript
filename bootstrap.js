@@ -2825,6 +2825,7 @@ function compiler(filename, code, ast, target, debug, currentDir, projectDir) {
             }
           ]))
         });
+        // FIXME: Does not work with scopes or renamed typing namespace
         if (instruction.returnType.base != "typing::void" && !checkMissingReturns(instruction.content)) {
           return new RareScriptError(filename, code, instruction.line, 112, "Not all code paths return");
         }
