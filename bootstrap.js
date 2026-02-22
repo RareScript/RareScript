@@ -1698,7 +1698,7 @@ function parser(filename, code, tokens) {
     if (token.type == TokenType.KEYWORD) {
       switch(value) {
         case "import":
-          var module = expectToken(TokenType.IDENTIFIER);
+          var module = expectToken(TokenType.IDENTIFIER) || expectToken(TokenType.STRING);
           if (!module) {
             return new RareScriptError(filename, code, token.line, 4, "Expected module name");
           }
@@ -1710,9 +1710,13 @@ function parser(filename, code, tokens) {
             }
           }
           requireSeparator();
+          if (module.type == TokenType.STRING && !as) {
+            return new RareScriptError(filename, code, instruction.line, 133, `Local modules must have "as namespace"`);
+          }
           ast.push({
             "type": InstructionType.IMPORT,
-            "module": getTokenValue(code, module),
+            "local": module.type == TokenType.STRING,
+            "module": (module.type == TokenType.STRING) ? getTokenValue(code, module).slice(1, -1) : getTokenValue(code, module),
             "as": getTokenValue(code, as),
             "line": token.line
           });
@@ -2204,7 +2208,7 @@ function renderType(type) {
   return `${type.star ? "*" : ""}${type.base}${type.subtype.length ? `<${type.subtype.map(renderType).join(", ")}>` : ""}`;
 }
 
-function compiler(filename, code, ast, target, debug) {
+function compiler(filename, code, ast, target, debug, currentDir) {
   var namespaces = new Map;
   var scopes = [];
   var typeTransformationTable = new Map;
@@ -2601,8 +2605,11 @@ function compiler(filename, code, ast, target, debug) {
           compiled[0].push(`var ${instruction.as || instruction.module} = {};`);
           continue;
         }
-        if (builtinRareModules[`${instruction.module}.rare`]) {
-          var result = processCode(`${instruction.module}.rare`, builtinRareModules[`${instruction.module}.rare`], target, debug, true, false);
+        if (builtinRareModules[`${instruction.module}.rare`] || instruction.local) {
+          if (instruction.local && !fs.existsSync(path.join(currentDir, instruction.module))) {
+            return new RareScriptError(filename, code, instruction.line, 134, `File "${instruction.module}" does not exist`);
+          }
+          var result = processCode(instruction.local ? path.basename(instruction.module) : `${instruction.module}.rare`, instruction.local ? fs.readFileSync(path.join(currentDir, instruction.module)).toString("utf-8") : builtinRareModules[`${instruction.module}.rare`], target, debug, true, false);
           if (result instanceof RareScriptError) {
             return result;
           }
@@ -2854,7 +2861,9 @@ function compiler(filename, code, ast, target, debug) {
   };
 }
 
-function processCode(filename, code, target, debug, supressErrors, minify) {
+function processCode(filepath, code, target, debug, supressErrors, minify) {
+  var filename = path.basename(filepath);
+
   if (!["crossplatform", "browser", "nodejs"].includes(target)) {
     throw `Target "${target}" does not exist.`;
   }
@@ -2907,7 +2916,7 @@ function processCode(filename, code, target, debug, supressErrors, minify) {
     console.log(util.inspect(ast, false, null, true));
   }
 
-  var compiled = compiler(filename, code, ast, target, debug);
+  var compiled = compiler(filename, code, ast, target, debug, path.dirname(filepath));
   if (compiled instanceof RareScriptError) {
     if (supressErrors) {
       return compiled;
@@ -3004,11 +3013,10 @@ async function handleCLI() {
       return console.log("\x1b[31mThis project is invalid.\x1b[0m");
     }
     var code = fs.readFileSync(rareproject.file).toString("utf-8");
-    var filename = path.basename(rareproject.file);
-    var result = processCode(filename, code, target, debug, false, !noMinify);
+    var result = processCode(rareproject.file, code, target, debug, false, !noMinify);
     if (!(result instanceof RareScriptError)) {
       if (debug) {
-        console.log(`\x1b[32m[DEBUG / ${filename} / EVALUATING CODE]\x1b[0m`);
+        console.log(`\x1b[32m[DEBUG / ${path.basename(rareproject.file)} / EVALUATING CODE]\x1b[0m`);
       }
       process.argv.splice(2, 1);
       eval(result.compiled.code);
