@@ -166,11 +166,7 @@ var operators = {
         if (rightValue.value == "has") {
           return {
             "base": "typing::function",
-            "subtype": [{
-              "base": left.type.subtype[0],
-              "subtype": [],
-              "star": false
-            }, {
+            "subtype": [left.type.subtype[0], {
               "base": "typing::boolean",
               "subtype": [],
               "star": false
@@ -1806,11 +1802,19 @@ function parser(filename, code, tokens) {
             falseContent = tokens.splice(0, tokenIndex);
             expectToken("}");
           }
+          var parsedTrue = parser(filename, code, trueContent);
+          if (parsedTrue instanceof RareScriptError) {
+            return parsedTrue;
+          }
+          var parsedFalse = (falseContent ? parser(filename, code, falseContent) : null);
+          if (parsedFalse instanceof RareScriptError) {
+            return parsedFalse;
+          }
           ast.push({
             "type": InstructionType.CONDITION,
             "condition": parseExpression(filename, code, condition),
-            "true": parser(filename, code, trueContent),
-            "false": falseContent ? parser(filename, code, falseContent) : null,
+            "true": parsedTrue,
+            "false": parsedFalse,
             "line": token.line
           });
           continue;
@@ -1823,12 +1827,9 @@ function parser(filename, code, tokens) {
             }
             value.push(expressionToken);
           }
-          if (!value.length) {
-            return new RareScriptError(filename, code, token.line, 11, "Expected return value");
-          }
           ast.push({
             "type": InstructionType.RETURN,
-            "value": parseExpression(filename, code, value),
+            "value": value.length ? parseExpression(filename, code, value) : null,
             "line": token.line
           });
           continue;
@@ -1996,12 +1997,16 @@ function parser(filename, code, tokens) {
         }
         var content = tokens.splice(0, tokenIndex);
         expectToken("}");
+        var parsedContent = parser(filename, code, content);
+        if (parsedContent instanceof RareScriptError) {
+          return parsedContent;
+        }
         ast.push({
           "type": InstructionType.FUNCTION,
           "returnType": type,
           name,
           "arguments": args,
-          "content": parser(filename, code, content),
+          "content": parsedContent,
           "line": token.line
         });
         continue;
@@ -2521,6 +2526,7 @@ function compiler(filename, code, ast, target, debug, currentDir, projectDir) {
       var result = operators[expression.operator].type(filename, code, lastInstruction.line, left, right, expression.left, expression.right);
       if (result instanceof RareScriptError) {
         cachedError = result;
+        return result;
       }
       return {
         "type": result,
@@ -2540,7 +2546,10 @@ function compiler(filename, code, ast, target, debug, currentDir, projectDir) {
           cachedError = functionName;
           return functionName;
         }
-        return functionName.type.subtype.at(-1);
+        return {
+          "type": functionName.type.subtype.at(-1),
+          "modifiers": []
+        };
       }
       if (namespace) {
         if (!namespaces.has(namespace)) {
@@ -2651,9 +2660,9 @@ function compiler(filename, code, ast, target, debug, currentDir, projectDir) {
             }
           }
           if (instruction.local && instruction.module.startsWith("@/")) {
-            var result = processCode(instruction.module.slice(2), fs.readFileSync(path.join(projectDir, instruction.module.slice(2))).toString("utf-8"), target, debug, true, false, projectDir);
+            var result = processCode(instruction.module.slice(2), fs.readFileSync(path.join(projectDir, instruction.module.slice(2))).toString("utf-8"), target, true, true, false, projectDir);
           } else {
-            var result = processCode(instruction.local ? instruction.module : `${instruction.module}.rare`, instruction.local ? fs.readFileSync(path.join(currentDir, instruction.module)).toString("utf-8") : builtinRareModules[`${instruction.module}.rare`], target, debug, true, false, projectDir);
+            var result = processCode(instruction.local ? instruction.module : `${instruction.module}.rare`, instruction.local ? fs.readFileSync(path.join(currentDir, instruction.module)).toString("utf-8") : builtinRareModules[`${instruction.module}.rare`], target, instruction.local, true, false, projectDir);
           }
           if (result instanceof RareScriptError) {
             return result;
@@ -2850,14 +2859,21 @@ function compiler(filename, code, ast, target, debug, currentDir, projectDir) {
         if (!correctType) {
           return new RareScriptError(filename, code, lastInstruction.line, 51, "Cannot use return outside of function");
         }
-        var valueType = solveExpressionType(instruction.value).type;
-        if (valueType instanceof RareScriptError) {
-          return valueType;
+        if (instruction.value) {
+          var valueType = solveExpressionType(instruction.value).type;
+          if (valueType instanceof RareScriptError) {
+            return valueType;
+          }
+          if (JSON.stringify(valueType) != JSON.stringify(correctType)) {
+            return new RareScriptError(filename, code, lastInstruction.line, 52, `Cannot return type "${renderType(valueType)}", expected "${renderType(correctType)}" instead`);
+          }
+          compiled.push(`return ${compileExpression(instruction.value)};`);
+        } else {
+          if (correctType.base != "typing::void") {
+            return new RareScriptError(filename, code, lastInstruction.line, 11, "Expected return value");
+          }
+          compiled.push("return;");
         }
-        if (JSON.stringify(valueType) != JSON.stringify(correctType)) {
-          return new RareScriptError(filename, code, lastInstruction.line, 52, `Cannot return type "${renderType(valueType)}", expected "${renderType(correctType)}" instead`);
-        }
-        compiled.push(`return ${compileExpression(instruction.value)};`);
       }
       if (instruction.type == InstructionType.WHILE) {
         compiled.push(`while (${compileExpression(instruction.condition)}) {`);
