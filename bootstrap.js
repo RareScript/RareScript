@@ -53,7 +53,7 @@ var InstructionType = {
 // TODO: Runtime errors
 var getProperties = String.raw`var getProperties = (obj, propType) => new Proxy({}, {
   get(_, prop) {
-    if ((typeof obj === "string" || Array.isArray(obj))) {
+    if (typeof obj === "string" || Array.isArray(obj)) {
       if (propType === "number") {
         return obj[prop > -1 ? prop - 1 : (obj.length + +prop)];
       }
@@ -65,6 +65,12 @@ var getProperties = String.raw`var getProperties = (obj, propType) => new Proxy(
       }
       if (prop == "where") {
         return value => new RSNumber(obj.indexOf(value) + 1);
+      }
+      if (prop == "from") {
+        return index => obj.slice(index);
+      }
+      if (prop == "to") {
+        return index => obj.slice(0, index);
       }
     }
     if (Array.isArray(obj) && prop == "join") {
@@ -97,12 +103,6 @@ var getProperties = String.raw`var getProperties = (obj, propType) => new Proxy(
       if (prop == "repeat") {
         return amount => obj.repeat(amount);
       }
-      if (prop == "from") {
-        return index => obj.slice(index);
-      }
-      if (prop == "to") {
-        return index => obj.slice(0, index);
-      }
     }
   },
   set(_, prop) {}
@@ -115,7 +115,7 @@ var operators = {
         return new RareScriptError(filename, code, line, 133, "Expected left side");
       }
       if (!right) {
-        return new RareScriptError(filename, code, line, 134, "Expected right side");
+        return new RareScriptError(filename, code, line, 138, "Expected right side");
       }
       if (left.type.base != "typing::number" || right.type.base != "typing::number") {
         return new RareScriptError(filename, code, line, 135, "Operator expects typing::number");
@@ -188,6 +188,17 @@ var operators = {
             "star": false
           };
         }
+        if (["from", "to"].includes(rightValue.value)) {
+          return {
+            "base": "typing::function",
+            "subtype": [{
+              "base": "typing::number",
+              "subtype": [],
+              "star": false
+            }, left.type],
+            "star": false
+          };
+        }
       }
       if (left.type.base == "typing::map") {
         if (rightValue.value == "has") {
@@ -248,7 +259,7 @@ var operators = {
               "subtype": [],
               "star": false
             }, {
-              "base": "typing::string",
+              "base": "typing::boolean",
               "subtype": [],
               "star": false
             }],
@@ -1357,6 +1368,32 @@ var builtinModules = {
   },
   "fs": {
     "variables": new Map([
+      ["exists", {
+        "type": {
+          "base": "typing::function",
+          "subtype": [{
+            "base": "typing::string",
+            "subtype": [],
+            "star": false
+          }, {
+            "base": "typing::boolean",
+            "subtype": [],
+            "star": false
+          }],
+          "star": false
+        },
+        "modifiers": ["final"],
+        "jsExtra": {
+          "crossplatform": `var nodeFs = null;try {nodeFs = require("fs");} catch {}`,
+          "browser": "",
+          "nodejs": `var nodeFs = require("fs");`
+        },
+        "js": {
+          "crossplatform": "path => nodeFs ? nodeFs.existsSync(path) : false",
+          "browser": "() => false",
+          "nodejs": "path => nodeFs.existsSync(path)"
+        }
+      }],
       ["readdir", {
         "type": {
           "base": "typing::function",
@@ -1502,6 +1539,10 @@ var builtinModules = {
             "base": "typing::string",
             "subtype": [],
             "star": false
+          }, {
+            "base": "typing::string",
+            "subtype": [],
+            "star": false
           }],
           "star": false
         },
@@ -1622,6 +1663,20 @@ function lexer(filename, code) {
       continue;
     }
     if (char == "\"") {
+      if (isString) {
+        var escapeStreak = 0;
+        for (var i2 = currentToken.length - 1; i2 >= 0; i2--) {
+          if (currentToken[i2] == "\\") {
+            escapeStreak++;
+          } else {
+            break;
+          }
+        }
+        if (escapeStreak % 2 > 0) {
+          currentToken += char;
+          continue;
+        }
+      }
       isString = !isString;
       if (!isString) {
         currentToken += char;
@@ -1769,7 +1824,7 @@ function parser(filename, code, tokens) {
           }
           requireSeparator();
           if (module.type == TokenType.STRING && !as) {
-            return new RareScriptError(filename, code, instruction.line, 133, `Local modules must have "as namespace"`);
+            return new RareScriptError(filename, code, instruction.line, 137, `Local modules must have "as namespace"`);
           }
           ast.push({
             "type": InstructionType.IMPORT,
@@ -1839,9 +1894,13 @@ function parser(filename, code, tokens) {
           if (parsedFalse instanceof RareScriptError) {
             return parsedFalse;
           }
+          condition = parseExpression(filename, code, condition);
+          if (!condition) {
+            return new RareScriptError(filename, code, token.line, 141, "Invalid condition");
+          }
           ast.push({
             "type": InstructionType.CONDITION,
-            "condition": parseExpression(filename, code, condition),
+            "condition": condition,
             "true": parsedTrue,
             "false": parsedFalse,
             "line": token.line
@@ -2684,7 +2743,7 @@ function compiler(filename, code, ast, target, debug, currentDir, projectDir) {
               }
             } else {
               if (instruction.local && !fs.existsSync(path.join(currentDir, instruction.module))) {
-                return new RareScriptError(filename, code, instruction.line, 135, `File "${instruction.module}" does not exist`);
+                return new RareScriptError(filename, code, instruction.line, 139, `File "${instruction.module}" does not exist`);
               }
             }
           }
@@ -2826,7 +2885,7 @@ function compiler(filename, code, ast, target, debug, currentDir, projectDir) {
             }
           }
           if (!typeNamespace) {
-            return new RareScriptError(filename, code, instruction.line, 48, `Variable "${typeNamespace ? `${typeNamespace}::` : ""}${type}" does not exist`);
+            return new RareScriptError(filename, code, instruction.line, 140, `Variable "${typeNamespace ? `${typeNamespace}::` : ""}${type}" does not exist`);
           }
         }
         if ((!typeNamespace && !globalVariables.get(type).modifiers.includes("type")) || (typeNamespace && !namespaces.get(typeNamespace).variables.get(type).modifiers.includes("type"))) {
@@ -3066,24 +3125,46 @@ function processCode(filepath, code, target, debug, supressErrors, minify, proje
 }
 
 async function handleCLI() {
-  var debug = (process.argv.includes("/debug") || process.argv.includes("--debug"));
-  var noMinify = (process.argv.includes("/nominify") || process.argv.includes("--no-minify"));
-  var target = null;
-  var defaultTarget = false;
-  if (process.argv.includes("/target")) {
-    target = process.argv[process.argv.indexOf("/target") + 1];
+  var args = process.argv.slice(2);
+  var debug = false;
+  var noMinify = false;
+  var target = "crossplatform";
+  var defaultTarget = true;
+  var command = "";
+  var appArgs = [];
+
+  // Parsing arguments
+  argparser:
+  for (var argIndex = 0; argIndex < args.length; argIndex++) {
+    var arg = args[argIndex];
+    switch(arg) {
+      case "/debug":
+      case "--debug":
+        debug = true;
+        break;
+      case "/nominify":
+      case "--no-minify":
+        noMinify = true;
+        break;
+      case "/target":
+      case "--target":
+        target = args[++argIndex];
+        defaultTarget = false;
+        if (!target) {
+          return console.log("\x1b[31mExpected a target.\x1b[0m");
+        }
+        break;
+      default:
+        if (arg.startsWith("/") || arg.startsWith("--")) {
+          return console.log("\x1b[31mUnknown flag.\x1b[0m");
+        }
+        command = arg;
+        appArgs = args.slice(argIndex + 1);
+        break argparser;
+    }
   }
-  if (process.argv.includes("--target")) {
-    target = process.argv[process.argv.indexOf("--target") + 1];
-  }
-  if (target === undefined) {
-    return console.log("\x1b[31mExpected a target.\x1b[0m");
-  }
-  if (!target) {
-    target = "crossplatform";
-    defaultTarget = true;
-  }
-  if (process.argv[2] == "setup") {
+
+  if (command == "setup") {
     if (fs.existsSync(".rareproject") || fs.existsSync("rare_modules")) {
       return console.log("\x1b[31mThis folder already contains a RareScript project.\x1b[0m");
     }
@@ -3104,7 +3185,7 @@ async function handleCLI() {
     }, null, 2));
     return console.log("\x1b[32mInitialized a new project in this folder.\x1b[0m");
   }
-  if (process.argv[2] == "build") {
+  if (command == "build") {
     if (!fs.existsSync(".rareproject")) {
       return console.log("\x1b[31mThis folder is not a RareScript project.\x1b[0m");
     }
@@ -3120,7 +3201,7 @@ async function handleCLI() {
     }
     return;
   }
-  if (process.argv[2] == "start") {
+  if (command == "start") {
     if (!fs.existsSync(".rareproject")) {
       return console.log("\x1b[31mThis folder is not a RareScript project.\x1b[0m");
     }
@@ -3135,12 +3216,12 @@ async function handleCLI() {
       if (debug) {
         console.log(`\x1b[32m[DEBUG / ${path.basename(rareproject.code.file)} / EVALUATING CODE]\x1b[0m`);
       }
-      process.argv.splice(2, 1);
+      process.argv = [process.argv[0], process.argv[1], ...appArgs];
       eval(result.compiled.code);
     }
     return;
   }
-  if (process.argv[2] == "watch") {
+  if (command == "watch") {
     if (!fs.existsSync(".rareproject")) {
       return console.log("\x1b[31mThis folder is not a RareScript project.\x1b[0m");
     }
@@ -3177,6 +3258,8 @@ async function handleCLI() {
       proc.kill("SIGKILL");
     }
   }
+
+  // Help page
   var commands = {
     "setup": "Initialize a new project",
     "build": "Build this project",
