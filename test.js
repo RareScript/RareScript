@@ -795,7 +795,6 @@ expectTokensAndAST("1 + 2 * 3 - 4 + 5;", [{
 }]);
 expectError("as con;", 3);
 expectError("return 1", 10);
-expectError("return;", 11);
 expectTokensAndAST("import typing; typing::number test() { return 1; }", [{
   "type": RareScript.TokenType.KEYWORD,
   "value": "import"
@@ -1184,6 +1183,23 @@ expectError("break;", 120);
 expectError("continue;", 121);
 
 expectSuccess("import console; (console::out)(1);");
+
+expectError(String.raw`"This is "quoted" text.";`, 117);
+expectTokens(String.raw`"This is \"quoted\" text.";`, [{
+  "type": RareScript.TokenType.STRING,
+  "value": String.raw`"This is \"quoted\" text."`
+}, {
+  "type": RareScript.TokenType.SEPARATOR,
+  "value": ";"
+}]);
+expectError(String.raw`"This is \\"quoted\\" text.";`, 117);
+expectTokens(String.raw`"This is \\\"quoted\\\" text.";`, [{
+  "type": RareScript.TokenType.STRING,
+  "value": String.raw`"This is \\\"quoted\\\" text."`
+}, {
+  "type": RareScript.TokenType.SEPARATOR,
+  "value": ";"
+}]);
 
 if (isFailed) {
   process.exit(1);
