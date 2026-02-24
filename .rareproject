@@ -1,15 +1,15 @@
 {
   "project": {
-    "name": "RareScript Compiler",
-    "folder": "./src"
+    "name": "New Project",
+    "folder": "."
   },
   "code": {
-    "file": "./src/main.rare"
+    "file": "test.rare"
   },
   "build": {
     "target": "crossplatform",
     "minify": true,
-    "output": "./dist/compiler.js"
+    "output": "main.js"
   },
   "modules": {}
 }
