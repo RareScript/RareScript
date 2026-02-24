@@ -1,0 +1,86 @@
+import typing;
+import cli;
+import fs;
+import console;
+import ansi;
+%% Bootstrap compiler does not work well with scopes
+%%scope typing;
+
+typing::void handleCLI() {
+  typing::array<typing::string> args := cli::args();
+  typing::boolean debug := false;
+  typing::boolean noMinify := false;
+  typing::string target := "crossplatform";
+  typing::boolean defaultTarget := true;
+  typing::string command := "";
+  typing::array<typing::string> appArgs := typing::array(#typing::string);
+
+  %% Parsing arguments
+  typing::number argIndex := 1;
+  typing::string arg := "";
+  while argIndex <= args->count {
+    arg := args->@argIndex as #typing::string;
+    cond arg = "/debug" or arg = "--debug" {
+      debug := true;
+      argIndex := argIndex + 1;
+      continue;
+    }
+    cond arg = "/nominify" or arg = "--no-minify" {
+      noMinify := true;
+      argIndex := argIndex + 1;
+      continue;
+    }
+    cond arg = "/target" or arg = "--target" {
+      cond args->count < argIndex + 1 {
+        console::out(ansi::red("Expected a target."));
+        return;
+      }
+      target := args->@(argIndex + 1) as #typing::string;
+      defaultTarget := false;
+      argIndex := argIndex + 1;
+      continue;
+    }
+    cond arg->starts("/") or arg->starts("--") {
+      console::out(ansi::red("Unknown flag."));
+      return;
+    }
+    command := arg;
+    appArgs := args->from(argIndex + 1);
+    break;
+  }
+
+  cond command = "setup" {
+    cond fs::exists(".rareproject") or fs::exists("rare_modules") {
+      console::out(ansi::red("This folder already contains a RareScript project."));
+      return;
+    }
+    fs::writeString(".rareproject", "{\n  \"project\": {\n    \"name\": \"New Project\",\n    \"folder\": \".\"\n  },\n  \"code\": {\n    \"file\": \"main.rare\"\n  },\n  \"build\": {\n    \"target\": \"crossplatform\",\n    \"minify\": true\n    \"output\": \"main.js\"\n  },\n  \"modules\": {}\n}");
+    console::out(ansi::green("Initialized a new project in this folder."));
+    return;
+  }
+  cond command = "build" {
+    return;
+  }
+  cond command = "start" {
+    return;
+  }
+  cond command = "watch" {
+    return;
+  }
+
+  %% Help page
+  console::out(ansi::bold("Usage: rare " + ansi::magenta("<command>") + " " + ansi::cyan("[...flags]") + " [...args]"));
+  console::out();
+  console::out(ansi::bold("Commands:"));
+  console::out(ansi::bold("  " + ansi::magenta("setup")) + " "->repeat(35) + "Initialize a new project");
+  console::out(ansi::bold("  " + ansi::magenta("build")) + " "->repeat(35) + "Build this project");
+  console::out(ansi::bold("  " + ansi::magenta("start")) + " "->repeat(35) + "Start this project");
+  console::out(ansi::bold("  " + ansi::magenta("watch")) + " "->repeat(35) + "Start this project and restart on changes");
+  console::out();
+  console::out(ansi::bold("Flags:"));
+  console::out(ansi::bold("  " + ansi::cyan("--debug")) + " "->repeat(33) + "Enable debug mode");
+  console::out(ansi::bold("  " + ansi::cyan("--no-minify")) + " "->repeat(29) + "Do not minify compiled code");
+  console::out(ansi::bold("  " + ansi::cyan("--target [crossplatform/browser/nodejs]")) + " Target to optimize the compiled code for");
+}
+
+handleCLI();
