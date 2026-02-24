@@ -8,5 +8,3 @@ bun.lock
 dist/
 rare.exe
 rare
-
-test.rare
